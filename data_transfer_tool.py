@@ -187,7 +187,7 @@ class DataTransferTool:
 
                 if found_object:
                     # If object exists, return its ID
-                    value = found_object.id
+                    value = found_object[0].id
                 else:
                     # If object does not exist, create it using the create_function
                     if additional_data and field_name_for_nesting:
