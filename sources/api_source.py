@@ -32,13 +32,19 @@ class APIDataSource(DataSource):
             auth_func = get_auth_function(module, self.config['auth_function'])
 
             if auth_method == 'token':
-                # Token-based authentication, calling the auth_function dynamically
+                # Token-based authentication, using the token from auth_params
                 client = auth_func(base_url, token=self.config['auth_params']['token'])
 
             elif auth_method == 'login':
-                # Login-based authentication, passing the auth_args dynamically
-                auth_args = [self.config['auth_params'][arg] for arg in self.config['auth_args']]
-                client = auth_func(*auth_args)
+                # Login-based authentication
+                # Handle cases where auth_args may be empty or not defined
+                if 'auth_args' in self.config and self.config['auth_args']:
+                    # Collect arguments from auth_args if they exist
+                    auth_args = [self.config['auth_params'][arg] for arg in self.config['auth_args']]
+                    client = auth_func(*auth_args)
+                else:
+                    # Fallback to use auth_params directly (for APIs like NetBox)
+                    client = auth_func(base_url, **self.config['auth_params'])
 
             else:
                 raise ValueError(f"Unsupported auth method: {auth_method}")
