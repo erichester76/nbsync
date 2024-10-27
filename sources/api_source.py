@@ -12,9 +12,19 @@ class APIDataSource(DataSource):
         module = importlib.import_module(module_name)
         auth_method = self.config['auth_method']
 
+        # Function to handle function paths with or without periods (e.g., connect.SmartConnect)
+        def get_auth_function(module, function_path):
+            func_parts = function_path.split(".")
+            # Dynamically resolve the function path step by step
+            auth_func = getattr(module, func_parts[0])
+            for part in func_parts[1:]:
+                auth_func = getattr(auth_func, part)
+            return auth_func
+
         # Iterate through the base URLs (for multi-instance APIs, if needed)
         for base_url in self.config['base_urls']:
-            auth_func = getattr(module, self.config['auth_function'])  # Get the dynamic auth function
+            # Dynamically retrieve the authentication function (supports paths like connect.SmartConnect)
+            auth_func = get_auth_function(module, self.config['auth_function'])
 
             if auth_method == 'token':
                 # Token-based authentication, calling the auth_function dynamically
@@ -30,3 +40,4 @@ class APIDataSource(DataSource):
 
             # Store the authenticated client
             self.clients.append(client)
+
