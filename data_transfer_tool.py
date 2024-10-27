@@ -83,7 +83,7 @@ class DataTransferTool:
         else:
             raise ValueError(f"Site '{value}' not found in NetBox.")
     
-    def apply_transform_function(self, value, transform, obj_config, field_name):
+    def apply_transform_function(self, value, transform, obj_config, field_name, item):
         """
         Apply a transformation to a value, based on the transform rule provided in the YAML.
         
@@ -142,9 +142,10 @@ class DataTransferTool:
                         # Retrieve the included fields from the YAML configuration
                         additional_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
                         print(f'{self.mapped_data}')
+                        
                         for field in additional_fields:
                             # Get the value of the additional field from the source data or the mapped data
-                            field_value = self.mapped_data.get(field)
+                            field_value = item.get(field)
                             additional_data[field] = field_value
                             print(f"adding required field {field} {field_value}")
 
@@ -190,7 +191,7 @@ class DataTransferTool:
                         for dest_field, field_info in obj_config['mapping'].items():
                             source_value = item.get(field_info['source'])
                             transform = field_info.get('transform_function')
-                            mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field)
+                            mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
 
                         # Create or update the destination object and return the ID
                         object_id = self.create_or_update(destination_api, find_function, create_function, update_function, mapped_data)
