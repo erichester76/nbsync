@@ -101,7 +101,7 @@ class DataTransferTool:
 
         return included_data
  
-    
+            
     def apply_transform_function(self, value, transform, obj_config, field_name, item):
         """
         Apply a transformation to a value, based on the transform rule provided in the YAML.
@@ -113,6 +113,10 @@ class DataTransferTool:
         :param item: The current source data item being processed.
         :return: Transformed value.
         """
+        if value is None:
+            print(f"Skipping transformation for {field_name}: value is None.")
+            return value  # Skip transformation if value is None
+
         if transform:
             # Perform regex replace
             if "regex_replace" in transform:
@@ -152,20 +156,13 @@ class DataTransferTool:
                 lookup_param_name = lookup_type  # The name of the parameter should match the lookup_type
                 lookup_param_value = value  # The value passed in should be the current field's value from the source
 
-                # Execute the find function with the dynamically built parameter
-                print(f"Looking up {lookup_param_value} via {find_function_path}")
-                found_object = find_function({lookup_param_name: lookup_param_value})
-
-                # Check if the object exists
-                found_object = found_object.first() if hasattr(found_object, 'first') else None
-
-                if found_object:
-                    # If object exists, return its ID
-                    value = found_object.id
-                else:
-                    # If object does not exist, create it using the create_function
-                    # Include any additional required fields (from included_fields for the current field)
+                # Gather any additional fields for filtering (e.g., manufacturer)
+                filter_params = {lookup_param_name: lookup_param_value}
+                additional_data = {}
+                if 'included_fields' in obj_config['mapping'][field_name]:
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
+                    filter_params.update(additional_data)  # Add additional fields to the filter
+
                     print(f'Additional data: {additional_data}')
                     print(f'{lookup_param_name}: {lookup_param_value}')
 
@@ -175,11 +172,22 @@ class DataTransferTool:
                         field_name_for_nesting = included_field.get('field')
                         break  # Assuming there's one field to nest under (like 'manufacturer')
 
-                    if not field_name_for_nesting:
-                        raise ValueError(f"Field name for nesting is missing in included_fields for {field_name}")
+                # Execute the find function with the dynamically built filter parameters
+                print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
+                found_object = find_function(filter_params)
 
-                    # Create the final nested structure
-                    create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
+                # Check if the object exists
+                found_object = found_object.first() if hasattr(found_object, 'first') else None
+
+                if found_object:
+                    # If object exists, return its ID
+                    value = found_object.id
+                else:
+                    # If object does not exist, create it using the create_function
+                    if additional_data and field_name_for_nesting:
+                        create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
+                    else:
+                        create_data = {lookup_param_name: lookup_param_value}
 
                     print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
@@ -191,8 +199,6 @@ class DataTransferTool:
                         raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
 
         return value
-
-
 
 
     def process_mappings(self):
