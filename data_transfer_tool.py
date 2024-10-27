@@ -126,10 +126,16 @@ class DataTransferTool:
             # Update existing object (use the object's ID if necessary)
             update_function = self.get_nested_function(api_client, update_function_path)
             update_function(existing_object.id, **mapped_data)
+
+            # Print status message for update
+            print(f"Updated object {existing_object.id} with data: {mapped_data}")
         else:
             # Create a new object if no match is found
             create_function = self.get_nested_function(api_client, create_function_path)
-            create_function(mapped_data)
+            new_object = create_function(mapped_data)
+
+            # Print status message for create
+            print(f"Created new object with data: {mapped_data}")
 
 def main():
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
