@@ -115,13 +115,13 @@ class DataTransferTool:
                     )
 
                 api_client = self.sources[obj_config['destination_api']].api
-                print(f"{obj_config['destination_api']} {find_function_path} {self.config['object_mappings'][lookup_type]['mapping']['name']['source']}: {value}")
                 # Dynamically retrieve the find_function and create_function from the API client
                 find_function = getattr(api_client, find_function_path)
                 create_function = getattr(api_client, create_function_path)
                 
+                print(f'lookup up {value} in {lookup_type}')
                 # Execute the find function with the mapped value (e.g., site name, device type)
-                found_object = find_function({self.config['object_mappings'][lookup_type]['mapping']['name']['source']: value})
+                found_object = find_function({lookup_type: value})
 
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None

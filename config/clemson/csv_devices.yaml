@@ -31,11 +31,11 @@ object_mappings:
         source: device_name
       device_type:
         source: device_type
-        transform_function: lookup_object('device_type', 'dcim.device_types.objects.filter', 'dcim.device_types.create')  # Lookup or create device_type
+        transform_function: lookup_object('model', 'dcim.device_types.objects.filter', 'dcim.device_types.create')  # Lookup or create device_type
       serial_number:
         source: serial
       site:
         source: site_name
-        transform_function: lookup_object('site', 'dcim.sites.objects.filter', 'dcim.sites.create')  # Lookup or create site
+        transform_function: lookup_object('name', 'dcim.sites.objects.filter', 'dcim.sites.create')  # Lookup or create site
       status:
         source: status
