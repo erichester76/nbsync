@@ -2,6 +2,7 @@
 
 import yaml
 import re
+import os
 import argparse
 from sources.api_source import APIDataSource
 from sources.csv_source import CSVDataSource
@@ -13,7 +14,7 @@ import jinja2
 class DataTransferTool:
     def __init__(self, yaml_file):
         
-        env = jinja2.Environment(loader=jinja2.FileSystemLoader())
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.abspath(yaml_file)))
         # Load the main YAML template
         template = env.get_template(yaml_file)
         # Render the template and parse as YAML
