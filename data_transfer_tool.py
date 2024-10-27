@@ -170,7 +170,8 @@ class DataTransferTool:
                     field_name_for_nesting = None
                     for included_field in obj_config['mapping'][field_name].get('included_fields', []):
                         field_name_for_nesting = included_field.get('field')
-                        break  # Assuming there's one field to nest under (like 'manufacturer')
+                        print(f'Found field for nesting: {field_name_for_nesting}')
+                        break
 
                 # Execute the find function with the dynamically built filter parameters
                 print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
@@ -199,6 +200,7 @@ class DataTransferTool:
                         raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
 
         return value
+
 
 
     def process_mappings(self):
