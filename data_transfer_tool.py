@@ -90,6 +90,8 @@ class DataTransferTool:
         :param value: The value from the source that needs transformation.
         :param transform: The transform rule (e.g., regex_replace, lookup_field, lookup_object).
         :param obj_config: The object configuration for the current data being processed.
+        :param field_name: The current field being transformed.
+        :param item: The current source data item being processed.
         :return: Transformed value.
         """
         if transform:
@@ -97,12 +99,17 @@ class DataTransferTool:
             if "regex_replace" in transform:
                 pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = re.sub(pattern, replacement, value)
-           
+
+            # Lookup field from the mapped data (used to reference other fields)
+            elif "lookup_field" in transform:
+                section, field = re.findall(r"lookup_field\('(.*)',\s*'(.*)'\)", transform)[0]
+                value = self.mapped_data.get(section, {}).get(field, value)
+
             # Handle slugify transformation
             elif transform == "slugify":
                 # Slugify: convert to lowercase and replace non-alphanumeric characters with hyphens
                 value = re.sub(r'\W+', '-', value.lower())
-                
+
             # Generic lookup using find_function and create_function passed directly in the transform
             elif "lookup_object" in transform:
                 # Check if the correct format is being used in the transform
@@ -127,7 +134,7 @@ class DataTransferTool:
                 lookup_param_value = value  # The value passed in should be the current field's value from the source
 
                 # Execute the find function with the dynamically built parameter
-                print(f"Looking up in {find_function_path} via model = {lookup_param_value}")
+                print(f"Looking up in {find_function_path} via {lookup_param_value}")
                 found_object = find_function({lookup_param_name: lookup_param_value})
 
                 # Check if the object exists
@@ -136,48 +143,22 @@ class DataTransferTool:
                 if found_object:
                     # If object exists, return its ID
                     value = found_object.id
-                    print(f'Object found {found_object.name} {found_object.id}')
-                    
                 else:
-                    print(f'Object not found {lookup_param_value}')
                     # If object does not exist, create it using the create_function
-                    additional_data = {}
-                    
-                    # Check if 'included_fields' exists for the current field
-                    if 'included_fields' in obj_config['mapping'].get(field_name, {}):
-                        additional_fields = obj_config['mapping'][field_name]['included_fields']
-                        for field_info in additional_fields:
-                            field = field_info['field']
-                            key = field_info.get('key', 'id')  # Default to 'id' if no key is specified
-                            transform = field_info.get('transform_function')  # Get any transform function if specified
-                            create_if_missing = field_info.get('create_if_missing', False)  # Check if field should be created if missing
-
-                            # Get the value of the additional field from the current source data item
-                            field_value = item.get(field)
-
-                            # If field doesn't exist in the source data but should be created, apply the transform
-                            if field_value is None and create_if_missing:
-                                print(f"Field '{field}' not found in source data, creating dynamically.")
-                                field_value = self.apply_transform_function(item.get(field_name), transform, obj_config, field_name, item)
-                            elif field_value is not None and transform:
-                                # Apply transform (like slugify) if needed for existing fields
-                                field_value = self.apply_transform_function(field_value, transform, obj_config, field_name, item)
-
-                            if field_value is not None:
-                                # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco', slug: 'cisco'})
-                                additional_data[key] = field_value
-                                print(f"Adding required {field} subfield {{'{key}': '{field_value}'}}")
-                            else:
-                                print(f"Warning: No value found for included field '{field}'")
-
-
+                    # Include any additional required fields (from included_fields for the current field)
+                    additional_data = self.get_included_fields_data(obj_config, field_name, item)
                     create_data = {lookup_param_name: lookup_param_value}
                     create_data.update(additional_data)  # Merge with the additional data
-                    print(f"Creating new object {field_name}")
+                    print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
-                    value = created_object.id
 
-            return value
+                    # Ensure the created object has the necessary fields
+                    if hasattr(created_object, 'id'):
+                        value = created_object.id
+                    else:
+                        raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
+
+        return value
 
 
     def process_mappings(self):
