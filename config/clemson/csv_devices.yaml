@@ -14,17 +14,16 @@ api_definitions:
       token: 25c89f4320476edf29a6cb24a1d2b085b1fd5264
     base_urls:
       - https://netbox.app.clemson.edu
-      
+
 object_mappings:
   devices:
-    source_api: csv
-    destination_api: netbox
+    source_api: csv  # This references the CSV source defined above
+    destination_api: netbox  # This references the NetBox API
     destination_endpoint: dcim.devices
-    fetch_data_function: read_csv
-    source_mapping:
-      file_path:
-        - ./sample-data/devices.csv
-      delimiter: ","
+    fetch_data_function: read_csv  # The function for fetching CSV data
+    find_function: dcim.devices.filter  # NetBox function to find existing devices
+    create_function: dcim.devices.create  # NetBox function to create new devices
+    update_function: dcim.devices.update  # NetBox function to update existing devices
     mapping:
       name:
         source: device_name
