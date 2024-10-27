@@ -1,8 +1,8 @@
 api_definitions:
   csv:
-    type: csv  # Indicates this is a CSV source
+    type: csv
     source_type: file
-    
+
   # NetBox API Definition
   netbox: 
     type: api
@@ -16,16 +16,17 @@ api_definitions:
 
 object_mappings:
   devices:
-    source_api: csv 
-    destination_api: netbox 
+    source_api: csv
+    destination_api: netbox
     destination_endpoint: dcim.devices
-    fetch_data_function: read_csv  
+    fetch_data_function: read_csv
     source_mapping:
-      file_path: ./sample-data/devices.csv  
-      delimiter: ","  
+      file_path:
+        - ./sample-data/devices.csv
+      delimiter: ","
     mapping:
       name:
-        source: device_name 
+        source: device_name
       device_type:
         source: device_type
       serial_number:

@@ -1,31 +1,49 @@
+import os
 import csv
 from sources.base import DataSource
 
 class CSVDataSource(DataSource):
+    def authenticate(self):
+        """
+        Authenticate by checking if the CSV files exist and have the correct permissions.
+        """
+        file_paths = self.config['source_mapping']['file_path']  # Now supporting multiple file paths
+
+        # Check if each file exists and is readable
+        for file_path in file_paths:
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"CSV file '{file_path}' does not exist.")
+            
+            if not os.access(file_path, os.R_OK):
+                raise PermissionError(f"CSV file '{file_path}' is not readable. Please check the permissions.")
+
+            print(f"CSV file '{file_path}' is accessible and ready to read.")
+
     def fetch_data(self, api_mapping):
         """
-        Fetch data from CSV files based on the provided YAML configuration.
+        Fetch data from multiple CSV files based on the provided YAML configuration.
         
         :param api_mapping: Mapping that defines the source and how to fetch the data.
         :return: Retrieved data in a structured format.
         """
         all_data = []
         
-        # Retrieve file path and delimiter from source_mapping
-        file_path = api_mapping['source_mapping']['file_path']
+        # Retrieve file paths and delimiter from source_mapping
+        file_paths = api_mapping['source_mapping']['file_path']
         delimiter = api_mapping['source_mapping'].get('delimiter', ',')  # Default to comma
 
-        # Read the CSV file
-        with open(file_path, mode='r') as file:
-            reader = csv.DictReader(file, delimiter=delimiter)
-            for row in reader:
-                row_data = {}
+        # Read each CSV file
+        for file_path in file_paths:
+            with open(file_path, mode='r') as file:
+                reader = csv.DictReader(file, delimiter=delimiter)
+                for row in reader:
+                    row_data = {}
 
-                # Perform dynamic field mapping from CSV columns to destination fields
-                for dest_field, field_info in api_mapping['mapping'].items():
-                    source_field = field_info['source']
-                    row_data[dest_field] = row.get(source_field)  # Map CSV field to destination field
+                    # Perform dynamic field mapping from CSV columns to destination fields
+                    for dest_field, field_info in api_mapping['mapping'].items():
+                        source_field = field_info['source']
+                        row_data[dest_field] = row.get(source_field)  # Map CSV field to destination field
 
-                all_data.append(row_data)
+                    all_data.append(row_data)
 
         return all_data
