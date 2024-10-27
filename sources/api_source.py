@@ -12,13 +12,16 @@ class APIDataSource(DataSource):
         module = importlib.import_module(module_name)
         auth_method = self.config['auth_method']
 
-        # Function to handle function paths with or without periods (e.g., connect.SmartConnect)
+        # Function to handle function paths with submodules (e.g., connect.SmartConnect)
         def get_auth_function(module, function_path):
             func_parts = function_path.split(".")
-            # Dynamically resolve the function path step by step
-            auth_func = getattr(module, func_parts[0])
-            for part in func_parts[1:]:
-                auth_func = getattr(auth_func, part)
+            
+            # Dynamically import the submodule if needed (e.g., pyVim.connect)
+            submodule = importlib.import_module(f"{module.__name__}.{func_parts[0]}")
+            
+            # Retrieve the function (e.g., SmartConnect)
+            auth_func = getattr(submodule, func_parts[1])
+            
             return auth_func
 
         # Iterate through the base URLs (for multi-instance APIs, if needed)
@@ -40,4 +43,3 @@ class APIDataSource(DataSource):
 
             # Store the authenticated client
             self.clients.append(client)
-
