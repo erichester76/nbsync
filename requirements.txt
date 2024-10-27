@@ -1,0 +1,5 @@
+pynetbox
+pyvmomi
+dnacentersdk
+pysnmp
+pandas
