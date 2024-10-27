@@ -25,22 +25,26 @@ class DataTransferTool:
         self.mapped_data = {}
 
 
-    def get_nested_function(self, obj, function_path):
+    def get_nested_function(self, api_client, function_path):
         """
-        Retrieve a nested function from an object (like API clients), given the function path.
+        Resolves a nested function path, such as 'dcim.device_types.filter', and returns the function.
         
-        :param obj: The base object (e.g., an API client).
-        :param function_path: The dot-separated path to the function (e.g., 'dcim.devices.filter').
-        :return: The function object to be invoked.
+        :param api_client: The API client to resolve the function from.
+        :param function_path: The full function path (e.g., 'dcim.device_types.filter').
+        :return: The resolved function.
         """
-        func_parts = function_path.split('.')
-        for part in func_parts:
-            obj = getattr(obj, part, None)
-            if obj is None:
-                raise AttributeError(f"Function path '{function_path}' not found.")
-        if not callable(obj):
-            raise TypeError(f"'{function_path}' is not a callable function.")
-        return obj
+        parts = function_path.split('.')
+        func = api_client
+
+        # Resolve each part of the function path step by step
+        for part in parts:
+            func = getattr(func, part)
+        
+        if not callable(func):
+            raise ValueError(f"{function_path} is not a valid callable function.")
+        
+        return func
+
     
     def initialize_sources(self):
         for name, config in self.config['api_definitions'].items():
@@ -118,9 +122,9 @@ class DataTransferTool:
                 print(f"lookup up in {obj_config['destination_api']} {find_function_path} via {lookup_type} = {value}")
 
                 # Dynamically retrieve the find_function and create_function from the API client
-                find_function = getattr(api_client, find_function_path)
-                create_function = getattr(api_client, create_function_path)
-                
+                find_function = self.get_nested_function(api_client, find_function_path)
+                create_function = self.get_nested_function(api_client, create_function_path)
+               
                 # Execute the find function with the mapped value (e.g., site name, device type)
                 found_object = find_function({lookup_type: value})
 
