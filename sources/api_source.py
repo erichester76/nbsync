@@ -3,7 +3,7 @@ import importlib
 from sources.base import DataSource
 
 class APIDataSource(DataSource):
-    def __init__(self, config):
+    def __init__(self, name, config):
         super().__init__(config)
         self.name = name  # Store the section name
         self.clients = []
