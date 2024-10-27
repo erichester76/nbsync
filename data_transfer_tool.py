@@ -170,10 +170,10 @@ class DataTransferTool:
                         print(f'Found field for nesting: {field_name_for_nesting}')
                         break
                     
-                filter_params[field_name_for_nesting]=additional_data[field_name_for_nesting]
-                """ for nested_key, nested_value in additional_data.items():
-                        filter_params[f"{field_name_for_nesting}__{nested_key}"] = nested_value
-                """
+                for nested_key, nested_value in additional_data.items():
+                        filter_params[f"{field_name_for_nesting}"] = nested_value
+                        break
+                
                 # Debug before the find function call
                 print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
                 try:
