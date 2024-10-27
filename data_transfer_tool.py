@@ -153,7 +153,7 @@ class DataTransferTool:
                 lookup_param_value = value  # The value passed in should be the current field's value from the source
 
                 # Execute the find function with the dynamically built parameter
-                print(f"Looking up in {find_function_path} via {lookup_param_value}")
+                print(f"Looking up {lookup_param_value} via {find_function_path} ")
                 found_object = find_function({lookup_param_name: lookup_param_value})
 
                 # Check if the object exists
