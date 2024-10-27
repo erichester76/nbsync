@@ -114,10 +114,12 @@ class DataTransferTool:
                         "Please ensure all parameters are specified."
                     )
 
-                # Directly use the find and create functions captured by the regex
-                find_function = getattr(self.sources[lookup_type].api, find_function_path)
-                create_function = getattr(self.sources[lookup_type].api, create_function_path)
+                api_client = self.sources[obj_config['destination_api']].api
 
+                # Dynamically retrieve the find_function and create_function from the API client
+                find_function = getattr(api_client, find_function_path)
+                create_function = getattr(api_client, create_function_path)
+                
                 # Execute the find function with the mapped value (e.g., site name, device type)
                 found_object = find_function({self.config['object_mappings'][lookup_type]['mapping']['name']['source']: value})
 
