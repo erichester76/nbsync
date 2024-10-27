@@ -171,6 +171,7 @@ class DataTransferTool:
                         break
                     
                 for nested_key, nested_value in additional_data.items():
+                    nested_value = re.sub(r'\W+', '-', nested_value.lower())
                     filter_params[field_name_for_nesting] = {nested_key: nested_value}
                     break
                 
