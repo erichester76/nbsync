@@ -166,7 +166,8 @@ class DataTransferTool:
                     # If object does not exist, create it using the create_function
                     # Include any additional required fields (from included_fields for the current field)
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
-                    
+                    print(f'Additional data: {additional_data}')
+                    print(f'{lookup_param_name}:{lookup_param_value}')
                     # Ensure that the additional data is nested under the correct key, like 'manufacturer'
                     create_data = {lookup_param_name: lookup_param_value}
                     if additional_data:
