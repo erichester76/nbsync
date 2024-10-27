@@ -9,6 +9,7 @@ from sources.csv_source import CSVDataSource
 from sources.xls_source import XLSDataSource
 from sources.snmp_source import SNMPDataSource
 import jinja2
+import pprint
 
 
 class DataTransferTool:
@@ -182,10 +183,10 @@ class DataTransferTool:
                     print(f"Error calling find_function: {str(e)}")
                     raise
                 
-                print (f"ID: {found_object.first().get('id')}")
+
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
-
+                pprint.pp(found_object)
                 if found_object:
                     # If object exists, return its ID
                     value = found_object.id
