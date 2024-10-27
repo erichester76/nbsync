@@ -45,7 +45,7 @@ class APIDataSource(DataSource):
                     else:
                         ssl_context = None
                     
-                    # Collect arguments from auth_args if they exist, passing base_url as host
+                    # Collect arguments from auth_args, passing base_url as host
                     auth_args = [base_url if arg == 'host' else self.config['auth_params'][arg] for arg in self.config['auth_args']]
                     
                     # If SSL context is required, append it to the arguments
