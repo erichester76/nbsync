@@ -3,6 +3,7 @@ api_definitions:
     type: csv
     source_type: file
 
+api_definitions:
   # NetBox API Definition
   netbox: 
     type: api
@@ -13,7 +14,7 @@ api_definitions:
       token: 25c89f4320476edf29a6cb24a1d2b085b1fd5264
     base_urls:
       - https://netbox.app.clemson.edu
-
+      
 object_mappings:
   devices:
     source_api: csv
