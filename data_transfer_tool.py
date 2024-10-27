@@ -131,7 +131,10 @@ class DataTransferTool:
                 if found_object:
                     # If object exists, return its ID
                     value = found_object.id
+                    print(f'Object found {found_object.name} {found_object.id}')
+                    
                 else:
+                    print(f'Object not found {lookup_param_value}')
                     # If object does not exist, create it using the create_function
                     additional_data = {}
                     
@@ -143,9 +146,12 @@ class DataTransferTool:
                             # Get the value of the additional field from the source data or the mapped data
                             field_value = self.mapped_data.get(field)
                             additional_data[field] = field_value
+                            print(f"adding required field {field} {field_value}")
+
 
                     create_data = {lookup_param_name: lookup_param_value}
                     create_data.update(additional_data)  # Merge with the additional data
+                    print(f"Creating new {field_name}")
                     created_object = create_function(create_data)
                     value = created_object.id
 
