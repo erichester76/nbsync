@@ -184,25 +184,7 @@ class DataTransferTool:
                 except Exception as e:
                     print(f"Error calling find_function: {str(e)}")
                     raise
-                
-                import json
 
-                if found_object:
-                    print(f"Found {len(found_object)} objects (detailed):")
-                    
-                    # Iterate through each object in found_object and print it
-                    for obj in found_object:
-                        try:
-                            # Convert each object to a dictionary and pretty print it
-                            print(json.dumps(dict(obj), indent=4))
-                        except TypeError:
-                            print("Unable to convert object to dictionary, printing raw object:")
-                            print(obj)
-                else:
-                    print("No objects found.")
-                # Check if the object exists
-                found_object = found_object.first() if hasattr(found_object, 'first') else None
-                
                 if found_object:
                     # If object exists, return its ID
                     value = found_object.id
