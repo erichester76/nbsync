@@ -167,11 +167,11 @@ class DataTransferTool:
                     # Include any additional required fields (from included_fields for the current field)
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
                     print(f'Additional data: {additional_data}')
-                    print(f'{lookup_param_name}:{lookup_param_value}')
+                    print(f'{lookup_param_name}: {lookup_param_value}')
                     # Ensure that the additional data is nested under the correct key, like 'manufacturer'
                     create_data = {lookup_param_name: lookup_param_value}
                     if additional_data:
-                        create_data = {lookup_param_name: additional_data}
+                        create_data = {lookup_param_name: lookup_param_value, field_name: {additional_data}}
                     
                     print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
