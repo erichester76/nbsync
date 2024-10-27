@@ -15,7 +15,7 @@ api_definitions:
     type: api
     module: pyVim
     auth_method: login
-    auth_function: Sconnect.martConnect
+    auth_function: connect.SmartConnect
     auth_params:
       username: esacollector
       password: Upward-Floral4-Avid
