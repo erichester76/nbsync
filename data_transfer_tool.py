@@ -134,14 +134,15 @@ class DataTransferTool:
                 else:
                     # If object does not exist, create it using the create_function
                     additional_data = {}
-
-                    # Retrieve the included fields from the YAML configuration
-                    additional_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
-        
-                    for field in additional_fields:
-                        # Get the value of the additional field from the source data or the mapped data
-                        field_value = self.mapped_data.get(field) or obj_config['source_api'].get(field)
-                        additional_data[field] = field_value
+                    
+                    if 'included_fields' in obj_config['mapping'].get(field_name, {}):
+                        # Retrieve the included fields from the YAML configuration
+                        additional_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
+            
+                        for field in additional_fields:
+                            # Get the value of the additional field from the source data or the mapped data
+                            field_value = self.mapped_data.get(field) or obj_config['source_api'].get(field)
+                            additional_data[field] = field_value
 
                     create_data = {lookup_param_name: lookup_param_value}
                     create_data.update(additional_data)  # Merge with the additional data
