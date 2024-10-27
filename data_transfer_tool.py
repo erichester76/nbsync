@@ -114,9 +114,9 @@ class DataTransferTool:
                         "Please ensure all parameters are specified."
                     )
 
-                # Dynamically retrieve the find_function and create_function from the source API client
-                find_function = self.get_nested_function(self.sources[lookup_type].api, find_function_path)
-                create_function = self.get_nested_function(self.sources[lookup_type].api, create_function_path)
+                # Directly use the find and create functions captured by the regex
+                find_function = getattr(self.sources[lookup_type].api, find_function_path)
+                create_function = getattr(self.sources[lookup_type].api, create_function_path)
 
                 # Execute the find function with the mapped value (e.g., site name, device type)
                 found_object = find_function({self.config['object_mappings'][lookup_type]['mapping']['name']['source']: value})
