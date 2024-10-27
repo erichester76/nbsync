@@ -7,7 +7,7 @@ class APIDataSource(DataSource):
         super().__init__(config)
         self.name = name  # Store the section name
         self.api = None
-
+        self.clients = []  # Initialize the clients list
 
     def authenticate(self):
         # Dynamically load the module specified in the YAML
