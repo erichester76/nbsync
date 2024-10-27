@@ -30,7 +30,7 @@ class DataTransferTool:
             if source_type == 'api':
                 self.sources[name] = APIDataSource(name, config)
             elif source_type == 'csv':
-                self.sources[name] = CSVDataSource(config)
+                self.sources[name] = CSVDataSource(name,config)
             elif source_type == 'xls':
                 self.sources[name] = XLSDataSource(config)
             elif source_type == 'snmp':
