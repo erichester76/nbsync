@@ -141,13 +141,25 @@ class DataTransferTool:
                     if 'included_fields' in obj_config['mapping'].get(field_name, {}):
                         # Retrieve the included fields from the YAML configuration
                         additional_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
-                        print(f'{self.mapped_data}')
                         
-                        for field in additional_fields:
-                            # Get the value of the additional field from the source data or the mapped data
+                        for field_info in additional_fields:
+                            field = field_info['field']
+                            key = field_info.get('key', 'id')  # Default to 'id' if no key is specified
+
+                            # Get the value of the additional field from the current source data item
                             field_value = item.get(field)
-                            additional_data[field] = field_value
-                            print(f"adding required field {field} {field_value}")
+                            if field_value is not None:
+                                # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco'})
+                                if key: 
+                                    additional_data[field] = {key: field_value} 
+                                    print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
+
+                                else: 
+                                    additional_data[field] = field_value
+                                    print(f"Adding required field {field} as {field_value}")
+
+                            else:
+                                print(f"Warning: No value found for included field '{field}'")
 
 
                     create_data = {lookup_param_name: lookup_param_value}
