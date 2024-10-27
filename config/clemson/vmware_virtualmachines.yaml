@@ -1,5 +1,5 @@
 # vmware_to_netbox_vms.yaml
-{% include "./api_definitions.yaml" %}
+{% include "config/clemson/api_definitions.yaml" %}
 
 object_mappings:
   virtual_machines:
