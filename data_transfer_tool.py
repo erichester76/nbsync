@@ -181,7 +181,8 @@ class DataTransferTool:
                 except Exception as e:
                     print(f"Error calling find_function: {str(e)}")
                     raise
-
+                
+                print (f'ID: {found_object.first().get('id')}')
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
 
