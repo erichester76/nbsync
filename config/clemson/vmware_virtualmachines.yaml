@@ -1,6 +1,6 @@
 api_definitions:
   # NetBox API Definition
-  netbox: &netbox_api
+  netbox: 
     type: api
     module: pynetbox
     auth_method: token
@@ -11,7 +11,7 @@ api_definitions:
       - https://netbox.app.clemson.edu
 
   # VMware API Definition (pyvmomi)
-  vmware: &vmware_api
+  vmware: 
     type: api
     module: pyVim
     auth_method: login
@@ -34,8 +34,8 @@ api_definitions:
 
 object_mappings:
   virtual_machines:
-    source_api: vmware_api
-    destination_api: netbox_api
+    source_api: vmware
+    destination_api: netbox
     destination_endpoint: virtualization.virtual_machines
     fetch_data_function: content.viewManager.CreateContainerView  # Custom VMware function to retrieve VMs
     mapping:
