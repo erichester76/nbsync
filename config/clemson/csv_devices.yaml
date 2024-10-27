@@ -1,7 +1,10 @@
 api_definitions:
   csv:
-    type: csv
-    source_type: file
+    type: csv  # Defines the CSV source type
+    source_mapping:
+      file_path:
+        - ./sample-data/devices.csv
+      delimiter: ","
 
   # NetBox API Definition
   netbox: 
