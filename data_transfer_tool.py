@@ -97,7 +97,12 @@ class DataTransferTool:
             if "regex_replace" in transform:
                 pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = re.sub(pattern, replacement, value)
-
+           
+            # Handle slugify transformation
+            elif transform == "slugify":
+                # Slugify: convert to lowercase and replace non-alphanumeric characters with hyphens
+                value = re.sub(r'\W+', '-', value.lower())
+                
             # Generic lookup using find_function and create_function passed directly in the transform
             elif "lookup_object" in transform:
                 # Check if the correct format is being used in the transform
@@ -138,28 +143,31 @@ class DataTransferTool:
                     # If object does not exist, create it using the create_function
                     additional_data = {}
                     
+                    # Check if 'included_fields' exists for the current field
                     if 'included_fields' in obj_config['mapping'].get(field_name, {}):
-                        # Retrieve the included fields from the YAML configuration
-                        additional_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
-                        
-                        for field_info in additional_fields:
+                        included_fields = obj_config['mapping'][field_name]['included_fields']
+
+                        for field_info in included_fields:
                             field = field_info['field']
                             key = field_info.get('key', 'id')  # Default to 'id' if no key is specified
+                            transform = field_info.get('transform_function')  # Get any transform function if specified
 
                             # Get the value of the additional field from the current source data item
                             field_value = item.get(field)
                             if field_value is not None:
-                                # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco'})
+                                # Apply transform (like slugify) if needed
+                                if transform:
+                                    field_value = self.apply_transform_function(field_value, transform, obj_config, field_name, item)
                                 if key: 
-                                    additional_data[field] = {key: field_value} 
-                                    print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
+                                        additional_data[field] = {key: field_value} 
+                                        print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
 
                                 else: 
                                     additional_data[field] = field_value
                                     print(f"Adding required field {field} as {field_value}")
 
-                            else:
-                                print(f"Warning: No value found for included field '{field}'")
+                    else:
+                        print(f"Warning: No value found for included field '{field}'")
 
 
                     create_data = {lookup_param_name: lookup_param_value}

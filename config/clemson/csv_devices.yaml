@@ -36,7 +36,11 @@ object_mappings:
         transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')  # Lookup or create device_type
         included_fields: 
           - field: manufacturer
-            key: name 
+            key: name  # The field for the name
+          - field: manufacturer
+            key: slug  # The field for the slug
+            transform_function: slugify  # New transform to convert name to slug
+            
       serial_number:
         source: serial
       site:
