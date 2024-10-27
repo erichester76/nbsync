@@ -28,7 +28,7 @@ class DataTransferTool:
         for name, config in self.config['api_definitions'].items():
             source_type = config['type']
             if source_type == 'api':
-                self.sources[name] = APIDataSource(config)
+                self.sources[name] = APIDataSource(name, config)
             elif source_type == 'csv':
                 self.sources[name] = CSVDataSource(config)
             elif source_type == 'xls':
