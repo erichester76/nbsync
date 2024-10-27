@@ -115,7 +115,7 @@ class DataTransferTool:
                     )
 
                 api_client = self.sources[obj_config['destination_api']].api
-
+                print("f{obj_config['destination_api']} {find_function_path}")
                 # Dynamically retrieve the find_function and create_function from the API client
                 find_function = getattr(api_client, find_function_path)
                 create_function = getattr(api_client, create_function_path)
