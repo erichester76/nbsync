@@ -64,7 +64,7 @@ api_definitions:
   # Cisco Nexus Dashboard Fabric Controller (ndfc-sdk)
   ndfc: &ndfc_api
     type: api
-    module: ndfc_sdk
+    module: ndfc_python
     auth_method: login
     auth_function: login
     auth_params:

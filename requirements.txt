@@ -4,7 +4,7 @@ pyvmomi
 dnacentersdk
 pysnmp
 pandas
-ndfc-sdk
+ndfc-python
 pybsn
 wmi
 pywinrm
