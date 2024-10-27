@@ -4,8 +4,7 @@ pyvmomi
 dnacentersdk
 pysnmp
 pandas
-ndfc-python
-pybsn
+ndfc-python @ git+https://github.com/allenrobel/ndfc-python.gitpybsn
 wmi
 pywinrm
 azure-mgmt
