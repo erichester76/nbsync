@@ -158,7 +158,7 @@ class DataTransferTool:
                 lookup_param_value = value  # The value passed in should be the current field's value from the source
 
                 # Gather any additional fields for filtering (e.g., manufacturer)
-                filter_params = {lookup_param_name: lookup_param_value}
+                filter_params = {lookup_param_name: lookup_param_value, }
                 additional_data = {}
                 if 'included_fields' in obj_config['mapping'][field_name]:
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
@@ -172,7 +172,7 @@ class DataTransferTool:
                     
                 for nested_key, nested_value in additional_data.items():
                     nested_value = re.sub(r'\W+', '-', nested_value.lower())
-                    filter_params[field_name_for_nesting] = {'slug': nested_value}
+                    filter_params[field_name_for_nesting] = nested_value
                     break
                 
                 # Debug before the find function call
