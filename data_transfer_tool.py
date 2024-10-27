@@ -245,6 +245,7 @@ class DataTransferTool:
                             mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
 
                         # Create or update the destination object and return the ID
+                        print(f"Creating/Updating {destination_api}, {find_function}, {create_function}, {update_function}, {mapped_data}")
                         object_id = self.create_or_update(destination_api, find_function, create_function, update_function, mapped_data)
                         print(f"Processed object with ID: {object_id}")
 
