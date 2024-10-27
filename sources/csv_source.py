@@ -4,20 +4,7 @@ from sources.base import DataSource
 
 class CSVDataSource(DataSource):
     def authenticate(self):
-        """
-        Authenticate by checking if the CSV files exist and have the correct permissions.
-        """
-        file_paths = self.config['source_mapping']['file_path']  # Now supporting multiple file paths
-
-        # Check if each file exists and is readable
-        for file_path in file_paths:
-            if not os.path.exists(file_path):
-                raise FileNotFoundError(f"CSV file '{file_path}' does not exist.")
-            
-            if not os.access(file_path, os.R_OK):
-                raise PermissionError(f"CSV file '{file_path}' is not readable. Please check the permissions.")
-
-            print(f"CSV file '{file_path}' is accessible and ready to read.")
+        pass
 
     def fetch_data(self, api_mapping):
         """
