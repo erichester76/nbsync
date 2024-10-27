@@ -114,72 +114,72 @@ class DataTransferTool:
         :return: Transformed value.
         """
         if transform:
-        # Perform regex replace
-        if "regex_replace" in transform:
-            pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
-            value = re.sub(pattern, replacement, value)
+            # Perform regex replace
+            if "regex_replace" in transform:
+                pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
+                value = re.sub(pattern, replacement, value)
 
-        # Lookup field from the mapped data (used to reference other fields)
-        elif "lookup_field" in transform:
-            section, field = re.findall(r"lookup_field\('(.*)',\s*'(.*)'\)", transform)[0]
-            value = self.mapped_data.get(section, {}).get(field, value)
+            # Lookup field from the mapped data (used to reference other fields)
+            elif "lookup_field" in transform:
+                section, field = re.findall(r"lookup_field\('(.*)',\s*'(.*)'\)", transform)[0]
+                value = self.mapped_data.get(section, {}).get(field, value)
 
-        # Handle slugify transformation
-        elif transform == "slugify":
-            # Slugify: convert to lowercase and replace non-alphanumeric characters with hyphens
-            value = re.sub(r'\W+', '-', value.lower())
+            # Handle slugify transformation
+            elif transform == "slugify":
+                # Slugify: convert to lowercase and replace non-alphanumeric characters with hyphens
+                value = re.sub(r'\W+', '-', value.lower())
 
-        # Generic lookup using find_function and create_function passed directly in the transform
-        elif "lookup_object" in transform:
-            # Check if the correct format is being used in the transform
-            matches = re.findall(r"lookup_object\('(.*)',\s*'(.*)',\s*'(.*)'\)", transform)
-            if not matches:
-                raise ValueError(
-                    "Incorrect format for lookup_object transform. "
-                    "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
-                )
+            # Generic lookup using find_function and create_function passed directly in the transform
+            elif "lookup_object" in transform:
+                # Check if the correct format is being used in the transform
+                matches = re.findall(r"lookup_object\('(.*)',\s*'(.*)',\s*'(.*)'\)", transform)
+                if not matches:
+                    raise ValueError(
+                        "Incorrect format for lookup_object transform. "
+                        "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
+                    )
 
-            lookup_type, find_function_path, create_function_path = matches[0]
+                lookup_type, find_function_path, create_function_path = matches[0]
 
-            # Retrieve the API client (assuming it's a destination API in this case)
-            api_client = self.sources[obj_config['destination_api']].api
+                # Retrieve the API client (assuming it's a destination API in this case)
+                api_client = self.sources[obj_config['destination_api']].api
 
-            # Resolve nested find_function and create_function paths (e.g., 'dcim.device_types.filter')
-            find_function = self.get_nested_function(api_client, find_function_path)
-            create_function = self.get_nested_function(api_client, create_function_path)
+                # Resolve nested find_function and create_function paths (e.g., 'dcim.device_types.filter')
+                find_function = self.get_nested_function(api_client, find_function_path)
+                create_function = self.get_nested_function(api_client, create_function_path)
 
-            # Build the RHS of the lookup call using the lookup_type as the key and value from the source field
-            lookup_param_name = lookup_type  # The name of the parameter should match the lookup_type
-            lookup_param_value = value  # The value passed in should be the current field's value from the source
+                # Build the RHS of the lookup call using the lookup_type as the key and value from the source field
+                lookup_param_name = lookup_type  # The name of the parameter should match the lookup_type
+                lookup_param_value = value  # The value passed in should be the current field's value from the source
 
-            # Execute the find function with the dynamically built parameter
-            print(f"Looking up in {find_function_path} via {lookup_param_value}")
-            found_object = find_function({lookup_param_name: lookup_param_value})
+                # Execute the find function with the dynamically built parameter
+                print(f"Looking up in {find_function_path} via {lookup_param_value}")
+                found_object = find_function({lookup_param_name: lookup_param_value})
 
-            # Check if the object exists
-            found_object = found_object.first() if hasattr(found_object, 'first') else None
+                # Check if the object exists
+                found_object = found_object.first() if hasattr(found_object, 'first') else None
 
-            if found_object:
-                # If object exists, return its ID
-                value = found_object.id
-            else:
-                # If object does not exist, create it using the create_function
-                # Include any additional required fields (from included_fields for the current field)
-                additional_data = self.get_included_fields_data(obj_config, field_name, item)
-
-                # Wrap additional data inside the main field (e.g., manufacturer: {name: 'Cisco', slug: 'cisco'})
-                create_data = {lookup_param_name: {**additional_data, lookup_param_name: lookup_param_value}}
-
-                print(f"Creating new object with data: {create_data}")
-                created_object = create_function(create_data)
-
-                # Ensure the created object has the necessary fields
-                if hasattr(created_object, 'id'):
-                    value = created_object.id
+                if found_object:
+                    # If object exists, return its ID
+                    value = found_object.id
                 else:
-                    raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
+                    # If object does not exist, create it using the create_function
+                    # Include any additional required fields (from included_fields for the current field)
+                    additional_data = self.get_included_fields_data(obj_config, field_name, item)
 
-        return value
+                    # Wrap additional data inside the main field (e.g., manufacturer: {name: 'Cisco', slug: 'cisco'})
+                    create_data = {lookup_param_name: {**additional_data, lookup_param_name: lookup_param_value}}
+
+                    print(f"Creating new object with data: {create_data}")
+                    created_object = create_function(create_data)
+
+                    # Ensure the created object has the necessary fields
+                    if hasattr(created_object, 'id'):
+                        value = created_object.id
+                    else:
+                        raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
+
+            return value
 
 
     def process_mappings(self):
