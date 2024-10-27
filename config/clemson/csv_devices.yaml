@@ -29,9 +29,12 @@ object_mappings:
     mapping:
       name:
         source: device_name
+      manufacturer:
+        source: manufacturer
       device_type:
         source: device_type
         transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')  # Lookup or create device_type
+        include_fields: ['manufacturer']  # Manufacturer needs to be included during create/update
       serial_number:
         source: serial
       site:

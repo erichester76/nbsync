@@ -83,7 +83,7 @@ class DataTransferTool:
         else:
             raise ValueError(f"Site '{value}' not found in NetBox.")
     
-    def apply_transform_function(self, value, transform, obj_config):
+    def apply_transform_function(self, value, transform, obj_config, field_name):
         """
         Apply a transformation to a value, based on the transform rule provided in the YAML.
         
@@ -110,23 +110,20 @@ class DataTransferTool:
 
                 lookup_type, find_function_path, create_function_path = matches[0]
 
-                # Check if the required fields are missing in the transform
-                if not lookup_type or not find_function_path or not create_function_path:
-                    raise ValueError(
-                        f"Missing required parameters in lookup_object: object_type='{lookup_type}', "
-                        f"find_function='{find_function_path}', create_function='{create_function_path}'."
-                        "Please ensure all parameters are specified."
-                    )
-
+                # Retrieve the API client (assuming it's a destination API in this case)
                 api_client = self.sources[obj_config['destination_api']].api
-                print(f"lookup up in {obj_config['destination_api']} {find_function_path} via {lookup_type} = {value}")
 
-                # Dynamically retrieve the find_function and create_function from the API client
+                # Resolve nested find_function and create_function paths (e.g., 'dcim.device_types.filter')
                 find_function = self.get_nested_function(api_client, find_function_path)
                 create_function = self.get_nested_function(api_client, create_function_path)
-               
-                # Execute the find function with the mapped value (e.g., site name, device type)
-                found_object = find_function({lookup_type: value})
+
+                # Build the RHS of the lookup call using the lookup_type as the key and value from the source field
+                lookup_param_name = lookup_type  # The name of the parameter should match the lookup_type
+                lookup_param_value = value  # The value passed in should be the current field's value from the source
+
+                # Execute the find function with the dynamically built parameter
+                print(f"Looking up in {find_function_path} via model = {lookup_param_value}")
+                found_object = find_function({lookup_param_name: lookup_param_value})
 
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
@@ -136,11 +133,22 @@ class DataTransferTool:
                     value = found_object.id
                 else:
                     # If object does not exist, create it using the create_function
-                    created_object = create_function({lookup_type: value})
+                    additional_data = {}
+
+                    # Retrieve the included fields from the YAML configuration
+                    additional_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
+        
+                    for field in additional_fields:
+                        # Get the value of the additional field from the source data or the mapped data
+                        field_value = self.mapped_data.get(field) or obj_config['source_api'].get(field)
+                        additional_data[field] = field_value
+
+                    create_data = {lookup_param_name: lookup_param_value}
+                    create_data.update(additional_data)  # Merge with the additional data
+                    created_object = create_function(create_data)
                     value = created_object.id
 
-        return value
-
+            return value
 
 
     def process_mappings(self):
@@ -175,7 +183,7 @@ class DataTransferTool:
                         for dest_field, field_info in obj_config['mapping'].items():
                             source_value = item.get(field_info['source'])
                             transform = field_info.get('transform_function')
-                            mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config)
+                            mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field)
 
                         # Create or update the destination object and return the ID
                         object_id = self.create_or_update(destination_api, find_function, create_function, update_function, mapped_data)
