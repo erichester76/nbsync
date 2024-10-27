@@ -76,16 +76,26 @@ class DataTransferTool:
                 # Send the mapped data to the destination system (NetBox, etc.)
                 self.create_or_update(destination_api_client, destination_endpoint, mapped_data)
 
-    def create_or_update(self, api_client, endpoint, data):
-        api_method = getattr(api_client, endpoint)
-        existing_obj = api_method.get(name=data['name'])
-        if existing_obj:
-            for key, value in data.items():
-                if getattr(existing_obj, key) != value:
-                    setattr(existing_obj, key, value)
-            existing_obj.save()
+    def create_or_update(self, destination_client, destination_endpoint, mapped_data):
+        """
+        Create or update objects in the destination API.
+        
+        :param destination_client: Authenticated client of the destination API
+        :param destination_endpoint: The endpoint where data should be sent (e.g., dcim.devices)
+        :param mapped_data: The mapped data from the source API
+        """
+        # Access the destination API endpoint dynamically
+        endpoint_obj = getattr(destination_client, destination_endpoint.split('.')[0])
+        endpoint_method = getattr(endpoint_obj, destination_endpoint.split('.')[1])
+
+        # Check if the object already exists (you may need to adjust this depending on the API)
+        existing_objects = endpoint_method.filter(name=mapped_data['name'])
+        if existing_objects:
+            # Update the object if it exists
+            existing_objects[0].update(**mapped_data)
         else:
-            api_method.create(data)
+            # Create a new object
+            endpoint_method.create(**mapped_data)
 
 def main():
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
