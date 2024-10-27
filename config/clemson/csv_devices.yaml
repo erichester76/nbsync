@@ -3,7 +3,6 @@ api_definitions:
     type: csv
     source_type: file
 
-api_definitions:
   # NetBox API Definition
   netbox: 
     type: api
