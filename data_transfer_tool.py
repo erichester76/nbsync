@@ -95,7 +95,7 @@ class DataTransferTool:
                 if field_value is not None:
                     # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco', slug: 'cisco'})
                     included_data[key] = field_value
-                    print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
+                    print(f"Adding required field {{'{key}': '{field_value}'}} to {field}")
                 else:
                     print(f"Warning: No value found for included field '{field}'")
 
@@ -165,14 +165,22 @@ class DataTransferTool:
                 else:
                     # If object does not exist, create it using the create_function
                     # Include any additional required fields (from included_fields for the current field)
-
-                    create_data = {lookup_param_name: lookup_param_value}
-                    
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
-                     # Ensure that the additional data is nested under the correct key, like 'manufacturer'
-                    if additional_data:
-                        create_data = {lookup_param_name: lookup_param_value, item: {'name': lookup_param_value, **additional_data}}
-                    
+                    print(f'Additional data: {additional_data}')
+                    print(f'{lookup_param_name}: {lookup_param_value}')
+
+                    # Get the field (like 'manufacturer') to correctly nest additional data
+                    field_name_for_nesting = None
+                    for included_field in obj_config['mapping'][field_name].get('included_fields', []):
+                        field_name_for_nesting = included_field.get('field')
+                        break  # Assuming there's one field to nest under (like 'manufacturer')
+
+                    if not field_name_for_nesting:
+                        raise ValueError(f"Field name for nesting is missing in included_fields for {field_name}")
+
+                    # Create the final nested structure
+                    create_data = {lookup_param_name: lookup_param_value, field_name_for_nesting: {**additional_data}}
+
                     print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
 
