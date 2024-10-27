@@ -49,23 +49,31 @@ class DataTransferTool:
 
     def process_mappings(self):
         for obj_type, obj_config in self.config['object_mappings'].items():
+            # Fetch data using the generic fetch_data method, driven by YAML
             source = self.sources[obj_config['source_api']]
-            data = source.fetch_data()
+            source_data = source.fetch_data(obj_config)
 
+            # Setup destination API client and endpoint
             destination_api_client = self.sources[obj_config['destination_api']].client
             destination_endpoint = obj_config['destination_endpoint']
 
-            for item in data:
+            for item in source_data:
                 mapped_data = {}
+
+                # Perform field mappings dynamically based on YAML
                 for dest_field, field_info in obj_config['mapping'].items():
                     source_value = item.get(field_info['source'])
+
+                    # Apply transformation if defined in the mapping
                     transform = field_info.get('transform_function')
                     mapped_data[dest_field] = self.apply_transform_function(source_value, transform)
 
+                # Store mapped data for further processing
                 if obj_type not in self.mapped_data:
                     self.mapped_data[obj_type] = {}
                 self.mapped_data[obj_type].update(mapped_data)
 
+                # Send the mapped data to the destination system (NetBox, etc.)
                 self.create_or_update(destination_api_client, destination_endpoint, mapped_data)
 
     def create_or_update(self, api_client, endpoint, data):

@@ -1,20 +1,20 @@
-
-api_definitions:
-  csv_ip_addresses:
-    type: csv
-    source_files:
-      - /path/to/ip_addresses_1.csv
-      - /path/to/ip_addresses_2.csv
-
 object_mappings:
-  ip_addresses:
-    source_api: csv_ip_addresses
-    destination_api: netbox
-    destination_endpoint: ipam.ip_addresses
+  devices:
+    source_api: csv 
+    destination_api: netbox 
+    destination_endpoint: dcim.devices
+    fetch_data_function: read_csv  
+    source_mapping:
+      file_path: ./sample-data/devices.csv  
+      delimiter: ","  
     mapping:
-      address: IP_Address
-      status: Status
-      interface: Interface
-      assigned_object_type: Assigned_Object_Type
-      assigned_object_id: Assigned_Object_ID
-      tenant: Tenant
+      name:
+        source: device_name 
+      device_type:
+        source: device_type
+      serial_number:
+        source: serial
+      site:
+        source: site_name
+      status:
+        source: status

@@ -37,12 +37,24 @@ object_mappings:
     source_api: vmware
     destination_api: netbox
     destination_endpoint: virtualization.virtual_machines
-    fetch_data_function: content.viewManager.CreateContainerView  # Custom VMware function to retrieve VMs
+    fetch_data_function: content.viewManager.CreateContainerView 
+    source_mapping:
+      method: custom  
+      params:
+        object_type: vim.VirtualMachine  
+        view_type: True  
     mapping:
-      name: name
-      status: runtime.powerState
-      cluster: resourcePool.name
-      host: runtime.host.name
-      cpu_count: config.hardware.numCPU
-      memory_mb: config.hardware.memoryMB
-      ip_address: guest.ipAddress
+      name:
+        source: name
+      status:
+        source: runtime.powerState
+      cluster:
+        source: resourcePool.name
+      host:
+        source: runtime.host.name
+      cpu_count:
+        source: config.hardware.numCPU
+      memory_mb:
+        source: config.hardware.memoryMB
+      ip_address:
+        source: guest.ipAddress
