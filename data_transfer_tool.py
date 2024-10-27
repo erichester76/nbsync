@@ -136,7 +136,7 @@ class DataTransferTool:
                     value = found_object.id
                 else:
                     # If object does not exist, create it using the create_function
-                    created_object = create_function({self.config['object_mappings'][lookup_type]['mapping']['name']['source']: value})
+                    created_object = create_function({lookup_type: value})
                     value = created_object.id
 
         return value
