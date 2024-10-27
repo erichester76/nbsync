@@ -141,7 +141,7 @@ class DataTransferTool:
                     if 'included_fields' in obj_config['mapping'].get(field_name, {}):
                         # Retrieve the included fields from the YAML configuration
                         additional_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
-            
+                        print(f'{self.mapped_data}')
                         for field in additional_fields:
                             # Get the value of the additional field from the source data or the mapped data
                             field_value = self.mapped_data.get(field)
@@ -151,7 +151,7 @@ class DataTransferTool:
 
                     create_data = {lookup_param_name: lookup_param_value}
                     create_data.update(additional_data)  # Merge with the additional data
-                    print(f"Creating new {field_name}")
+                    print(f"Creating new bject {field_name}")
                     created_object = create_function(create_data)
                     value = created_object.id
 
