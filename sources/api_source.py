@@ -1,3 +1,4 @@
+import ssl
 import importlib
 from sources.base import DataSource
 
@@ -37,10 +38,20 @@ class APIDataSource(DataSource):
 
             elif auth_method == 'login':
                 # Login-based authentication
-                # Handle cases where auth_args may be empty or not defined
                 if 'auth_args' in self.config and self.config['auth_args']:
+                    # Handle SSL context (ignore if specified)
+                    if 'sslContext' in self.config['auth_params'] and self.config['auth_params']['sslContext'] == 'ignore':
+                        ssl_context = ssl._create_unverified_context()  # Ignore SSL errors
+                    else:
+                        ssl_context = None
+                    
                     # Collect arguments from auth_args if they exist, passing base_url as host
                     auth_args = [base_url if arg == 'host' else self.config['auth_params'][arg] for arg in self.config['auth_args']]
+                    
+                    # If SSL context is required, append it to the arguments
+                    if ssl_context:
+                        auth_args.append(ssl_context)
+
                     client = auth_func(*auth_args)
                 else:
                     # Fallback to use auth_params directly
