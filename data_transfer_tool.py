@@ -84,7 +84,7 @@ class DataTransferTool:
         Apply a transformation to a value, based on the transform rule provided in the YAML.
         
         :param value: The value from the source that needs transformation.
-        :param transform: The transform rule (e.g., regex_replace, lookup_field, lookup_find_function).
+        :param transform: The transform rule (e.g., regex_replace, lookup_field, lookup_object).
         :param obj_config: The object configuration for the current data being processed.
         :return: Transformed value.
         """
@@ -94,24 +94,32 @@ class DataTransferTool:
                 pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = re.sub(pattern, replacement, value)
 
+            # Generic lookup using find_function and create_function passed directly in the transform
             elif "lookup_object" in transform:
-                lookup_section = re.findall(r"lookup_object\('(.*)'\)", transform)[0]
-                
-                # Retrieve the corresponding config for the lookup section
-                lookup_obj_config = self.config['object_mappings'][lookup_section]
-                
-                # Get the find and create functions from the relevant API
-                find_function = self.get_nested_function(
-                    self.sources[lookup_obj_config['source_api']].api, 
-                    lookup_obj_config['find_function']
-                )
-                create_function = self.get_nested_function(
-                    self.sources[lookup_obj_config['destination_api']].api, 
-                    lookup_obj_config['create_function']
-                )
+                # Check if the correct format is being used in the transform
+                matches = re.findall(r"lookup_object\('(.*)',\s*'(.*)',\s*'(.*)'\)", transform)
+                if not matches:
+                    raise ValueError(
+                        "Incorrect format for lookup_object transform. "
+                        "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
+                    )
 
-                # Execute the find function with the mapped value (e.g., device type, site)
-                found_object = find_function({lookup_obj_config['mapping']['name']['source']: value})
+                lookup_type, find_function_path, create_function_path = matches[0]
+
+                # Check if the required fields are missing in the transform
+                if not lookup_type or not find_function_path or not create_function_path:
+                    raise ValueError(
+                        f"Missing required parameters in lookup_object: object_type='{lookup_type}', "
+                        f"find_function='{find_function_path}', create_function='{create_function_path}'."
+                        "Please ensure all parameters are specified."
+                    )
+
+                # Dynamically retrieve the find_function and create_function from the source API client
+                find_function = self.get_nested_function(self.sources[lookup_type].api, find_function_path)
+                create_function = self.get_nested_function(self.sources[lookup_type].api, create_function_path)
+
+                # Execute the find function with the mapped value (e.g., site name, device type)
+                found_object = find_function({self.config['object_mappings'][lookup_type]['mapping']['name']['source']: value})
 
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
@@ -120,11 +128,12 @@ class DataTransferTool:
                     # If object exists, return its ID
                     value = found_object.id
                 else:
-                    # If object does not exist, create it and return the new object's ID
-                    created_object = create_function({lookup_obj_config['mapping']['name']['source']: value})
+                    # If object does not exist, create it using the create_function
+                    created_object = create_function({self.config['object_mappings'][lookup_type]['mapping']['name']['source']: value})
                     value = created_object.id
 
         return value
+
 
 
     def process_mappings(self):
