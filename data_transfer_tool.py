@@ -173,7 +173,7 @@ class DataTransferTool:
 
                 # Execute the find function with the dynamically built filter parameters
                 print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
-                found_object = find_function(filter_params)
+                found_object = find_function(**filter_params)
 
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
