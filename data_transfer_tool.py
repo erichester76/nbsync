@@ -13,7 +13,7 @@ import jinja2
 class DataTransferTool:
     def __init__(self, yaml_file):
         
-        env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath="./"))
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader())
         # Load the main YAML template
         template = env.get_template(yaml_file)
         # Render the template and parse as YAML
