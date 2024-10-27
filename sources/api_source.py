@@ -80,6 +80,7 @@ def fetch_data(self, api_mapping):
     :return: Retrieved data (usually in a structured format).
     """
     data = []
+    print(f'Retrieving Objects from API')
     method = api_mapping.get('method', 'GET').upper()
 
     # VMware or other API requiring a custom function (like CreateContainerView)
