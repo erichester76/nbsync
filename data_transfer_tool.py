@@ -58,30 +58,49 @@ class DataTransferTool:
             elif source_type == 'snmp':
                 self.sources[name] = SNMPDataSource(config)
             self.sources[name].authenticate()
-
-    def lookup_device_type(self, value):
+    
+    
+    def get_included_fields_data(self, obj_config, field_name, item):
         """
-        Lookup device type ID from the NetBox API based on the device type name.
-        """
-        # Assuming you have a NetBox API client instance already authenticated
-        device_type_obj = self.sources['netbox'].api.dcim.device_types.get(name=value)
+        Retrieve additional fields to be included in the create/update operation based on the 'included_fields' key.
         
-        if device_type_obj:
-            return device_type_obj.id  # Return the device type ID
-        else:
-            raise ValueError(f"Device type '{value}' not found in NetBox.")
+        :param obj_config: The object configuration for the current data being processed.
+        :param field_name: The current field being transformed.
+        :param item: The current source data item being processed.
+        :return: A dictionary of additional fields that need to be included in the create/update operation.
+        """
+        included_data = {}
 
-    def lookup_site(self, value):
-        """
-        Lookup site ID from the NetBox API based on the site name.
-        """
-        # Assuming you have a NetBox API client instance already authenticated
-        site_obj = self.sources['netbox'].api.dcim.sites.get(name=value)
-        
-        if site_obj:
-            return site_obj.id  # Return the site ID
-        else:
-            raise ValueError(f"Site '{value}' not found in NetBox.")
+        # Check if 'included_fields' exists for the current field
+        if 'included_fields' in obj_config['mapping'].get(field_name, {}):
+            included_fields = obj_config['mapping'][field_name]['included_fields']
+
+            for field_info in included_fields:
+                field = field_info['field']
+                key = field_info.get('key', 'id')  # Default to 'id' if no key is specified
+                transform = field_info.get('transform_function')  # Get any transform function if specified
+                create_if_missing = field_info.get('create_if_missing', False)  # Check if field should be created if missing
+
+                # Get the value of the additional field from the current source data item
+                field_value = item.get(field)
+
+                # If field doesn't exist in the source data but should be created, apply the transform
+                if field_value is None and create_if_missing:
+                    print(f"Field '{field}' not found in source data, creating dynamically.")
+                    field_value = self.apply_transform_function(item.get(field_name), transform, obj_config, field_name, item)
+                elif field_value is not None and transform:
+                    # Apply transform (like slugify) if needed for existing fields
+                    field_value = self.apply_transform_function(field_value, transform, obj_config, field_name, item)
+
+                if field_value is not None:
+                    # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco', slug: 'cisco'})
+                    included_data[key] = field_value
+                    print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
+                else:
+                    print(f"Warning: No value found for included field '{field}'")
+
+        return included_data
+ 
     
     def apply_transform_function(self, value, transform, obj_config, field_name, item):
         """
