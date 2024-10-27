@@ -141,7 +141,7 @@ class DataTransferTool:
             
                         for field in additional_fields:
                             # Get the value of the additional field from the source data or the mapped data
-                            field_value = self.mapped_data.get(field) or obj_config['source_api'].get(field)
+                            field_value = self.mapped_data.get(field)
                             additional_data[field] = field_value
 
                     create_data = {lookup_param_name: lookup_param_value}
