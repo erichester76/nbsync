@@ -1,5 +1,36 @@
-# vmware_to_netbox_vms.yaml
-{% include "config/clemson/api_definitions.yaml" %}
+api_definitions:
+  # NetBox API Definition
+  netbox: &netbox_api
+    type: api
+    module: pynetbox
+    auth_method: token
+    auth_function: api  
+    auth_params:
+      token: 25c89f4320476edf29a6cb24a1d2b085b1fd5264
+    base_urls:
+      - https://netbox.app.clemson.edu
+
+  # VMware API Definition (pyvmomi)
+  vmware: &vmware_api
+    type: api
+    module: pyVim
+    auth_method: login
+    auth_function: connect.SmartConnect
+    auth_params:
+      username: esacollector
+      password: Upward-Floral4-Avid
+      sslContext: ignore
+    auth_args:
+      - host
+      - username
+      - password
+      - sslContext
+    base_urls:
+      - cu-vcenter.clemson.edu
+      - poole-vcenter.clemson.edu
+      - cudr-vcenter.clemson.edu
+      - proto-vcenter.clemson.edu
+      - vdi-vcenter.clemson.edu
 
 object_mappings:
   virtual_machines:
