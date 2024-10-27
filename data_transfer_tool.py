@@ -15,6 +15,7 @@ class DataTransferTool:
     def __init__(self, yaml_file):
         with open(yaml_file, 'r') as file:
             self.config = yaml.load(file, Loader=yaml.FullLoader)
+        print(self.config)
         self.sources = {}
         self.mapped_data = {}
 
