@@ -13,12 +13,15 @@ YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader)
 
 class DataTransferTool:
     def __init__(self, yaml_file):
+        
         with open('config/clemson/api_definitions.yaml', 'r') as f:
             api_definitions = yaml.safe_load(f)
-
+        print(f'Loaded API Defimitions {api_definitions}')
+        
         with open(yaml_file, 'r') as file:
             main_file = yaml.load(file, Loader=yaml.FullLoader)
-
+        print(f'Loaded {yaml_file} {main_file}')
+        
         self.config = {**api_definitions, **main_file}
         self.sources = {}
         self.mapped_data = {}
