@@ -161,9 +161,7 @@ class DataTransferTool:
                 additional_data = {}
                 if 'included_fields' in obj_config['mapping'][field_name]:
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
-                    for nested_key, nested_value in additional_data.items():
-                        filter_params[f"{field_name_for_nesting}__{nested_key}"] = nested_value
-
+                   
                     # Get the field (like 'manufacturer') to correctly nest additional data
                     field_name_for_nesting = None
                     for included_field in obj_config['mapping'][field_name].get('included_fields', []):
@@ -171,6 +169,9 @@ class DataTransferTool:
                         print(f'Found field for nesting: {field_name_for_nesting}')
                         break
                     
+                    for nested_key, nested_value in additional_data.items():
+                        filter_params[f"{field_name_for_nesting}__{nested_key}"] = nested_value
+ 
                 # Debug before the find function call
                 print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
                 try:
