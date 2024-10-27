@@ -183,10 +183,10 @@ class DataTransferTool:
                     print(f"Error calling find_function: {str(e)}")
                     raise
                 
+                print (len(found_object))
 
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
-                print (len(found_object))
                 
                 if found_object:
                     # If object exists, return its ID
