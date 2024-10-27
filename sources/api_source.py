@@ -108,17 +108,31 @@ def fetch_data(self, obj_config, api_client):
     return result
 
 
-def get_nested_function(self, obj, function_path):
+def get_nested_function(self, api_client, function_path):
     """
-    Get a nested function or attribute from a module or API client.
-    Supports paths like 'dcim.devices.all' or 'content.viewManager.CreateContainerView'.
+    Recursively get a function from the API client.
+    
+    :param api_client: The API client (e.g., NetBox client)
+    :param function_path: Path to the function (e.g., 'dcim.device_types.filter')
+    :return: The function object
     """
-    attrs = function_path.split('.')
-    for attr in attrs:
-        obj = getattr(obj, attr, None)
-        if obj is None:
-            raise AttributeError(f"Function or attribute '{attr}' not found.")
-    return obj
+    parts = function_path.split('.')
+    func = api_client  # Start with the root client (e.g., pynetbox.NetBox())
+
+    # Traverse down the client object tree
+    for part in parts:
+        try:
+            func = getattr(func, part)
+        except AttributeError:
+            raise AttributeError(f"Attribute '{part}' not found in API client at path '{function_path}'")
+    
+    # Ensure the final attribute is callable
+    if not callable(func):
+        raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
+    
+    return func
+
+
 
 def get_nested_attr(self, obj, attrs):
     """

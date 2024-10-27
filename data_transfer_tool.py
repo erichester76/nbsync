@@ -28,23 +28,28 @@ class DataTransferTool:
 
     def get_nested_function(self, api_client, function_path):
         """
-        Resolves a nested function path, such as 'dcim.device_types.filter', and returns the function.
+        Recursively get a function from the API client.
         
-        :param api_client: The API client to resolve the function from.
-        :param function_path: The full function path (e.g., 'dcim.device_types.filter').
-        :return: The resolved function.
+        :param api_client: The API client (e.g., NetBox client)
+        :param function_path: Path to the function (e.g., 'dcim.device_types.filter')
+        :return: The function object
         """
         parts = function_path.split('.')
-        func = api_client
+        func = api_client  # Start with the root client (e.g., pynetbox.NetBox())
 
-        # Resolve each part of the function path step by step
+        # Traverse down the client object tree
         for part in parts:
-            func = getattr(func, part)
+            try:
+                func = getattr(func, part)
+            except AttributeError:
+                raise AttributeError(f"Attribute '{part}' not found in API client at path '{function_path}'")
         
+        # Ensure the final attribute is callable
         if not callable(func):
-            raise ValueError(f"{function_path} is not a valid callable function.")
+            raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
         
         return func
+
 
     
     def initialize_sources(self):
@@ -167,7 +172,6 @@ class DataTransferTool:
                     field_name_for_nesting = None
                     for included_field in obj_config['mapping'][field_name].get('included_fields', []):
                         field_name_for_nesting = included_field.get('field')
-                        print(f'Found field for nesting: {field_name_for_nesting}')
                         break
                     
                 for nested_key, nested_value in additional_data.items():
@@ -176,11 +180,9 @@ class DataTransferTool:
                     break
                 
                 # Debug before the find function call
-                print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
                 try:
                     # Call the find_function with the correct filter params, similar to Django ORM-style filtering
                     found_object = find_function(**filter_params)
-                    print(f"find_function called successfully with {filter_params}")
                 except Exception as e:
                     print(f"Error calling find_function: {str(e)}")
                     raise
