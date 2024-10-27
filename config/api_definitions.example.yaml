@@ -80,13 +80,6 @@ api_definitions:
     base_urls:
       - https://bsn.example.com/api
 
-  # WMI API Definition
-  windows_wmi: &wmi_api
-    type: api
-    module: wmi
-    auth_method: none
-    base_urls:
-      - localhost
 
   # WinRM API Definition
   windows_winrm: &winrm_api

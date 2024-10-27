@@ -6,7 +6,6 @@ pysnmp
 pandas
 #ndfc_python @ git+https://github.com/allenrobel/ndfc-python.git
 pybsn
-wmi
 pywinrm
 azure-mgmt-compute
 azure-mgmt-network
