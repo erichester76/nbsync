@@ -7,20 +7,14 @@ from sources.api_source import APIDataSource
 from sources.csv_source import CSVDataSource
 from sources.xls_source import XLSDataSource
 from sources.snmp_source import SNMPDataSource
+from yamlinclude import YamlIncludeConstructor
 
+YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader)
 
-class LoaderWithIncludes(yaml.SafeLoader):
-    def include(self, node):
-        filename = self.construct_scalar(node)
-        with open(filename, 'r') as f:
-            return yaml.safe_load(f)
-
-LoaderWithIncludes.add_constructor('!include', LoaderWithIncludes.include)
-       
 class DataTransferTool:
     def __init__(self, yaml_file):
         with open(yaml_file, 'r') as file:
-            self.config = yaml.load(file, Loader=LoaderWithIncludes)
+            self.config = yaml.load(file, Loader=yaml.FullLoader)
         self.sources = {}
         self.mapped_data = {}
 
