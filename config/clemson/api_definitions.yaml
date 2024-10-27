@@ -13,7 +13,7 @@ api_definitions:
   # VMware API Definition (pyvmomi)
   vmware: &vmware_api
     type: api
-    module: pyvmomi
+    module: pyVmomi
     auth_method: login
     auth_function: SmartConnect
     auth_params:
