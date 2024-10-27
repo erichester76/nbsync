@@ -24,6 +24,24 @@ class DataTransferTool:
         self.sources = {}
         self.mapped_data = {}
 
+
+    def get_nested_function(self, obj, function_path):
+        """
+        Retrieve a nested function from an object (like API clients), given the function path.
+        
+        :param obj: The base object (e.g., an API client).
+        :param function_path: The dot-separated path to the function (e.g., 'dcim.devices.filter').
+        :return: The function object to be invoked.
+        """
+        func_parts = function_path.split('.')
+        for part in func_parts:
+            obj = getattr(obj, part, None)
+            if obj is None:
+                raise AttributeError(f"Function path '{function_path}' not found.")
+        if not callable(obj):
+            raise TypeError(f"'{function_path}' is not a callable function.")
+        return obj
+    
     def initialize_sources(self):
         for name, config in self.config['api_definitions'].items():
             source_type = config['type']
