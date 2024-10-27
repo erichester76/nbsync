@@ -170,9 +170,9 @@ class DataTransferTool:
                         print(f'Found field for nesting: {field_name_for_nesting}')
                         break
                     
-                    for nested_key, nested_value in additional_data.items():
+                """ for nested_key, nested_value in additional_data.items():
                         filter_params[f"{field_name_for_nesting}__{nested_key}"] = nested_value
- 
+                """
                 # Debug before the find function call
                 print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
                 try:
@@ -186,22 +186,6 @@ class DataTransferTool:
 
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
-                
-                import json
-
-                if found_object:
-                    print(f"Found {len(found_object)} objects (detailed):")
-                    
-                    # Iterate through each object in found_object and print it
-                    for obj in found_object:
-                        try:
-                            # Convert each object to a dictionary and pretty print it
-                            print(json.dumps(dict(obj), indent=4))
-                        except TypeError:
-                            print("Unable to convert object to dictionary, printing raw object:")
-                            print(obj)
-                else:
-                    print("No objects found.")
                 
                 if found_object:
                     # If object exists, return its ID
