@@ -73,32 +73,40 @@ class APIDataSource(DataSource):
             print(f"Connected to {self.name} at {base_url}")
             self.clients.append(self.api)
             
-            
-def fetch_data(self, api_mapping):
+def fetch_data(self, obj_config, api_client):
     """
-    Generic fetch data based on the YAML-defined fetch_data_function.
+    Fetch data from the source API using the provided API client.
+
+    :param obj_config: Mapping configuration for the object.
+    :param api_client: The API client instance to use for fetching the data.
+    :return: Retrieved and processed data.
     """
-    if not self.api:
-        raise RuntimeError(f"API not authenticated for {self.name}")
+    # Retrieve the fetch function from the API client (defined in object_mappings)
+    fetch_function = self.get_nested_function(api_client, obj_config['fetch_data_function'])
 
-    # Dynamically retrieve the fetch_data_function
-    fetch_function_path = api_mapping['fetch_data_function']
-    fetch_function = self.get_nested_function(self.api, fetch_function_path)
+    # Check if there are any params defined in the YAML for this fetch function
+    params = obj_config.get('params', {})
 
-    # Call the function with params if needed
-    params = api_mapping.get('params', {})
-    data = fetch_function(**params) if callable(fetch_function) else fetch_function
+    # Call the fetch function with the parameters if they exist, or without if no params
+    if params:
+        # If there are custom parameters, pass them to the fetch function
+        data = fetch_function(**params)
+    else:
+        # If no parameters are defined, call the fetch function without arguments
+        data = fetch_function()
 
-    result = []
     # Process the data and map fields according to YAML
+    result = []
     for item in data:
         obj_data = {}
-        for dest_field, field_info in api_mapping['mapping'].items():
+        for dest_field, field_info in obj_config['mapping'].items():
+            # Dynamically fetch the nested attributes (e.g., runtime.powerState)
             source_value = self.get_nested_attr(item, field_info['source'].split('.'))
             obj_data[dest_field] = source_value
         result.append(obj_data)
 
     return result
+
 
 def get_nested_function(self, obj, function_path):
     """

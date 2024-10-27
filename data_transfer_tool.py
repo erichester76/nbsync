@@ -48,54 +48,80 @@ class DataTransferTool:
         return value
 
     def process_mappings(self):
+        """
+        Process the mappings defined in the object_mappings section of the YAML.
+        Fetch data from the source API and send it to the destination API.
+        """
         for obj_type, obj_config in self.config['object_mappings'].items():
-            # Fetch data using the generic fetch_data method, driven by YAML
+            # Get the source API object (already authenticated)
             source = self.sources[obj_config['source_api']]
-            source_data = source.fetch_data(obj_config)
 
-            # Setup destination API client and endpoint
-            destination_api_client = self.sources[obj_config['destination_api']].client
-            destination_endpoint = obj_config['destination_endpoint']
+            # Iterate over all clients (API instances) for the source
+            for source_client in source.clients:
+                source_data = source.fetch_data(obj_config, source_client)
 
-            for item in source_data:
-                mapped_data = {}
+                # Access the destination API client
+                destination_api = self.sources[obj_config['destination_api']]
 
-                # Perform field mappings dynamically based on YAML
-                for dest_field, field_info in obj_config['mapping'].items():
-                    source_value = item.get(field_info['source'])
+                # Iterate over all clients (API instances) for the destination
+                for destination_client in destination_api.clients:
+                    # Get CRUD functions for the destination API (create and update)
+                    create_function = obj_config.get('create_function')
+                    update_function = obj_config.get('update_function')
 
-                    # Apply transformation if defined in the mapping
-                    transform = field_info.get('transform_function')
-                    mapped_data[dest_field] = self.apply_transform_function(source_value, transform)
+                    # Get the find function for the destination API to check if objects exist
+                    find_function = obj_config.get('find_function')
 
-                # Store mapped data for further processing
-                if obj_type not in self.mapped_data:
-                    self.mapped_data[obj_type] = {}
-                self.mapped_data[obj_type].update(mapped_data)
+                    # Map and push the data to the destination API
+                    for item in source_data:
+                        mapped_data = {}
 
-                # Send the mapped data to the destination system (NetBox, etc.)
-                self.create_or_update(destination_api_client, destination_endpoint, mapped_data)
+                        # Perform field mappings defined in the YAML
+                        for dest_field, field_info in obj_config['mapping'].items():
+                            source_value = item.get(field_info['source'])
+                            transform = field_info.get('transform_function')
+                            mapped_data[dest_field] = self.apply_transform_function(source_value, transform)
 
-    def create_or_update(self, destination_client, destination_endpoint, mapped_data):
+                        # Create or update the destination object
+                        self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
+
+    def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """
-        Create or update objects in the destination API.
-        
-        :param destination_client: Authenticated client of the destination API
-        :param destination_endpoint: The endpoint where data should be sent (e.g., dcim.devices)
-        :param mapped_data: The mapped data from the source API
-        """
-        # Access the destination API endpoint dynamically
-        endpoint_obj = getattr(destination_client, destination_endpoint.split('.')[0])
-        endpoint_method = getattr(endpoint_obj, destination_endpoint.split('.')[1])
+        Create or update objects in the destination API based on the YAML configuration.
 
-        # Check if the object already exists (you may need to adjust this depending on the API)
-        existing_objects = endpoint_method.filter(name=mapped_data['name'])
-        if existing_objects:
-            # Update the object if it exists
-            existing_objects[0].update(**mapped_data)
+        :param api_client: The authenticated client for the destination API.
+        :param find_function_path: Path to the function that finds existing objects (from object_mappings).
+        :param create_function_path: Path to the function that creates new objects (from object_mappings).
+        :param update_function_path: Path to the function that updates existing objects (from object_mappings).
+        :param mapped_data: The mapped data from the source API, ready for creation or update.
+        """
+        # Dynamically retrieve the find, create, and update functions from the API client
+        find_function = self.get_nested_function(api_client, find_function_path)
+        create_function = self.get_nested_function(api_client, create_function_path)
+        update_function = self.get_nested_function(api_client, update_function_path)
+
+        # Check if the find function exists and is callable
+        if find_function:
+            # Attempt to find existing objects using the find function
+            existing_objects = find_function(name=mapped_data['name'])
         else:
-            # Create a new object
-            endpoint_method.create(**mapped_data)
+            existing_objects = []
+
+        if existing_objects:
+            # If the object exists, update it
+            if update_function:
+                print(f"Updating object {mapped_data['name']} in {api_client}.")
+                update_function(existing_objects[0].id, **mapped_data)
+            else:
+                print(f"No update function defined for {api_client}.")
+        else:
+            # If the object doesn't exist, create a new one
+            if create_function:
+                print(f"Creating new object {mapped_data['name']} in {api_client}.")
+                create_function(**mapped_data)
+            else:
+                print(f"No create function defined for {api_client}.")
+
 
 def main():
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
