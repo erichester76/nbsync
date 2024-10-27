@@ -13,9 +13,9 @@ api_definitions:
   # VMware API Definition (pyvmomi)
   vmware: &vmware_api
     type: api
-    module: pyVmomi
+    module: pyVim
     auth_method: login
-    auth_function: SmartConnect
+    auth_function: Sconnect.martConnect
     auth_params:
       username: esacollector
       password: Upward-Floral4-Avid
