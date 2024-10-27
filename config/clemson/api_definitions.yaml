@@ -108,8 +108,8 @@ api_definitions:
     base_urls:
       - http://windows-server.local
 
-  # Azure API Definition (azure-mgmt)
-  azure: &azure_api
+  # Azure Compute API (for managing Virtual Machines)
+  azure_compute: &azure_compute_api
     type: api
     module: azure.mgmt.compute
     auth_method: login
@@ -124,6 +124,41 @@ api_definitions:
       - client_secret
     base_urls:
       - https://management.azure.com
+
+  # Azure Network API (for managing Network Interfaces, Public IPs, etc.)
+  azure_network: &azure_network_api
+    type: api
+    module: azure.mgmt.network
+    auth_method: login
+    auth_function: ClientSecretCredential
+    auth_params:
+      tenant_id: your_azure_tenant_id
+      client_id: your_azure_client_id
+      client_secret: your_azure_client_secret
+    auth_args:
+      - tenant_id
+      - client_id
+      - client_secret
+    base_urls:
+      - https://management.azure.com
+
+  # Azure Resource Management API (generic ARM resources)
+  azure_resource: &azure_resource_api
+    type: api
+    module: azure.mgmt.resource
+    auth_method: login
+    auth_function: ClientSecretCredential
+    auth_params:
+      tenant_id: your_azure_tenant_id
+      client_id: your_azure_client_id
+      client_secret: your_azure_client_secret
+    auth_args:
+      - tenant_id
+      - client_id
+      - client_secret
+    base_urls:
+      - https://management.azure.com
+
 
   # AWS API Definition (boto3)
   aws: &aws_api
