@@ -17,6 +17,7 @@ api_definitions:
     base_urls:
       - https://netbox.app.clemson.edu
 
+object_mappings:
   devices:
     source_api: csv
     destination_api: netbox
