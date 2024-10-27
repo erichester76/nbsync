@@ -45,19 +45,19 @@ class APIDataSource(DataSource):
                     else:
                         ssl_context = None
                     
-                    # Collect arguments from auth_args, passing base_url as host
-                    auth_args = [base_url if arg == 'host' else self.config['auth_params'][arg] for arg in self.config['auth_args']]
-                    
-                    # If SSL context is required, append it to the arguments
-                    if ssl_context:
-                        auth_args.append(ssl_context)
+                    # Collect arguments for SmartConnect: host, user, pwd, and sslContext
+                    auth_args = {
+                        "host": base_url,
+                        "user": self.config['auth_params']['username'],
+                        "pwd": self.config['auth_params']['password'],
+                        "sslContext": ssl_context
+                    }
 
-                    # Call the SmartConnect function with the appropriate arguments
-                    client = auth_func(*auth_args)
+                    # Call the SmartConnect function with explicit arguments
+                    client = auth_func(**auth_args)
                 else:
-                    # Fallback to use auth_params directly
-                    client = auth_func(base_url, **self.config['auth_params'])
-
+                    raise ValueError("Login-based authentication requires auth_args to be set.")
+                    
             else:
                 raise ValueError(f"Unsupported auth method: {auth_method}")
 
