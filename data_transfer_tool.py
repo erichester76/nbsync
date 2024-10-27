@@ -105,41 +105,31 @@ class DataTransferTool:
 
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """
-        Create or update objects in the destination API based on the YAML configuration.
-
-        :param api_client: The authenticated client for the destination API.
-        :param find_function_path: Path to the function that finds existing objects (from object_mappings).
-        :param create_function_path: Path to the function that creates new objects (from object_mappings).
-        :param update_function_path: Path to the function that updates existing objects (from object_mappings).
-        :param mapped_data: The mapped data from the source API, ready for creation or update.
+        Create or update objects in the destination API.
+        
+        :param api_client: The destination API client.
+        :param find_function_path: Path to the function used to find existing objects.
+        :param create_function_path: Path to the function used to create new objects.
+        :param update_function_path: Path to the function used to update existing objects.
+        :param mapped_data: The data to be created or updated.
         """
-        # Dynamically retrieve the find, create, and update functions from the API client
+        # Find function
         find_function = self.get_nested_function(api_client, find_function_path)
-        create_function = self.get_nested_function(api_client, create_function_path)
-        update_function = self.get_nested_function(api_client, update_function_path)
+        
+        # Search for the object using the find function (e.g., dcim.devices.filter)
+        found_objects = find_function(mapped_data)
 
-        # Check if the find function exists and is callable
-        if find_function:
-            # Attempt to find existing objects using the find function
-            existing_objects = find_function(name=mapped_data['name'])
+        # Check if the result set is not empty (using .first() if available)
+        existing_object = found_objects.first() if hasattr(found_objects, 'first') else None
+
+        if existing_object:
+            # Update existing object (use the object's ID if necessary)
+            update_function = self.get_nested_function(api_client, update_function_path)
+            update_function(existing_object.id, **mapped_data)
         else:
-            existing_objects = []
-
-        if existing_objects:
-            # If the object exists, update it
-            if update_function:
-                print(f"Updating object {mapped_data['name']} in {api_client}.")
-                update_function(existing_objects[0].id, **mapped_data)
-            else:
-                print(f"No update function defined for {api_client}.")
-        else:
-            # If the object doesn't exist, create a new one
-            if create_function:
-                print(f"Creating new object {mapped_data['name']} in {api_client}.")
-                create_function(**mapped_data)
-            else:
-                print(f"No create function defined for {api_client}.")
-
+            # Create a new object if no match is found
+            create_function = self.get_nested_function(api_client, create_function_path)
+            create_function(mapped_data)
 
 def main():
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
