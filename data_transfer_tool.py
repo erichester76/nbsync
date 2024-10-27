@@ -172,7 +172,7 @@ class DataTransferTool:
                     
                 for nested_key, nested_value in additional_data.items():
                     nested_value = re.sub(r'\W+', '-', nested_value.lower())
-                    filter_params[field_name_for_nesting] = {nested_key: nested_value}
+                    filter_params[field_name_for_nesting] = {'slug': nested_value}
                     break
                 
                 # Debug before the find function call
