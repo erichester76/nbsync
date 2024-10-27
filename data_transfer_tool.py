@@ -105,7 +105,7 @@ class DataTransferTool:
     def apply_transform_function(self, value, transform, obj_config, field_name, item):
         """
         Apply a transformation to a value, based on the transform rule provided in the YAML.
-
+        
         :param value: The value from the source that needs transformation.
         :param transform: The transform rule (e.g., regex_replace, lookup_field, lookup_object).
         :param obj_config: The object configuration for the current data being processed.
@@ -153,7 +153,7 @@ class DataTransferTool:
                 lookup_param_value = value  # The value passed in should be the current field's value from the source
 
                 # Execute the find function with the dynamically built parameter
-                print(f"Looking up {lookup_param_value} via {find_function_path} ")
+                print(f"Looking up {lookup_param_value} via {find_function_path}")
                 found_object = find_function({lookup_param_name: lookup_param_value})
 
                 # Check if the object exists
@@ -166,10 +166,12 @@ class DataTransferTool:
                     # If object does not exist, create it using the create_function
                     # Include any additional required fields (from included_fields for the current field)
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
+                    create_data = {lookup_param_name: lookup_param_value}
+                    
+                    # Merge additional fields into the relevant field (e.g., manufacturer) instead of creating new fields.
+                    create_data.update(additional_data)
 
-                    # Wrap additional data inside the main field (e.g., manufacturer: {name: 'Cisco', slug: 'cisco'})
-                    create_data = {lookup_param_name: {**additional_data, lookup_param_name: lookup_param_value}}
-
+                    # Ensure the new data is nested under the correct field, i.e., manufacturer: {name, slug}
                     print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
 
@@ -179,7 +181,8 @@ class DataTransferTool:
                     else:
                         raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
 
-            return value
+        return value
+
 
 
     def process_mappings(self):
