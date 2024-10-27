@@ -17,11 +17,11 @@ class APIDataSource(DataSource):
         def get_auth_function(module, function_path):
             func_parts = function_path.split(".")
             
-            # Try to retrieve the function directly from the module (e.g., pynetbox.api)
-            if hasattr(module, func_parts[0]):
+            # If it's a single part (no "."), we assume it's directly from the module
+            if len(func_parts) == 1:
                 auth_func = getattr(module, func_parts[0])
             else:
-                # If not found, dynamically import the submodule (e.g., pyVim.connect)
+                # Otherwise, we treat it as a submodule or subpath (e.g., connect.SmartConnect)
                 submodule = importlib.import_module(f"{module.__name__}.{func_parts[0]}")
                 auth_func = getattr(submodule, func_parts[1])
             
@@ -31,6 +31,9 @@ class APIDataSource(DataSource):
         for base_url in self.config['base_urls']:
             # Dynamically retrieve the authentication function (supports paths like connect.SmartConnect)
             auth_func = get_auth_function(module, self.config['auth_function'])
+
+            if not callable(auth_func):
+                raise TypeError(f"{auth_func} is not callable. Please check your function path.")
 
             if auth_method == 'token':
                 # Token-based authentication, calling the auth_function dynamically
