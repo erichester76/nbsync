@@ -11,19 +11,21 @@ class CSVDataSource(DataSource):
         """
         all_data = []
         
-        for source_file in api_mapping['source_mapping']['file_path']:  # Multiple file support
-            delimiter = api_mapping['source_mapping'].get('delimiter', ',')  # Default to comma
+        # Retrieve file path and delimiter from source_mapping
+        file_path = api_mapping['source_mapping']['file_path']
+        delimiter = api_mapping['source_mapping'].get('delimiter', ',')  # Default to comma
 
-            with open(source_file, mode='r') as file:
-                reader = csv.DictReader(file, delimiter=delimiter)
-                for row in reader:
-                    row_data = {}
+        # Read the CSV file
+        with open(file_path, mode='r') as file:
+            reader = csv.DictReader(file, delimiter=delimiter)
+            for row in reader:
+                row_data = {}
 
-                    # Perform dynamic field mapping from CSV columns to destination fields
-                    for dest_field, field_info in api_mapping['mapping'].items():
-                        source_field = field_info['source']
-                        row_data[dest_field] = row.get(source_field)  # Map CSV field to destination field
+                # Perform dynamic field mapping from CSV columns to destination fields
+                for dest_field, field_info in api_mapping['mapping'].items():
+                    source_field = field_info['source']
+                    row_data[dest_field] = row.get(source_field)  # Map CSV field to destination field
 
-                    all_data.append(row_data)
+                all_data.append(row_data)
 
         return all_data

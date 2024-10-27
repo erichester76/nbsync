@@ -1,3 +1,19 @@
+api_definitions:
+  csv:
+    type: csv  # Indicates this is a CSV source
+    source_type: file
+    
+  # NetBox API Definition
+  netbox: 
+    type: api
+    module: pynetbox
+    auth_method: token
+    auth_function: api  
+    auth_params:
+      token: 25c89f4320476edf29a6cb24a1d2b085b1fd5264
+    base_urls:
+      - https://netbox.app.clemson.edu
+
 object_mappings:
   devices:
     source_api: csv 
