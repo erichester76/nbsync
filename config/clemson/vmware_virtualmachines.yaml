@@ -36,25 +36,38 @@ object_mappings:
   virtual_machines:
     source_api: vmware
     destination_api: netbox
-    destination_endpoint: virtualization.virtual_machines
-    fetch_data_function: content.viewManager.CreateContainerView 
-    source_mapping:
-      method: custom  
-      params:
-        object_type: vim.VirtualMachine  
-        view_type: True  
+    # Source API (VMware) CRUD functions
+    fetch_data_function: content.viewManager.CreateContainerView  # For VMware to read VMs
+    find_function: content.viewManager.CreateContainerView  # For VMware to "find" VMs
+    params:
+      object_type: vim.VirtualMachine
+      view_type: True
+    # Destination API (NetBox) CRUD functions
+    create_function: dcim.devices.create  # Create virtual machines as devices in NetBox
+    update_function: dcim.devices.update  # Update virtual machines in NetBox
+    destination_endpoint: dcim.devices
     mapping:
       name:
         source: name
       status:
         source: runtime.powerState
       cluster:
-        source: resourcePool.name
-      host:
+        source: runtime.host.parent.name
+      device:
         source: runtime.host.name
-      cpu_count:
+      platform:
+        source: guest.guestFullName  
+      vcpus:
         source: config.hardware.numCPU
-      memory_mb:
+      memory:
         source: config.hardware.memoryMB
-      ip_address:
-        source: guest.ipAddress
+      disk:
+        source: summary.storage.committed  
+      description:
+        source: config.annotation
+      serial:
+        source: customAttributes["serial_number"]  
+      comments:
+        source: config.annotation
+      tags:
+        source: customAttributes["tags"]  
