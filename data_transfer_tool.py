@@ -166,12 +166,12 @@ class DataTransferTool:
                     # If object does not exist, create it using the create_function
                     # Include any additional required fields (from included_fields for the current field)
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
-                    create_data = {lookup_param_name: lookup_param_value}
                     
-                    # Merge additional fields into the relevant field (e.g., manufacturer) instead of creating new fields.
-                    create_data.update(additional_data)
-
-                    # Ensure the new data is nested under the correct field, i.e., manufacturer: {name, slug}
+                    # Ensure that the additional data is nested under the correct key, like 'manufacturer'
+                    create_data = {lookup_param_name: lookup_param_value}
+                    if additional_data:
+                        create_data = {lookup_param_name: additional_data}
+                    
                     print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
 
@@ -182,6 +182,7 @@ class DataTransferTool:
                         raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
 
         return value
+
 
 
 
