@@ -132,6 +132,7 @@ class DataTransferTool:
         else:
             # Create a new object if no match is found
             create_function = self.get_nested_function(api_client, create_function_path)
+            print(f'{mapped_data}')
             new_object = create_function(mapped_data)
 
             # Print status message for create
