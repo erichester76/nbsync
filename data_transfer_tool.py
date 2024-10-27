@@ -171,7 +171,7 @@ class DataTransferTool:
                     # Ensure that the additional data is nested under the correct key, like 'manufacturer'
                     create_data = {lookup_param_name: lookup_param_value}
                     if additional_data:
-                        create_data = {lookup_param_name: lookup_param_value, field_name: {additional_data}}
+                        create_data = {lookup_param_name: {'name': lookup_param_value, **additional_data}}
                     
                     print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
