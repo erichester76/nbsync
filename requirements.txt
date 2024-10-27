@@ -3,3 +3,10 @@ pyvmomi
 dnacentersdk
 pysnmp
 pandas
+ndfc-sdk
+pybsn
+wmi
+pywinrm
+azure-mgmt
+azure-identity
+boto3
