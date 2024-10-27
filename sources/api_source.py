@@ -5,6 +5,7 @@ from sources.base import DataSource
 class APIDataSource(DataSource):
     def __init__(self, config):
         super().__init__(config)
+        self.name = name  # Store the section name
         self.clients = []
 
     def authenticate(self):
@@ -65,4 +66,5 @@ class APIDataSource(DataSource):
                 raise ValueError(f"Unsupported auth method: {auth_method}")
 
             # Store the authenticated client
+            print(f"Connected to {self.name} API @ {base_url}")
             self.clients.append(client)
