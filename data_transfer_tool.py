@@ -143,32 +143,32 @@ class DataTransferTool:
                     # If object does not exist, create it using the create_function
                     additional_data = {}
                     
-                     # Check if 'included_fields' exists for the current field
-                if 'included_fields' in obj_config['mapping'].get(field_name, {}):
-                    additional_fields = obj_config['mapping'][field_name]['included_fields']
-                    for field_info in additional_fields:
-                        field = field_info['field']
-                        key = field_info.get('key', 'id')  # Default to 'id' if no key is specified
-                        transform = field_info.get('transform_function')  # Get any transform function if specified
-                        create_if_missing = field_info.get('create_if_missing', False)  # Check if field should be created if missing
+                    # Check if 'included_fields' exists for the current field
+                    if 'included_fields' in obj_config['mapping'].get(field_name, {}):
+                        additional_fields = obj_config['mapping'][field_name]['included_fields']
+                        for field_info in additional_fields:
+                            field = field_info['field']
+                            key = field_info.get('key', 'id')  # Default to 'id' if no key is specified
+                            transform = field_info.get('transform_function')  # Get any transform function if specified
+                            create_if_missing = field_info.get('create_if_missing', False)  # Check if field should be created if missing
 
-                        # Get the value of the additional field from the current source data item
-                        field_value = item.get(field)
+                            # Get the value of the additional field from the current source data item
+                            field_value = item.get(field)
 
-                        # If field doesn't exist in the source data but should be created, apply the transform
-                        if field_value is None and create_if_missing:
-                            print(f"Field '{field}' not found in source data, creating dynamically.")
-                            field_value = self.apply_transform_function(item.get(field_name), transform, obj_config, field_name, item)
-                        elif field_value is not None and transform:
-                            # Apply transform (like slugify) if needed for existing fields
-                            field_value = self.apply_transform_function(field_value, transform, obj_config, field_name, item)
+                            # If field doesn't exist in the source data but should be created, apply the transform
+                            if field_value is None and create_if_missing:
+                                print(f"Field '{field}' not found in source data, creating dynamically.")
+                                field_value = self.apply_transform_function(item.get(field_name), transform, obj_config, field_name, item)
+                            elif field_value is not None and transform:
+                                # Apply transform (like slugify) if needed for existing fields
+                                field_value = self.apply_transform_function(field_value, transform, obj_config, field_name, item)
 
-                        if field_value is not None:
-                            # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco', slug: 'cisco'})
-                            additional_data[key] = field_value
-                            print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
-                        else:
-                            print(f"Warning: No value found for included field '{field}'")
+                            if field_value is not None:
+                                # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco', slug: 'cisco'})
+                                additional_data[key] = field_value
+                                print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
+                            else:
+                                print(f"Warning: No value found for included field '{field}'")
 
 
                     create_data = {lookup_param_name: lookup_param_value}
