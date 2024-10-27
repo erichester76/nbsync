@@ -6,7 +6,8 @@ class APIDataSource(DataSource):
     def __init__(self, name, config):
         super().__init__(config)
         self.name = name  # Store the section name
-        self.clients = []
+        self.api = None
+
 
     def authenticate(self):
         # Dynamically load the module specified in the YAML
@@ -35,12 +36,13 @@ class APIDataSource(DataSource):
             # Dynamically retrieve the authentication function (supports paths like connect.SmartConnect)
             auth_func = get_auth_function(module, self.config['auth_function'])
 
+
             if not callable(auth_func):
                 raise TypeError(f"{auth_func} is not callable. Please check your function path.")
 
             if auth_method == 'token':
                 # Token-based authentication, calling the auth_function dynamically
-                client = auth_func(base_url, token=self.config['auth_params']['token'])
+                self.api = auth_func(base_url, token=self.config['auth_params']['token'])
 
             elif auth_method == 'login':
                 # Login-based authentication
@@ -60,7 +62,7 @@ class APIDataSource(DataSource):
                     }
 
                     # Call the SmartConnect function with explicit arguments
-                    client = auth_func(**auth_args)
+                    self.api = auth_func(**auth_args)
                 else:
                     raise ValueError("Login-based authentication requires auth_args to be set.")
                     
@@ -69,57 +71,54 @@ class APIDataSource(DataSource):
 
             # Store the authenticated client
             print(f"Connected to {self.name} at {base_url}")
-            self.clients.append(client)
+            self.clients.append(self.api)
             
             
 def fetch_data(self, api_mapping):
     """
-    Fetch data from the API dynamically based on the provided api_mapping.
-    
-    :param api_mapping: Mapping that defines which API data to fetch, the endpoint, and query parameters.
-    :return: Retrieved data (usually in a structured format).
+    Generic fetch data based on the YAML-defined fetch_data_function.
     """
-    data = []
-    print(f'Retrieving Objects from API')
-    method = api_mapping.get('method', 'GET').upper()
+    if not self.api:
+        raise RuntimeError(f"API not authenticated for {self.name}")
 
-    # VMware or other API requiring a custom function (like CreateContainerView)
-    if method == 'CUSTOM' and 'fetch_data_function' in api_mapping:
-        fetch_function = api_mapping['fetch_data_function']
-        custom_func = getattr(self.client.content.viewManager, fetch_function.split('.')[-1])  # Extract function dynamically
+    # Dynamically retrieve the fetch_data_function
+    fetch_function_path = api_mapping['fetch_data_function']
+    fetch_function = self.get_nested_function(self.api, fetch_function_path)
 
-        # Use parameters from the YAML to call the custom function
-        object_type = api_mapping['params']['object_type']
-        view_type = api_mapping['params']['view_type']
-        container_view = custom_func(self.client.content.rootFolder, [object_type], view_type)
+    # Call the function with params if needed
+    params = api_mapping.get('params', {})
+    data = fetch_function(**params) if callable(fetch_function) else fetch_function
 
-        # Dynamically fetch the list of objects (e.g., VMs)
-        object_list = container_view.view
-        container_view.Destroy()
+    result = []
+    # Process the data and map fields according to YAML
+    for item in data:
+        obj_data = {}
+        for dest_field, field_info in api_mapping['mapping'].items():
+            source_value = self.get_nested_attr(item, field_info['source'].split('.'))
+            obj_data[dest_field] = source_value
+        result.append(obj_data)
 
-        # Dynamically map fields based on the YAML mapping
-        for obj in object_list:
-            obj_data = {}
-            for dest_field, field_info in api_mapping['mapping'].items():
-                # Dynamically traverse the object tree to fetch the required fields
-                source_value = self.get_nested_attr(obj, field_info['source'].split('.'))
-                obj_data[dest_field] = source_value
-            data.append(obj_data)
+    return result
 
-    return data
+def get_nested_function(self, obj, function_path):
+    """
+    Get a nested function or attribute from a module or API client.
+    Supports paths like 'dcim.devices.all' or 'content.viewManager.CreateContainerView'.
+    """
+    attrs = function_path.split('.')
+    for attr in attrs:
+        obj = getattr(obj, attr, None)
+        if obj is None:
+            raise AttributeError(f"Function or attribute '{attr}' not found.")
+    return obj
 
 def get_nested_attr(self, obj, attrs):
     """
     Recursively get attributes from an object based on a list of attribute names.
-    Handles attributes like "runtime.powerState" from YAML.
-    
-    :param obj: The base object (e.g., a VMware VirtualMachine object).
-    :param attrs: List of attribute names (e.g., ["runtime", "powerState"]).
-    :return: The retrieved attribute value.
+    Handles attributes like 'runtime.powerState' from YAML.
     """
     for attr in attrs:
-        obj = getattr(obj, attr, None)  # Get the attribute, or None if not found
+        obj = getattr(obj, attr, None)
         if obj is None:
             break  # Stop if any attribute in the chain is None
     return obj
-
