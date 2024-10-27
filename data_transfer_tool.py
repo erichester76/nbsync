@@ -1,5 +1,6 @@
 import yaml
 import re
+import argparse
 from sources.api_source import APIDataSource
 from sources.csv_source import CSVDataSource
 from sources.xls_source import XLSDataSource
@@ -31,7 +32,6 @@ class DataTransferTool:
                 pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = re.sub(pattern, replacement, value)
             elif "lookup_field" in transform:
-                # For lookup, parse the section and field to reference
                 section, field = re.findall(r"lookup_field\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = self.mapped_data.get(section, {}).get(field, value)
         return value
@@ -49,10 +49,8 @@ class DataTransferTool:
                 for dest_field, field_info in obj_config['mapping'].items():
                     source_value = item.get(field_info['source'])
                     transform = field_info.get('transform_function')
-                    # Apply transform if exists
                     mapped_data[dest_field] = self.apply_transform_function(source_value, transform)
 
-                # Save mapped data for future lookup if needed
                 if obj_type not in self.mapped_data:
                     self.mapped_data[obj_type] = {}
                 self.mapped_data[obj_type].update(mapped_data)
@@ -70,7 +68,14 @@ class DataTransferTool:
         else:
             api_method.create(data)
 
-if __name__ == "__main__":
-    tool = DataTransferTool('config.yaml')
+def main():
+    parser = argparse.ArgumentParser(description='Data Transfer Tool')
+    parser.add_argument('-f', '--file', required=True, help='YAML file to load configurations')
+    args = parser.parse_args()
+
+    tool = DataTransferTool(args.file)
     tool.initialize_sources()
     tool.process_mappings()
+
+if __name__ == "__main__":
+    main()
