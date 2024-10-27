@@ -33,8 +33,8 @@ class CSVDataSource(DataSource):
         """
         Fetch data from the CSV file using the provided file path and delimiter.
         """
-        # Retrieve delimiter from source_mapping
-        delimiter = obj_config['source_mapping'].get('delimiter', ',')
+        # Retrieve delimiter from source_mapping (use self.config to access source_mapping)
+        delimiter = self.config['source_mapping'].get('delimiter', ',')
 
         all_data = []
 
