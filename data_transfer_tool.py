@@ -104,99 +104,123 @@ class DataTransferTool:
  
             
     def apply_transform_function(self, value, transform, obj_config, field_name, item):
+        """
+        Apply a transformation to a value, based on the transform rule provided in the YAML.
+        
+        :param value: The value from the source that needs transformation.
+        :param transform: The transform rule (e.g., regex_replace, lookup_field, lookup_object).
+        :param obj_config: The object configuration for the current data being processed.
+        :param field_name: The current field being transformed.
+        :param item: The current source data item being processed.
+        :return: Transformed value.
+        """
         if value is None:
             print(f"Skipping transformation for {field_name}: value is None.")
-            return value
+            return value  # Skip transformation if value is None
 
         if transform:
+            # Perform regex replace
             if "regex_replace" in transform:
                 pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = re.sub(pattern, replacement, value)
 
+            # Lookup field from the mapped data (used to reference other fields)
             elif "lookup_field" in transform:
                 section, field = re.findall(r"lookup_field\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = self.mapped_data.get(section, {}).get(field, value)
 
+            # Handle slugify transformation
             elif transform == "slugify":
+                # Slugify: convert to lowercase and replace non-alphanumeric characters with hyphens
                 value = re.sub(r'\W+', '-', value.lower())
 
+            # Generic lookup using find_function and create_function passed directly in the transform
             elif "lookup_object" in transform:
+                # Check if the correct format is being used in the transform
                 matches = re.findall(r"lookup_object\('(.*)',\s*'(.*)',\s*'(.*)'\)", transform)
                 if not matches:
-                    raise ValueError("Incorrect format for lookup_object transform.")
+                    raise ValueError(
+                        "Incorrect format for lookup_object transform. "
+                        "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
+                    )
 
                 lookup_type, find_function_path, create_function_path = matches[0]
 
+                # Retrieve the API client (assuming it's a destination API in this case)
                 api_client = self.sources[obj_config['destination_api']].api
+
+                # Resolve nested find_function and create_function paths (e.g., 'dcim.device_types.filter')
                 find_function = self.get_nested_function(api_client, find_function_path)
                 create_function = self.get_nested_function(api_client, create_function_path)
 
-                lookup_param_name = lookup_type
-                lookup_param_value = value
+                # Build the RHS of the lookup call using the lookup_type as the key and value from the source field
+                lookup_param_name = lookup_type  # The name of the parameter should match the lookup_type
+                lookup_param_value = value  # The value passed in should be the current field's value from the source
 
-                # Initialize filter_params with the main lookup param (e.g., model='Switch')
+                # Gather any additional fields for filtering (e.g., manufacturer)
                 filter_params = {lookup_param_name: lookup_param_value}
                 additional_data = {}
-
-                # Check if there are included fields to add to filter params
                 if 'included_fields' in obj_config['mapping'][field_name]:
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
-
-                    # Merge additional fields into filter params (e.g., manufacturer__name='Cisco')
-                    for nested_key, nested_value in additional_data.items():
-                        # Ensure double underscores for related fields like 'manufacturer__name'
-                        filter_params[f"{field_name}__{nested_key}"] = nested_value
-
-                    print(f'Additional data: {additional_data}')
-                    print(f'{lookup_param_name}: {lookup_param_value}')
-
+                   
+                    # Get the field (like 'manufacturer') to correctly nest additional data
+                    field_name_for_nesting = None
+                    for included_field in obj_config['mapping'][field_name].get('included_fields', []):
+                        field_name_for_nesting = included_field.get('field')
+                        print(f'Found field for nesting: {field_name_for_nesting}')
+                        break
+                    
+                """ for nested_key, nested_value in additional_data.items():
+                        filter_params[f"{field_name_for_nesting}__{nested_key}"] = nested_value
+                """
                 # Debug before the find function call
                 print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
                 try:
-                    # Call the find_function with the correct filter params
+                    # Call the find_function with the correct filter params, similar to Django ORM-style filtering
                     found_object = find_function(**filter_params)
                     print(f"find_function called successfully with {filter_params}")
                 except Exception as e:
                     print(f"Error calling find_function: {str(e)}")
                     raise
+                
+                import json
 
-                # Check and log the result of the query
                 if found_object:
-                    try:
-                        print(f"Found {len(found_object)} objects.")
-                    except TypeError:
-                        print(f"Found object: {found_object}")
+                    print(f"Found {len(found_object)} objects (detailed):")
+                    
+                    # Iterate through each object in found_object and print it
+                    for obj in found_object:
+                        try:
+                            # Convert each object to a dictionary and pretty print it
+                            print(json.dumps(dict(obj), indent=4))
+                        except TypeError:
+                            print("Unable to convert object to dictionary, printing raw object:")
+                            print(obj)
                 else:
-                    print(f"No objects found with filter params: {filter_params}")
-
-                # Print the raw response for debugging
-                print(f"Raw found_object response: {found_object}")
-
-                # If an object is found, log it
+                    print("No objects found.")
+                # Check if the object exists
+                found_object = found_object.first() if hasattr(found_object, 'first') else None
+                
                 if found_object:
-                    first_object = found_object.first() if hasattr(found_object, 'first') else None
-                    if first_object:
-                        print(f"First object found: {first_object}")
+                    # If object exists, return its ID
+                    value = found_object.id
+                else:
+                    # If object does not exist, create it using the create_function
+                    if additional_data and field_name_for_nesting:
+                        create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
                     else:
-                        print("No first object found, empty set.")
-
-                # Handle creating the object if not found
-                if not first_object:
-                    create_data = {lookup_param_name: lookup_param_value}
-                    create_data.update(additional_data)
+                        create_data = {lookup_param_name: lookup_param_value}
 
                     print(f"Creating new object with data: {create_data}")
-                    try:
-                        created_object = create_function(create_data)
-                        print(f"Object created: {created_object.id}")
-                    except Exception as e:
-                        print(f"Error creating object: {str(e)}")
-                        raise
+                    created_object = create_function(create_data)
 
-                    value = created_object.id if hasattr(created_object, 'id') else None
+                    # Ensure the created object has the necessary fields
+                    if hasattr(created_object, 'id'):
+                        value = created_object.id
+                    else:
+                        raise ValueError(f"Failed to create object for {lookup_type}. Missing 'id' in response.")
 
         return value
-
 
 
 
