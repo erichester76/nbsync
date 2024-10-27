@@ -179,7 +179,7 @@ class DataTransferTool:
                         raise ValueError(f"Field name for nesting is missing in included_fields for {field_name}")
 
                     # Create the final nested structure
-                    create_data = {lookup_param_name: lookup_param_value, field_name_for_nesting: {**additional_data}}
+                    create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
 
                     print(f"Creating new object with data: {create_data}")
                     created_object = create_function(create_data)
