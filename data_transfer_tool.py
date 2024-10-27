@@ -171,7 +171,7 @@ class DataTransferTool:
                         break
                     
                 for nested_key, nested_value in additional_data.items():
-                        filter_params[f"{field_name_for_nesting}"] = f"{{nested_key}: {nested_value}}"
+                        filter_params[f"{field_name_for_nesting}"] = "{"+nested_key+": "+nested_value+"}"
                         break
                 
                 # Debug before the find function call
