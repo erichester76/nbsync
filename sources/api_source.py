@@ -52,6 +52,7 @@ class APIDataSource(DataSource):
                     if ssl_context:
                         auth_args.append(ssl_context)
 
+                    # Call the SmartConnect function with the appropriate arguments
                     client = auth_func(*auth_args)
                 else:
                     # Fallback to use auth_params directly
