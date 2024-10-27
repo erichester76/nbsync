@@ -166,7 +166,7 @@ class DataTransferTool:
                             if field_value is not None:
                                 # Include the field as a dictionary with the specified key (e.g., {name: 'Cisco', slug: 'cisco'})
                                 additional_data[key] = field_value
-                                print(f"Adding required field {field} as {{'{key}': '{field_value}'}}")
+                                print(f"Adding required {field} subfield {{'{key}': '{field_value}'}}")
                             else:
                                 print(f"Warning: No value found for included field '{field}'")
 
