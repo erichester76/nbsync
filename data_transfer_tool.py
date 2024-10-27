@@ -161,6 +161,8 @@ class DataTransferTool:
                 additional_data = {}
                 if 'included_fields' in obj_config['mapping'][field_name]:
                     additional_data = self.get_included_fields_data(obj_config, field_name, item)
+                    for nested_key, nested_value in additional_data.items():
+                        filter_params[f"{field_name_for_nesting}__{nested_key}"] = nested_value
 
                     # Get the field (like 'manufacturer') to correctly nest additional data
                     field_name_for_nesting = None
@@ -169,11 +171,15 @@ class DataTransferTool:
                         print(f'Found field for nesting: {field_name_for_nesting}')
                         break
                     
-                    filter_params = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
-
-                # Execute the find function with the dynamically built filter parameters
+                # Debug before the find function call
                 print(f"Looking up {lookup_param_value} via {find_function_path} with filter params {filter_params}")
-                found_object = find_function(**filter_params)
+                try:
+                    # Call the find_function with the correct filter params, similar to Django ORM-style filtering
+                    found_object = find_function(**filter_params)
+                    print(f"find_function called successfully with {filter_params}")
+                except Exception as e:
+                    print(f"Error calling find_function: {str(e)}")
+                    raise
 
                 # Check if the object exists
                 found_object = found_object.first() if hasattr(found_object, 'first') else None
