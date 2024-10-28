@@ -75,21 +75,35 @@ class DataTransferTool:
         """Retrieve additional fields to be included in the create/update operation."""
         included_data = {}
         included_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
+
         for field_info in included_fields:
             field = field_info['field']
             key = field_info.get('key', 'id')
             transform = field_info.get('transform_function')
             create_if_missing = field_info.get('create_if_missing', False)
-            field_value = item.get(field)
 
+            # Handle dictionary-like data sources
+            if isinstance(item, dict):
+                field_value = item.get(field)
+            else:
+                # Handle object-like data sources, retrieve nested attributes
+                field_value = self.get_nested_attribute(item, field, None)
+
+            # Handle creation or transformation of missing fields
             if field_value is None and create_if_missing:
-                field_value = self.apply_transform_function(item.get(field_name), transform, obj_config, field_name, item)
+                field_value = self.apply_transform_function(
+                    self.get_nested_attribute(item, field_name, None),  # Pass the field_name to apply transform on
+                    transform, obj_config, field_name, item
+                )
             elif field_value is not None and transform:
                 field_value = self.apply_transform_function(field_value, transform, obj_config, field_name, item)
 
+            # Add the key-value pair if field_value is not None
             if field_value is not None:
                 included_data[key] = field_value
+
         return included_data
+
 
     def apply_transform_function(self, value, transform, obj_config, field_name, item):
         """Apply a transformation to a value, based on the transform rule."""
