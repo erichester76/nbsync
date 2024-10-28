@@ -177,15 +177,15 @@ class DataTransferTool:
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                 
                 elif "extract_by_type" in trans:
-                    type, field_name = re.findall(r"extract_by_type\('(.*)',\s*'(.*)'\)", trans)[0]
+                    type, var_name = re.findall(r"extract_by_type\('(.*)',\s*'(.*)'\)", trans)[0]
                     if isinstance(value, list):
                         ipv4_regex = r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
                         ipv6_regex = r"^[a-fA-F0-9:]+$"
                         
-                        if self.DEBUG == 1: print(f"Searching fields {field_name} for {type}")
+                        if self.DEBUG == 1: print(f"Searching fields {var_name} for {type}")
 
                         for item in value:
-                            field_value = getattr(item, field_name, None)  
+                            field_value = getattr(item, var_name, None)  
                             if not field_value:
                                 continue
 
