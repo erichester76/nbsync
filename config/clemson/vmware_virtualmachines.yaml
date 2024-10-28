@@ -29,7 +29,7 @@ api_definitions:
       - cu-vcenter.clemson.edu
       - poole-vcenter.clemson.edu
       - cudr-vcenter.clemson.edu
-      - proto-vcenter.clemson.edu
+      #- proto-vcenter.clemson.edu
       - vdi-vcenter.clemson.edu
 
 object_mappings:
@@ -38,7 +38,6 @@ object_mappings:
     source_api: vmware
     destination_api: netbox
     destination_endpoint: dcim.devices
-    fetch_data_function: fetch_data  
     find_function: dcim.devices.filter
     create_function: dcim.devices.create
     update_function: dcim.devices.update
@@ -47,10 +46,7 @@ object_mappings:
     fetch_data_code: |
       def fetch_data(api_client):
           content = api_client.RetrieveContent()
-          # Create a container view for Hosts
           hosts = content.viewManager.CreateContainerView(content.rootFolder, [vim.HostSystem], True).view
-          
-          # Return the list of hosts
           return hosts
 
     mapping:
@@ -104,6 +100,7 @@ object_mappings:
           - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
   virtual_machines:
+
     source_api: vmware
     destination_api: netbox
     destination_endpoint: virtualization.virtual_machines
@@ -119,49 +116,39 @@ object_mappings:
           return vms
 
     mapping:
-      # Mapping VM name to NetBox name
       name:
         source: "config.name"
 
-      # Mapping status (VMware power state) to NetBox status
       status:
         source: "runtime.powerState"
         transform_function: 
           - regex_replace('poweredOn', 'active')
           - regex_replace('poweredOff', 'offline')
    
-      # Mapping VMware cluster to NetBox cluster (uses lookup to find or create)
       cluster:
         source: "runtime.host.parent.name"
         transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
-      # Mapping host (VMware host) to NetBox device
       host:
         source: "runtime.host.name"
         transform_function: 
           - regex_replace('.clemson.edu', '')
           - lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
 
-      # Mapping CPU count to NetBox vCPUs
       vcpus:
         source: "config.hardware.numCPU"
 
-      # Mapping Memory size in MB to NetBox memory (in MB)
       memory:
         source: "config.hardware.memoryMB"
 
-      # Mapping IP address from VMware Guest Info to NetBox primary IP
       primary_ip4:
         source: "guest.ipAddress"
         transform_function: lookup_object('address', 'ipam.addresses.filter', 'ipam.addresses.create')
 
-      # Mapping platform (could be OS type in VMware to NetBox platform)
       platform:
         source: "config.product.name"
         transform_function: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
-
-      # UUID from VMware to NetBox serial number (Optional)
       serial:
         source: "config.uuid"
 
