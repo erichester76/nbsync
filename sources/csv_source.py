@@ -44,7 +44,6 @@ class CSVDataSource(DataSource):
 
             # Collect raw rows without mapping
             for row in reader:
-                print(f"Raw row from CSV: {row}")  # Display the raw row from CSV
                 all_data.append(row)
 
         return all_data
