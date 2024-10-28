@@ -109,15 +109,17 @@ class APIDataSource(DataSource):
                         if isinstance(param, str) and param.startswith('{') and param.endswith('}'):
                             # Resolve the nested attributes (e.g., content.rootFolder)
                             parts = param.strip('{}').split('.')
-                            value = special_vars
-                            for part in parts:
+                            value = special_vars.get(parts[0], None)
+                            if value is None:
+                                raise ValueError(f"Could not resolve special variable: {param}")
+                            for part in parts[1:]:
                                 value = getattr(value, part, None)
                                 if value is None:
-                                    raise ValueError(f"Could not resolve special variable: {param}")
+                                    raise ValueError(f"Could not resolve nested attribute '{part}' in {param}")
                             resolved_params.append(value)
                         else:
                             resolved_params.append(param)
-                    
+
                     print(f"Executing step: {method_name} with params: {resolved_params}")
                     result = func(*resolved_params)
                 else:
@@ -134,7 +136,8 @@ class APIDataSource(DataSource):
                 special_vars[store_as] = result
 
         return result
-
+    
+    
     def get_nested_function(self, api_client, function_path):
         """
         Recursively get a function from the API client.
