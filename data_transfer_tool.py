@@ -33,7 +33,7 @@ class DataTransferTool:
             raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
         return func
     
-    def get_nested_attribute(obj, attr_path, default=None):
+    def get_nested_attribute(self, obj, attr_path, default=None):
         """ Recursively get nested attributes from an object using a dotted path. """
         attrs = attr_path.split('.')
         current_attr = obj
