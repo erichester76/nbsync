@@ -152,7 +152,7 @@ class DataTransferTool:
                 if "regex_replace" in trans:
                     # Extract pattern and replacement from the transform rule
                     pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
-                    print(f'Applying regex: {value} {pattern} {replacement}')
+                    if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
                     value = re.sub(pattern, replacement, value)
                 
                 elif "slugify" in trans:
@@ -171,7 +171,7 @@ class DataTransferTool:
                     # Get the list of source fields to concatenate
                     fields_to_concat = obj_config['mapping'][field_name]['source']
                     delimiter = trans.split('concat(\"')[1].strip("\"*)")
-                    print(f"Concating fields {field_name} : {value}")
+                    if self.DEBUG == 1:print(f"Concating fields {field_name} : {value}")
                     # Get the values of the fields to concatenate
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
@@ -341,7 +341,7 @@ class DataTransferTool:
                 #check for changes in object to determine if we should update
                 differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True)
                 if differences:
-                    print(f"Differences found for {existing_object.name}: {differences}")
+                    if self.DEBUG == 1:print(f"Differences found for {existing_object.name}: {differences}")
                     print(f"Updating object {existing_object.name}: {sanitized_mapped_data}")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     update_function([sanitized_mapped_data])
