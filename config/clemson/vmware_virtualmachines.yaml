@@ -36,38 +36,48 @@ object_mappings:
   virtual_machines:
     source_api: vmware
     destination_api: netbox
-    # Source API (VMware) CRUD functions
-    fetch_data_function: content.viewManager.CreateContainerView  # For VMware to read VMs
-    find_function: content.viewManager.CreateContainerView  # For VMware to "find" VMs
-    params:
-      object_type: vim.VirtualMachine
-      view_type: True
-    # Destination API (NetBox) CRUD functions
-    create_function: dcim.devices.create  # Create virtual machines as devices in NetBox
-    update_function: dcim.devices.update  # Update virtual machines in NetBox
-    destination_endpoint: dcim.devices
+    destination_endpoint: virtualization.virtual_machines
+    fetch_data_function: vim.VirtualMachine  # Fetch virtual machines
+    find_function: virtualization.virtual_machines.filter
+    create_function: virtualization.virtual_machines.create
+    update_function: virtualization.virtual_machines.update
     mapping:
+      # Mapping VMware name to NetBox name
       name:
-        source: name
+        source: config.name
+
+      # Mapping status (VMware power state) to NetBox status
       status:
         source: runtime.powerState
+        transform_function: "regex_replace('poweredOn', 'active') | regex_replace('poweredOff', 'offline')"
+
+      # Mapping VMware cluster to NetBox cluster (uses lookup to find or create)
       cluster:
-        source: runtime.host.parent.name
-      device:
+        source: runtime.host.parent
+        transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
+
+      # Mapping host (VMware host) to NetBox device
+      host:
         source: runtime.host.name
-      platform:
-        source: guest.guestFullName  
+        transform_function: lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
+
+      # Mapping CPU count to NetBox vCPUs
       vcpus:
         source: config.hardware.numCPU
+
+      # Mapping Memory size in MB to NetBox memory (in MB)
       memory:
         source: config.hardware.memoryMB
-      disk:
-        source: summary.storage.committed  
-      description:
-        source: config.annotation
+
+      # Mapping IP address from VMware Guest Info to NetBox primary IP
+      primary_ip4:
+        source: guest.ipAddress
+
+      # Mapping platform (could be OS type in VMware to NetBox platform)
+      platform:
+        source: config.guestFullName
+        transform_function: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+
+      # Serial number from VMware to NetBox serial number (Optional)
       serial:
-        source: customAttributes["serial_number"]  
-      comments:
-        source: config.annotation
-      tags:
-        source: customAttributes["tags"]  
+        source: config.uuid
