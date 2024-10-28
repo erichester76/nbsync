@@ -98,15 +98,16 @@ class DataTransferTool:
 
         if transform:
             if "regex_replace" in transform:
-                if isinstance(transform, list):
+                # If transform is a string, convert it into a list with a single item
+                if isinstance(transform, str):
+                    transform = [transform]
+                
+                    # Apply all transformations in the list
                     for trans in transform:
-                        pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", trans)[0]
-                        print(f'Processing regex replace: {value}: {pattern} = {replacement}')
+                        # Extract pattern and replacement from the transform rule
+                        pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
+                        print(f'Applying regex: {value} {pattern} {replacement}')
                         value = re.sub(pattern, replacement, value)
-                else:
-                    pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
-                    print(f'Processing regex replace: {value}: {pattern} = {replacement}')
-                    value = re.sub(pattern, replacement, value)
                         
             elif transform == "slugify":
                 value = re.sub(r'\W+', '-', value.lower())
