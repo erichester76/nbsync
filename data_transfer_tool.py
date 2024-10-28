@@ -289,6 +289,7 @@ class DataTransferTool:
             else:
                 #mapped_data.pop('name', None)  # Remove 'name' field if it's not required
                 #mapped_data.pop('model', None)  # Remove 'model' field if not required
+                mapped_data['id'] = existing_object.id
                 print(f"Updating object {existing_object.id} using {update_function_path} with data: {mapped_data}")
                 update_function = self.get_nested_function(api_client, update_function_path)
                 update_function(existing_object.id, **self.sanitize_data(mapped_data))
