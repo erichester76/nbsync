@@ -36,15 +36,44 @@ class DataTransferTool:
             raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
         return func
     
-    def get_nested_attribute(self, obj, attr_path, default=None):
-        """ Recursively get nested attributes from an object using a dotted path. """
-        attrs = attr_path.split('.')
-        current_attr = obj
-        for attr in attrs:
-            current_attr = getattr(current_attr, attr, default)
-            if current_attr is None:
+    def get_nested_attribute(obj, attr_paths, default=None):
+        """
+        This function retrieves the value of a nested attribute from an object.
+        It now supports handling a list of attribute paths and concatenating them.
+        """
+        if isinstance(attr_paths, list):
+            # If we have multiple attribute paths, we will concatenate their values
+            values = []
+            for attr_path in attr_paths:
+                try:
+                    attrs = attr_path.split('.')
+                    value = obj
+                    for attr in attrs:
+                        if '[' in attr and ']' in attr:  # Handle array indexing
+                            attr_name, index = attr.split('[')
+                            index = int(index[:-1])
+                            value = getattr(value, attr_name)[index]
+                        else:
+                            value = getattr(value, attr)
+                    values.append(str(value))  # Convert to string for concatenation
+                except (AttributeError, IndexError):
+                    values.append(str(default))  # Append default value if any error occurs
+            return ''.join(values)  # Concatenate all values
+        else:
+            # Handle the single attribute path (original logic)
+            try:
+                attrs = attr_paths.split('.')
+                value = obj
+                for attr in attrs:
+                    if '[' in attr and ']' in attr:  # Handle array indexing
+                        attr_name, index = attr.split('[')
+                        index = int(index[:-1])
+                        value = getattr(value, attr_name)[index]
+                    else:
+                        value = getattr(value, attr)
+                return value
+            except (AttributeError, IndexError):
                 return default
-        return current_attr
 
     def sanitize_data(self, data):
         """
@@ -112,7 +141,7 @@ class DataTransferTool:
         """Apply a transformation to a value, based on the transform rule."""
         if value is None:
             return value  # Skip transformation if value is None
-        
+
         if transform:
             # If transform is a string, convert it into a list with a single item
             if isinstance(transform, str):
