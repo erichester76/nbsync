@@ -123,7 +123,7 @@ class DataTransferTool:
                 if "regex_replace" in trans:
                     # Extract pattern and replacement from the transform rule
                     pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
-                    if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
+                    print(f'Applying regex: {value} {pattern} {replacement}')
                     value = re.sub(pattern, replacement, value)
                 
                 elif "slugify" in trans:
