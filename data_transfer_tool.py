@@ -153,23 +153,16 @@ class DataTransferTool:
                     update_function = obj_config.get('update_function')
                     find_function = obj_config.get('find_function')
                     for item in source_data:
-                        print(f"ROW: {item}")
-                        print(f"Available keys in CSV row: {item.keys()}")
     
                         mapped_data = {}
                         for dest_field, field_info in obj_config['mapping'].items():
                             source_value = item.get(field_info['source'])
-                            print(f"Mapping {field_info['source']} (CSV) -> {dest_field} (API): {source_value}")
                             if ('transform_function' in field_info):
                                 transform = field_info.get('transform_function')
-                                print(f"Applying transform to field {dest_field} {source_value} {transform}")
                                 mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
                             else:
-                                print(f"Direct mapping {source_value} to {dest_field}")
                                 mapped_data[dest_field] = source_value
-                                
-                        print(f"Final mapped data for creation: {mapped_data}")
-        
+                                        
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         print(f"Processed object with ID: {object_id}")
 
@@ -177,7 +170,7 @@ class DataTransferTool:
         """Create or update objects in the destination API."""
         find_function = self.get_nested_function(api_client, find_function_path)
         found_objects = find_function(mapped_data)
-        existing_object = found_objects.first() if hasattr(found_objects, 'first') else found_objects[0] if found_objects else None
+        existing_object = list(found_objects)[0] if found_objects else None
 
         if existing_object:
             if self.dry_run:
