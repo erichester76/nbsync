@@ -50,44 +50,44 @@ object_mappings:
     mapping:
       # Mapping VMware name to NetBox name
       name:
-        source: config.name
+        source: "config.name"
 
       # Mapping status (VMware power state) to NetBox status
       status:
-        source: runtime.powerState
+        source: "runtime.powerState"
         transform_function: "regex_replace('poweredOn', 'active') | regex_replace('poweredOff', 'offline')"
 
       # Mapping VMware cluster to NetBox cluster (uses lookup to find or create)
       cluster:
-        source: runtime.host.parent
+        source: "runtime.host.parent"
         transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
       # Mapping host (VMware host) to NetBox device
       host:
-        source: runtime.host.name
+        source: "runtime.host.name"
         transform_function: lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
 
       # Mapping CPU count to NetBox vCPUs
       vcpus:
-        source: config.hardware.numCPU
+        source: "config.hardware.numCPU"
 
       # Mapping Memory size in MB to NetBox memory (in MB)
       memory:
-        source: config.hardware.memoryMB
+        source: "config.hardware.memoryMB"
 
       # Mapping IP address from VMware Guest Info to NetBox primary IP
       primary_ip4:
-        source: guest.ipAddress
+        source: "guest.ipAddress"
 
       # Mapping platform (could be OS type in VMware to NetBox platform)
       platform:
-        source: config.guestFullName
+        source: "config.guestFullName"
         transform_function: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
       # Serial number from VMware to NetBox serial number (Optional)
       serial:
-        source: config.uuid
+        source: "config.uuid"
 
       site:
-        source: runtime.host.parent.name;parentFolder.parent.name
+        source: "runtime.host.parent.name;parentFolder.parent.name"
         transform_function: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
