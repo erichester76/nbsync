@@ -37,7 +37,7 @@ object_mappings:
     source_api: vmware
     destination_api: netbox
     destination_endpoint: virtualization.virtual_machines
-    fetch_data_function: vim.VirtualMachine  # Fetch virtual machines
+    fetch_data_function: VirtualMachine  # Fetch virtual machines
     find_function: virtualization.virtual_machines.filter
     create_function: virtualization.virtual_machines.create
     update_function: virtualization.virtual_machines.update
