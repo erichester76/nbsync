@@ -98,8 +98,9 @@ object_mappings:
           - regex_replace('disconnected', 'offline')
   
       serial_number:
-        source: "summary.hardware.serialNumber"
-  
+        source: summary.hardware.otherIdentifyingInfo
+        transform_function: extract_identifier('SerialNumberTag')  
+
       platform:
         source: ["config.product.name", "config.product.version"]
         transform_function: 

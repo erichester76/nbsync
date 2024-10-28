@@ -144,7 +144,15 @@ class DataTransferTool:
                     # Get the values of the fields to concatenate
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
-                                            
+                elif "extract_identifier" in transform:
+                    identifier_key = re.findall(r"extract_identifier\('(.*)'\)", transform)[0]
+                    if isinstance(value, list):
+                        for identifier in value:
+                            identifier_value = getattr(identifier, 'identifierValue', None)
+                            identifier_type = getattr(identifier.identifierType, 'key', None)
+                            if identifier_type == identifier_key:
+                                return identifier_value  # Return the matched identifier value
+                        
                 elif "lookup_object" in trans:
                     matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", trans)
                     if not matches:
