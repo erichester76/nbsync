@@ -76,10 +76,6 @@ object_mappings:
           - regex_replace('^Proto\-.+','Clemson Information Technology Center')
           - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')    
   
-      manufacturer:
-        source: "hardware.systemInfo.vendor"
-        transform_function: lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
-
       device_type:
         source: "hardware.systemInfo.model"
         transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
@@ -97,7 +93,7 @@ object_mappings:
           - regex_replace('connected', 'active')
           - regex_replace('disconnected', 'offline')
   
-      serial_number:
+      serial:
         source: summary.hardware.otherIdentifyingInfo
         transform_function: extract_identifier('SerialNumberTag')  
 
