@@ -178,15 +178,13 @@ class DataTransferTool:
                 
                 elif "extract_by_type" in trans:
                     type, field_name = re.findall(r"extract_by_type\('(.*)',\s*'(.*)'\)", trans)[0]
-                    fields = obj_config['mapping'][field_name]['source']
-                    value = None
-                    if isinstance(fields, list):
+                    if isinstance(value, list):
                         ipv4_regex = r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
                         ipv6_regex = r"^[a-fA-F0-9:]+$"
                         
                         if self.DEBUG == 1: print(f"Searching fields {field_name} for {type}")
 
-                        for item in fields:
+                        for item in value:
                             field_value = getattr(item, field_name, None)  
                             if not field_value:
                                 continue
