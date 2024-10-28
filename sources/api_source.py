@@ -124,7 +124,7 @@ class APIDataSource(DataSource):
                             if isinstance(eval_expression, type):
                                 resolved_params.append(eval_expression)
                             else:
-                                raise TypeError(f"Expected a Python type, but got {type(evaluated_object).__name__}")
+                                raise TypeError(f"Expected a Python type, but got {type(eval_expression).__name__}")
 
                     print(f"Executing step: {method_name} with params: {resolved_params}")
                     result = func(*resolved_params)
