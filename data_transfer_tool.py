@@ -148,7 +148,7 @@ class DataTransferTool:
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """Create or update objects in the destination API."""
         find_function = self.get_nested_function(api_client, find_function_path)
-        found_objects = find_function(**mapped_data)
+        found_objects = find_function(mapped_data)
         existing_object = found_objects.first() if hasattr(found_objects, 'first') else found_objects[0] if found_objects else None
 
         if existing_object:
