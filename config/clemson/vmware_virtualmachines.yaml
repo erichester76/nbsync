@@ -78,6 +78,8 @@ object_mappings:
   
       manufacturer:
         source: "hardware.systemInfo.vendor"
+        transform_function: lookup_object('name', 'dcim.manufacturer.filter', 'dcim.manufacturer.create')
+
   
       device_type:
         source: "hardware.systemInfo.model"
