@@ -115,6 +115,7 @@ class DataTransferTool:
                     for included_field in obj_config['mapping'][field_name].get('included_fields', []):
                         field_name_for_nesting = included_field.get('field')
                         break
+                    print(f"Added {additional_data} and {field_name_for_nesting}")
                     
                 for _, nested_value in additional_data.items():
                     nested_value = re.sub(r'\W+', '-', nested_value.lower())
