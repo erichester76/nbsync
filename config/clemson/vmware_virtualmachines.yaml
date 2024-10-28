@@ -40,16 +40,15 @@ object_mappings:
     find_function: virtualization.virtual_machines.filter
     create_function: virtualization.virtual_machines.create
     update_function: virtualization.virtual_machines.update
-    fetch_data_function: content.viewManager.CreateContainerView
     fetch_data_steps:
-      - method: RetrieveContent
+      - method: RetrieveContent  # Retrieve the content object
       - method: viewManager.CreateContainerView
         params:
-          - attr: content.rootFolder  # This provides the container parameter
-          - [vim.VirtualMachine]  # This defines the type of objects we're looking for (Virtual Machines)
-          - True  # Recursive flag
+          - "{{ content.rootFolder }}"  # Root folder to start the view
+          - "[vim.VirtualMachine]"  # Object type as a string for evaluation
+          - "True"  # Recursive flag as a string
       - method: view
-
+      
     mapping:
       # Mapping VMware name to NetBox name
       name:

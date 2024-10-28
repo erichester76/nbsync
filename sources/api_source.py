@@ -75,53 +75,52 @@ class APIDataSource(DataSource):
             
     def fetch_data(self, obj_config, api_client):
         """
-        Fetch data dynamically based on either a single fetch_data_function or multiple fetch_data_steps.
-
-        :param obj_config: Object configuration that defines the fetch steps or single fetch function.
-        :param api_client: Authenticated API client (e.g., VMware, NetBox).
-        :return: List of objects (e.g., virtual machines).
+        Fetch data from the API using either a direct fetch_data_function or a series of steps (fetch_data_steps).
         """
-        if 'fetch_data_function' in obj_config:
-            # Handle a single function call
-            function_path = obj_config['fetch_data_function']
-            parts = function_path.split('.')
-            
-            # Traverse the API client to get the function or attribute
-            func = api_client
-            for part in parts:
-                func = getattr(func, part, None)
-                if func is None:
-                    raise AttributeError(f"Function '{function_path}' not found in API client.")
-            
-            # Call the function and return the result (assume no params for simplicity)
-            return func()
 
-        elif 'fetch_data_steps' in obj_config:
-            # Handle multiple steps dynamically
-            obj = api_client  # Start with the API client (e.g., vmware connection)
-            for step in obj_config.get('fetch_data_steps', []):
-                method_name = step.get('method')
-                
+        # Check if 'fetch_data_function' is defined
+        fetch_data_function = obj_config.get('fetch_data_function')
+        
+        if fetch_data_function:
+            print(f"Using fetch_data_function: {fetch_data_function}")
+            func = self.get_nested_function(api_client, fetch_data_function)
+            return func()  # Call the function directly
+
+        # If no 'fetch_data_function', fall back to 'fetch_data_steps'
+        fetch_data_steps = obj_config.get('fetch_data_steps', [])
+        if fetch_data_steps:
+            print("Using fetch_data_steps...")
+            result = api_client  # Start with the base API client object
+
+            for step in fetch_data_steps:
+                method_name = step['method']
+                print(f"Executing step: {method_name}")
+
+                # Get the method from the current API client or result
+                func = getattr(result, method_name)
+
                 if 'params' in step:
                     params = []
+
+                    # Dynamically resolve any template-like references in params (e.g., content.rootFolder)
                     for param in step['params']:
-                        # Handle nested attributes (e.g., content.rootFolder)
-                        if isinstance(param, str) and '.' in param:
-                            attrs = param.split('.')
-                            param_value = api_client
-                            for attr in attrs:
-                                param_value = getattr(param_value, attr)
-                            params.append(param_value)
+                        if isinstance(param, str) and param.startswith('{{') and param.endswith('}}'):
+                            # Strip the curly braces and resolve the attribute dynamically
+                            attr_path = param[2:-2].strip()
+                            resolved_param = eval(attr_path, globals(), locals())  # Resolve using eval
+                            params.append(resolved_param)
                         else:
-                            params.append(eval(str(param)))
-                    obj = getattr(obj, method_name)(*params)
+                            # Pass the param as is (already evaluated)
+                            params.append(eval(param) if isinstance(param, str) else param)
+                    
+                    result = func(*params)  # Call the method with resolved params
                 else:
-                    obj = getattr(obj, method_name, None)
-                    if obj is None:
-                        raise AttributeError(f"Step '{method_name}' not found in API client.")
-            return obj
-        else:
-            raise ValueError("No valid 'fetch_data_function' or 'fetch_data_steps' found in the YAML configuration.")
+                    result = func()  # Call the method with no params
+
+            return result
+
+        # If neither are found, raise an error
+        raise ValueError("Either 'fetch_data_function' or 'fetch_data_steps' must be defined in the object configuration.")
 
 
     def get_nested_function(self, api_client, function_path):
