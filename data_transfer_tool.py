@@ -225,7 +225,7 @@ class DataTransferTool:
                 source_data = source.fetch_data(obj_config, file_path)
 
                 # Access the destination API object
-                destination_api = self.sources[obj_config['destination_api']].api
+                destination_api = self.sources[obj_config['destination_api']]
 
                 # Iterate over all clients (API instances) for the destination
                 for destination_client in destination_api.clients:

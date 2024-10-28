@@ -132,8 +132,6 @@ def get_nested_function(self, api_client, function_path):
     
     return func
 
-
-
 def get_nested_attr(self, obj, attrs):
     """
     Recursively get attributes from an object based on a list of attribute names.
