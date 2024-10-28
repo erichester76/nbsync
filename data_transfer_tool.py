@@ -197,7 +197,7 @@ class DataTransferTool:
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
-            if self.DEBUG == 1: print(f"Process Object Group {obj_type}")
+            print(f"Process Object Group {obj_type}")
             source = self.sources[obj_config['source_api']]
             for source_client in source.clients:
                 source_data = source.fetch_data(obj_config, source_client)
@@ -278,26 +278,26 @@ class DataTransferTool:
         try:
             found_object = find_function(**filter_params)
         except Exception as e:
-            if self.DEBUG == 1: print(f"Error calling find_function: {str(e)}")
+            print(f"Error calling find_function: {str(e)}")
             raise
                 
         # Check if the result set is not empty (using .first() if available)        
         if found_object:
             existing_object = list(found_object)[0]
             if self.dry_run:
-                if self.DEBUG == 1: print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
+                print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
             else:
                 #mapped_data.pop('name', None)  # Remove 'name' field if it's not required
                 #mapped_data.pop('model', None)  # Remove 'model' field if not required
-                if self.DEBUG == 1: print(f"Updating object {existing_object.id} using {update_function_path} with data: {mapped_data}")
-                #update_function = self.get_nested_function(api_client, update_function_path)
-                #update_function(existing_object.id, **self.sanitize_data(mapped_data))
+                print(f"Updating object {existing_object.id} using {update_function_path} with data: {mapped_data}")
+                update_function = self.get_nested_function(api_client, update_function_path)
+                update_function(existing_object.id, **self.sanitize_data(mapped_data))
             return existing_object.id
         else:
             if self.dry_run:
-                if self.DEBUG == 1: print(f"[DRY RUN] Would create new object with {create_function_path}: {mapped_data}")
+                print(f"[DRY RUN] Would create new object with {create_function_path}: {mapped_data}")
             else:
-                if self.DEBUG == 1: print(f"Creating new object with {create_function_path}: {mapped_data}")
+                print(f"Creating new object with {create_function_path}: {mapped_data}")
                 create_function = self.get_nested_function(api_client, create_function_path)
                 new_object = create_function(self.sanitize_data(mapped_data))
                 return new_object.id
