@@ -75,8 +75,6 @@ class APIDataSource(DataSource):
             self.clients.append(self.api)
             
 
-    import types
-
     def fetch_data(self, obj_config, api_client):
         """
         Fetch data from the API using either a direct fetch_data_function or a custom Python code block.
@@ -86,11 +84,6 @@ class APIDataSource(DataSource):
         fetch_data_function = obj_config.get('fetch_data_function')
         fetch_data_code = obj_config.get('fetch_data_code')
 
-        # Create the local_vars dictionary that will hold the `api_client` and its vim object
-        local_vars = {
-            'api_client': api_client,
-        }
-
         if fetch_data_function:
             print(f"Using fetch_data_function: {fetch_data_function}")
             func = self.get_nested_function(api_client, fetch_data_function)
@@ -99,7 +92,10 @@ class APIDataSource(DataSource):
         if fetch_data_code:
             print(f"Using custom Python code for data fetch...")
 
-            # Execute the custom fetch_data_code using api_client and its vim context
+            # Use exec to run the custom Python code within this function's context
+            local_vars = {
+                'api_client': api_client
+            }
             exec(fetch_data_code, {}, local_vars)
 
             # Ensure the 'fetch_data' function is defined in the code
@@ -112,10 +108,9 @@ class APIDataSource(DataSource):
                 return fetch_func(api_client)
             else:
                 raise TypeError("fetch_data is not a valid function")
-        
+
         # If no fetch method is specified, raise an error
         raise ValueError("No valid fetch method (fetch_data_function or fetch_data_code) found")
-
 
     
     def get_nested_function(self, api_client, function_path):
