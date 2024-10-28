@@ -45,7 +45,6 @@ class CSVDataSource(DataSource):
             # Process each row in the CSV and map fields according to YAML mapping
             for row in reader:
                 obj_data = {}
-                print(f"Row data: {row}")  # Add this line to print each row
                 for dest_field, field_info in obj_config['mapping'].items():
                     source_field = field_info['source']
                     obj_data[dest_field] = row.get(source_field)

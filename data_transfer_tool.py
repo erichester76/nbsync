@@ -154,7 +154,6 @@ class DataTransferTool:
                     find_function = obj_config.get('find_function')
                     for item in source_data:
                         mapped_data = {}
-                        print(f"Processing Source Item: {item}")
                         for dest_field, field_info in obj_config['mapping'].items():
                             source_value = item.get(field_info['source'])
                             print(f"{item}: {source_value} -> {dest_field}")
