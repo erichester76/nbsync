@@ -116,9 +116,10 @@ class APIDataSource(DataSource):
                                 if value is None:
                                     raise ValueError(f"Could not resolve nested attribute '{part}' in {param}")
                             resolved_params.append(value)
-                        elif isinstance(param, str) and param.startswith('!eval'):
-                            # Evaluate Python expression (e.g., list of types)
-                            resolved_params.append(eval(param.split(' ', 1)[1]))
+                        elif isinstance(param, str) and param.startswith("eval(") and param.endswith(")"):
+                            # Evaluate Python expression (e.g., eval([vim.VirtualMachine]))
+                            eval_expression = param[5:-1]  # Strip off 'eval(' and ')'
+                            resolved_params.append(eval(eval_expression))                        
                         else:
                             resolved_params.append(param)
 
