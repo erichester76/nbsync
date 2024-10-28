@@ -78,14 +78,14 @@ class APIDataSource(DataSource):
     def fetch_data(self, obj_config, api_client):
         """
         Fetch data from the API using either a direct fetch_data_function or a custom Python code block.
-        Dynamically load modules specified in the 'imports' section of the YAML.
+        Dynamically load modules specified in the 'imports' section of the YAML and inject into globals.
         """
 
         # Handle imports specified in YAML
         imports = obj_config.get('imports', [])
         local_vars = {'api_client': api_client}
 
-        # Dynamically import modules and make them available in the local_vars
+        # Dynamically import modules and make them available in local_vars
         for import_path in imports:
             try:
                 module_name, attr_name = import_path.rsplit('.', 1)
@@ -95,6 +95,12 @@ class APIDataSource(DataSource):
             except ImportError as e:
                 print(f"Error importing {import_path}: {e}")
                 raise
+
+        # Inject all imported local_vars into globals, except for 'api_client'
+        for var_name, var_value in local_vars.items():
+            if var_name != 'api_client':  # Skip api_client to prevent accidental overwrites
+                globals()[var_name] = var_value
+                print(f"Injected {var_name} into global scope")
 
         # Fetch custom Python code to execute
         fetch_data_code = obj_config.get('fetch_data_code')
@@ -119,7 +125,7 @@ class APIDataSource(DataSource):
         # If no fetch method is specified, raise an error
         raise ValueError("No valid fetch method (fetch_data_function or fetch_data_code) found")
 
-    
+        
     def get_nested_function(self, api_client, function_path):
         """
         Recursively get a function from the API client.
