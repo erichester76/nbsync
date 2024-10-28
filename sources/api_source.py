@@ -87,41 +87,36 @@ class APIDataSource(DataSource):
             return func()  # Call the function directly
 
         # If no 'fetch_data_function', fall back to 'fetch_data_steps'
-        fetch_data_steps = obj_config.get('fetch_data_steps', [])
-        if fetch_data_steps:
-            print("Using fetch_data_steps...")
-            result = api_client  # Start with the base API client object
+        fetch_steps = obj_config.get('fetch_data_steps', [])
+        result = api_client  # Start from the base client (ServiceInstance)
 
-            for step in fetch_data_steps:
-                method_name = step['method']
-                print(f"Executing step: {method_name}")
+        for step in fetch_steps:
+            method_name = step['method']
+            params = step.get('params', [])
 
-                # Get the method from the current API client or result
+            # Check if the method_name is an attribute (like viewManager) or a method (like CreateContainerView)
+            if hasattr(result, method_name):
                 func = getattr(result, method_name)
-
-                if 'params' in step:
-                    params = []
-
-                    # Dynamically resolve any template-like references in params (e.g., content.rootFolder)
-                    for param in step['params']:
-                        if isinstance(param, str) and param.startswith('{{') and param.endswith('}}'):
-                            # Strip the curly braces and resolve the attribute dynamically
-                            attr_path = param[2:-2].strip()
-                            resolved_param = eval(attr_path, globals(), locals())  # Resolve using eval
-                            params.append(resolved_param)
-                        else:
-                            # Pass the param as is (already evaluated)
-                            params.append(eval(param) if isinstance(param, str) else param)
-                    
-                    result = func(*params)  # Call the method with resolved params
+                
+                # If it's callable (a method), invoke it
+                if callable(func):
+                    # If there are parameters, pass them; otherwise, call with no parameters
+                    if params:
+                        print(f"Executing step: {method_name} with params: {params}")
+                        # Handle Jinja2 expressions in params
+                        params = [eval(param) for param in params]
+                        result = func(*params)
+                    else:
+                        print(f"Executing step: {method_name}")
+                        result = func()
                 else:
-                    result = func()  # Call the method with no params
+                    # It's an attribute, just get the value
+                    print(f"Accessing attribute: {method_name}")
+                    result = func
+            else:
+                raise AttributeError(f"{method_name} not found on {result}")
 
-            return result
-
-        # If neither are found, raise an error
-        raise ValueError("Either 'fetch_data_function' or 'fetch_data_steps' must be defined in the object configuration.")
-
+        return result
 
     def get_nested_function(self, api_client, function_path):
         """
