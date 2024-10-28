@@ -42,10 +42,10 @@ object_mappings:
     update_function: virtualization.virtual_machines.update
     fetch_data_steps:
       - method: RetrieveContent
-      - method: viewManager  # Fetch the viewManager object
+      - method: viewManager
       - method: CreateContainerView
         params:
-          - '{{ "{{ content.rootFolder }}" }}'
+          - '{content.rootFolder}'  # Correctly pass the content's root folder
           - "[vim.VirtualMachine]"
           - "True"
       - method: view

@@ -90,6 +90,9 @@ class APIDataSource(DataSource):
         fetch_steps = obj_config.get('fetch_data_steps', [])
         result = api_client  # Start from the base client (ServiceInstance)
 
+        # Track special objects like 'content' so they can be used in later steps
+        special_vars = {}
+
         for step in fetch_steps:
             method_name = step['method']
             params = step.get('params', [])
@@ -100,11 +103,12 @@ class APIDataSource(DataSource):
                 
                 # If it's callable (a method), invoke it
                 if callable(func):
-                    # If there are parameters, pass them; otherwise, call with no parameters
+                    # Handle any special objects like 'content' or 'rootFolder'
                     if params:
                         print(f"Executing step: {method_name} with params: {params}")
-                        # Handle Jinja2 expressions in params
-                        params = [eval(param) for param in params]
+                        
+                        # Replace special variables (like content) with the actual object from earlier steps
+                        params = [special_vars.get(param.strip('{}'), param) for param in params]
                         result = func(*params)
                     else:
                         print(f"Executing step: {method_name}")
@@ -115,6 +119,12 @@ class APIDataSource(DataSource):
                     result = func
             else:
                 raise AttributeError(f"{method_name} not found on {result}")
+
+            # Store result for later steps (e.g., content)
+            if method_name == 'RetrieveContent':
+                special_vars['content'] = result
+            elif method_name == 'rootFolder':
+                special_vars['rootFolder'] = result
 
         return result
 
