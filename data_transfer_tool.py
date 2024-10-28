@@ -158,17 +158,16 @@ class DataTransferTool:
     
                         mapped_data = {}
                         for dest_field, field_info in obj_config['mapping'].items():
-                            source_field = field_info['source']
-                            source_value = item.get(source_field)
-                            print(f"Mapping {source_field} -> {dest_field}: {source_value}")  # Show the source field and the retrieved value
+                            source_value = item.get(field_info['source'])
+                            print(f"Mapping {field_info['source']} (CSV) -> {dest_field} (API): {source_value}")
                             if ('transform_function' in field_info):
                                 transform = field_info.get('transform_function')
                                 print(f"Applying transform to field {dest_field} {source_value} {transform}")
-                                mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, row)
+                                mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
                             else:
                                 print(f"Direct mapping {source_value} to {dest_field}")
-                                mapped_data[dest_field] = source_value                                
-                        
+                                mapped_data[dest_field] = source_value
+                                
                         print(f"Final mapped data for creation: {mapped_data}")
         
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
