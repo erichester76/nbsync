@@ -152,17 +152,17 @@ object_mappings:
       memory:
         source: "config.hardware.memoryMB"
 
-      primary_ip4:
-        source: ["guest.net[0].ipConfig.ipAddress[0].ipAddress", "guest.net[0].ipConfig.ipAddress[0].prefixLength"]
-        transform_function:
-          - concat("/")
-          - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
+      # primary_ip4:
+      #   source: ["guest.net[0].ipConfig.ipAddress[0].ipAddress", "guest.net[0].ipConfig.ipAddress[0].prefixLength"]
+      #   transform_function:
+      #     - concat("/")
+      #     - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
 
-      primary_ip6:
-        source: ["guest.net[0].ipConfig.ipAddress[1].ipAddress", "guest.net[0].ipConfig.ipAddress[1].prefixLength"]
-        transform_function:
-          - concat("/")
-          - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
+      # primary_ip6:
+      #   source: ["guest.net[0].ipConfig.ipAddress[1].ipAddress", "guest.net[0].ipConfig.ipAddress[1].prefixLength"]
+      #   transform_function:
+      #     - concat("/")
+      #     - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
 
       platform:
         source: "config.product.name"
