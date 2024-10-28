@@ -101,6 +101,7 @@ class DataTransferTool:
                 if isinstance(transform, list):
                     for trans in transform:
                         pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", trans)[0]
+                        print(f'Processing regex replace: {value}: {pattern} = {replacement}')
                         value = re.sub(pattern, replacement, value)
                 else:
                     pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
