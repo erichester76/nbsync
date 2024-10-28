@@ -147,7 +147,7 @@ class DataTransferTool:
                     
                 elif "extract_identifier" in trans:
                     # Extract the identifier type (e.g., 'SerialNumberTag')
-                    identifier_key = re.findall(r"extract_identifier\('(.*)'\)", transform)[0]
+                    identifier_key = re.findall(r"extract_identifier\('(.*)'\)", trans)[0]
                     if isinstance(value, list):
                         for identifier in value:
                             identifier_value = getattr(identifier, 'identifierValue', None)
