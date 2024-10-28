@@ -112,7 +112,7 @@ class DataTransferTool:
         """Apply a transformation to a value, based on the transform rule."""
         if value is None:
             return value  # Skip transformation if value is None
-
+        
         if transform:
             # If transform is a string, convert it into a list with a single item
             if isinstance(transform, str):
