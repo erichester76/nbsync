@@ -78,24 +78,25 @@ class APIDataSource(DataSource):
     def fetch_data(self, obj_config, api_client):
         """
         Fetch data from the API using either a direct fetch_data_function or a custom Python code block.
+        Dynamically load modules specified in the 'imports' section of the YAML.
         """
 
-        # Check if 'fetch_data_function' is defined
-        fetch_data_function = obj_config.get('fetch_data_function')
-        fetch_data_code = obj_config.get('fetch_data_code')
+        # Handle imports specified in YAML
+        imports = obj_config.get('imports', [])
+        local_vars = {'api_client': api_client}
 
-        if fetch_data_function:
-            print(f"Using fetch_data_function: {fetch_data_function}")
-            func = self.get_nested_function(api_client, fetch_data_function)
-            return func()  # Call the function directly
+        # Dynamically import modules and make them available in the local_vars
+        for import_path in imports:
+            module_name, attr_name = import_path.rsplit('.', 1)
+            module = __import__(module_name, fromlist=[attr_name])
+            local_vars[attr_name] = getattr(module, attr_name)
+
+        fetch_data_code = obj_config.get('fetch_data_code')
 
         if fetch_data_code:
             print(f"Using custom Python code for data fetch...")
 
-            # Use exec to run the custom Python code within this function's context
-            local_vars = {
-                'api_client': api_client
-            }
+            # Execute the provided code
             exec(fetch_data_code, {}, local_vars)
 
             # Ensure the 'fetch_data' function is defined in the code

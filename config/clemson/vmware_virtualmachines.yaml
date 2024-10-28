@@ -40,14 +40,15 @@ object_mappings:
     find_function: virtualization.virtual_machines.filter
     create_function: virtualization.virtual_machines.create
     update_function: virtualization.virtual_machines.update
+    imports:
+      - pyVmomi.vim
     fetch_data_code: |
-      from pyVmomi import vim
       def fetch_data(api_client):
           content = api_client.RetrieveContent()
           container_view = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True)
-          virtual_machines = container_view.view
-          return virtual_machines
-        
+          return container_view.view
+
+
     mapping:
       # Mapping VMware name to NetBox name
       name:
