@@ -17,7 +17,7 @@ api_definitions:
     base_urls:
       - https://netbox.app.clemson.edu
 
-oobject_mappings:
+object_mappings:
   devices:
     source_api: csv
     destination_api: netbox
@@ -29,12 +29,8 @@ oobject_mappings:
     mapping:
       name:
         source: device_name
-      role:
-        source: role
-        transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
       manufacturer:
         source: manufacturer
-        expand_reference: name  
       device_type:
         source: device_type
         transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
@@ -50,6 +46,9 @@ oobject_mappings:
       site:
         source: site_name
         transform_function: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
-        expand_reference: name 
       status:
         source: status
+      role:
+        source: role
+        transform_function: expand  # This field will be expanded using 'expand_reference'
+        expand_reference: name  # The name to wrap around the expanded value
