@@ -41,12 +41,13 @@ object_mappings:
     create_function: virtualization.virtual_machines.create
     update_function: virtualization.virtual_machines.update
     fetch_data_steps:
-      - method: RetrieveContent  # Retrieve the content object
-      - method: viewManager.CreateContainerView
+      - method: RetrieveContent
+      - method: viewManager  # Fetch the viewManager object
+      - method: CreateContainerView
         params:
-          - '{{ "{{ content.rootFolder }}" }}' #escaped to avoid jinja interpreter
-          - "[vim.VirtualMachine]"  # Object type as a string for evaluation
-          - "True"  # Recursive flag as a string
+          - '{{ "{{ content.rootFolder }}" }}'
+          - "[vim.VirtualMachine]"
+          - "True"
       - method: view
       
     mapping:
