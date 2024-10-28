@@ -42,15 +42,16 @@ object_mappings:
     update_function: virtualization.virtual_machines.update
     fetch_data_steps:
       - method: RetrieveContent
-        params: []
-        store_as: content
-      - attribute: viewManager  # We access viewManager from content
-        store_as: view_manager
+        store_as: content  # Store the result of RetrieveContent as 'content'
+      - method: viewManager
+        store_as: view_manager  # Store viewManager as 'view_manager'
       - method: CreateContainerView
         params:
-          - "{content.rootFolder}"
-          - ["vim.VirtualMachine"]  # Replace later in Python with the actual type
-          - True
+          - '{content.rootFolder}'  # Use 'content.rootFolder' dynamically from the previous step
+          - "[vim.VirtualMachine]"
+          - "True"
+        store_as: container_view  # Store the result as 'container_view'
+      - method: view
         
     mapping:
       # Mapping VMware name to NetBox name

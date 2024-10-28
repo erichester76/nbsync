@@ -86,43 +86,56 @@ class APIDataSource(DataSource):
             func = self.get_nested_function(api_client, fetch_data_function)
             return func()  # Call the function directly
 
-        steps = obj_config.get('fetch_data_steps')
-        result = None
+        fetch_steps = obj_config.get('fetch_data_steps', [])
+        result = api_client  # Start from the base client (ServiceInstance)
+
+        # Track special objects so they can be used in later steps
         special_vars = {}
 
-        for step in steps:
-            method_name = step.get('method')
-            attribute_name = step.get('attribute')
+        for step in fetch_steps:
+            method_name = step['method']
             params = step.get('params', [])
 
-            # Resolve parameters with special variables
-            resolved_params = []
-            for param in params:
-                if isinstance(param, str) and param.startswith("{") and param.endswith("}"):
-                    # Resolve special variables like {content.rootFolder}
-                    special_var_name = param[1:-1]
-                    if special_var_name in special_vars:
-                        resolved_params.append(special_vars[special_var_name])
-                    else:
-                        raise ValueError(f"Could not resolve special variable: {param}")
-                elif isinstance(param, list) and "vim.VirtualMachine" in param:
-                    resolved_params.append([pyVmomi.vim.VirtualMachine])
+            # Check if the method_name is an attribute (like viewManager) or a method (like CreateContainerView)
+            if hasattr(result, method_name):
+                func = getattr(result, method_name)
+
+                # If it's callable (a method), invoke it
+                if callable(func):
+                    # Replace special variables (like content.rootFolder) with the actual object from earlier steps
+                    resolved_params = []
+                    for param in params:
+                        if isinstance(param, str) and param.startswith('{') and param.endswith('}'):
+                            # Resolve the nested attributes (e.g., content.rootFolder)
+                            parts = param.strip('{}').split('.')
+                            value = special_vars.get(parts[0], None)
+                            if value is None:
+                                raise ValueError(f"Could not resolve special variable: {param}")
+                            for part in parts[1:]:
+                                value = getattr(value, part, None)
+                                if value is None:
+                                    raise ValueError(f"Could not resolve nested attribute '{part}' in {param}")
+                            resolved_params.append(value)
+                        else:
+                            resolved_params.append(param)
+
+                    print(f"Executing step: {method_name} with params: {resolved_params}")
+                    result = func(*resolved_params)
                 else:
-                    resolved_params.append(param)
-
-            # If there's an attribute to access instead of a method
-            if attribute_name:
-                # Access the attribute (like viewManager) from the result (content)
-                result = getattr(special_vars.get('content'), attribute_name)
+                    # It's an attribute, just get the value
+                    print(f"Accessing attribute: {method_name}")
+                    result = func
             else:
-                func = getattr(api_client, method_name) if method_name else result
-                result = func(*resolved_params)
+                raise AttributeError(f"{method_name} not found on {result}")
 
-            # Store result for later steps if necessary
-            if 'store_as' in step:
-                special_vars[step['store_as']] = result
+            # Store result for later steps if 'store_as' is provided
+            store_as = step.get('store_as')
+            if store_as:
+                print(f"Storing result of {method_name} as '{store_as}'")
+                special_vars[store_as] = result
 
         return result
+
     
     
     def get_nested_function(self, api_client, function_path):
