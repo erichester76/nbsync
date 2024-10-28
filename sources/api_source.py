@@ -116,13 +116,15 @@ class APIDataSource(DataSource):
                                 if value is None:
                                     raise ValueError(f"Could not resolve nested attribute '{part}' in {param}")
                             resolved_params.append(value)
+                            
                         elif isinstance(param, str) and param.startswith("eval(") and param.endswith(")"):
-                            # Evaluate Python expression (e.g., eval([vim.VirtualMachine]))
+                            # Evaluate Python expression and ensure it's passed as a type, not string
                             eval_expression = param[5:-1]  # Strip off 'eval(' and ')'
-                            print(f"evaluating {eval_expression} as object")
-                            resolved_params.append(eval(eval_expression))                        
-                        else:
-                            resolved_params.append(param)
+                            # Check if the evaluated object is a type
+                            if isinstance(eval_expression, type):
+                                resolved_params.append(eval_expression)
+                            else:
+                                raise TypeError(f"Expected a Python type, but got {type(evaluated_object).__name__}")
 
                     print(f"Executing step: {method_name} with params: {resolved_params}")
                     result = func(*resolved_params)
@@ -140,6 +142,7 @@ class APIDataSource(DataSource):
                 special_vars[store_as] = result
 
         return result
+
 
     
     def get_nested_function(self, api_client, function_path):
