@@ -44,12 +44,12 @@ object_mappings:
       - method: RetrieveContent
         params: []
         store_as: content
-      - method: viewManager
+      - attribute: viewManager  # We access viewManager from content
         store_as: view_manager
       - method: CreateContainerView
         params:
           - "{content.rootFolder}"
-          - ["vim.VirtualMachine"]  # Use a string placeholder for type, to be replaced in Python
+          - ["vim.VirtualMachine"]  # Replace later in Python with the actual type
           - True
         
     mapping:

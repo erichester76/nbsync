@@ -91,10 +91,11 @@ class APIDataSource(DataSource):
         special_vars = {}
 
         for step in steps:
-            method_name = step['method']
+            method_name = step.get('method')
+            attribute_name = step.get('attribute')
             params = step.get('params', [])
 
-            # Replace any special variables
+            # Resolve parameters with special variables
             resolved_params = []
             for param in params:
                 if isinstance(param, str) and param.startswith("{") and param.endswith("}"):
@@ -105,24 +106,19 @@ class APIDataSource(DataSource):
                     else:
                         raise ValueError(f"Could not resolve special variable: {param}")
                 elif isinstance(param, list) and "vim.VirtualMachine" in param:
-                    # Replace the string "vim.VirtualMachine" with the actual class reference
                     resolved_params.append([pyVmomi.vim.VirtualMachine])
                 else:
                     resolved_params.append(param)
 
-            if '.' in method_name:
-                # If there's a dot in the method name, it means we're accessing attributes
-                method_chain = method_name.split('.')
-                func = api_client
-                for part in method_chain:
-                    func = getattr(func, part)
+            # If there's an attribute to access instead of a method
+            if attribute_name:
+                # Access the attribute (like viewManager) from the result (content)
+                result = getattr(special_vars.get('content'), attribute_name)
             else:
-                func = getattr(api_client, method_name)
+                func = getattr(api_client, method_name) if method_name else result
+                result = func(*resolved_params)
 
-            # Call the method with resolved params
-            result = func(*resolved_params)
-
-            # Store result for later steps (if needed)
+            # Store result for later steps if necessary
             if 'store_as' in step:
                 special_vars[step['store_as']] = result
 
