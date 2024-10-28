@@ -34,70 +34,70 @@ api_definitions:
 
 object_mappings:
 
-  hosts:
-    source_api: vmware
-    destination_api: netbox
-    destination_endpoint: dcim.devices
-    find_function: dcim.devices.filter
-    create_function: dcim.devices.create
-    update_function: dcim.devices.update
-    imports:
-      - pyVmomi.vim
-    fetch_data_code: |
-      def fetch_data(api_client):
-          content = api_client.RetrieveContent()
-          hosts = content.viewManager.CreateContainerView(content.rootFolder, [vim.HostSystem], True).view
-          return hosts
+  # hosts:
+  #   source_api: vmware
+  #   destination_api: netbox
+  #   destination_endpoint: dcim.devices
+  #   find_function: dcim.devices.filter
+  #   create_function: dcim.devices.create
+  #   update_function: dcim.devices.update
+  #   imports:
+  #     - pyVmomi.vim
+  #   fetch_data_code: |
+  #     def fetch_data(api_client):
+  #         content = api_client.RetrieveContent()
+  #         hosts = content.viewManager.CreateContainerView(content.rootFolder, [vim.HostSystem], True).view
+  #         return hosts
 
-    mapping:
+  #   mapping:
 
-      name:
-        source: "name"
-        transform_function: regex_replace('.clemson.edu', '')
+  #     name:
+  #       source: "name"
+  #       transform_function: regex_replace('.clemson.edu', '')
   
-      cluster:
-        source: "parent.name"
-        transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
+  #     cluster:
+  #       source: "parent.name"
+  #       transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
   
-      role: 
-        source: str:"Hypervisor Host"
-        transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
+  #     role: 
+  #       source: str:"Hypervisor Host"
+  #       transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
-      site:
-        source: "parent.name"
-        transform_function: 
-          - regex_replace('^CU\-.+','Clemson Information Technology Center')
-          - regex_replace('^CUDR\-.+|^DR\-.+','University of California San Diego')
-          - regex_replace('^Poole\-.+','Poole')
-          - regex_replace('^Proto\-.+','Clemson Information Technology Center')
-          - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')    
+  #     site:
+  #       source: "parent.name"
+  #       transform_function: 
+  #         - regex_replace('^CU\-.+','Clemson Information Technology Center')
+  #         - regex_replace('^CUDR\-.+|^DR\-.+','University of California San Diego')
+  #         - regex_replace('^Poole\-.+','Poole')
+  #         - regex_replace('^Proto\-.+','Clemson Information Technology Center')
+  #         - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')    
   
-      device_type:
-        source: "hardware.systemInfo.model"
-        transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
-        included_fields:
-          - field: manufacturer
-            key: name
-          - field: manufacturer
-            key: slug
-            create_if_missing: true
-            transform_function: slugify    
+  #     device_type:
+  #       source: "hardware.systemInfo.model"
+  #       transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
+  #       included_fields:
+  #         - field: manufacturer
+  #           key: name
+  #         - field: manufacturer
+  #           key: slug
+  #           create_if_missing: true
+  #           transform_function: slugify    
 
-      status:
-        source: "runtime.connectionState"
-        transform_function: 
-          - regex_replace('connected', 'active')
-          - regex_replace('disconnected', 'offline')
+  #     status:
+  #       source: "runtime.connectionState"
+  #       transform_function: 
+  #         - regex_replace('connected', 'active')
+  #         - regex_replace('disconnected', 'offline')
   
-      serial:
-        source: summary.hardware.otherIdentifyingInfo
-        transform_function: extract_identifier('SerialNumberTag')  
+  #     serial:
+  #       source: summary.hardware.otherIdentifyingInfo
+  #       transform_function: extract_identifier('SerialNumberTag')  
 
-      platform:
-        source: ["config.product.name", "config.product.version"]
-        transform_function: 
-          - concat(" ")
-          - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+  #     platform:
+  #       source: ["config.product.name", "config.product.version"]
+  #       transform_function: 
+  #         - concat(" ")
+  #         - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
   virtual_machines:
 
