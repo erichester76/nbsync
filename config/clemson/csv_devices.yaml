@@ -29,6 +29,8 @@ object_mappings:
     mapping:
       name:
         source: device_name
+      role:
+        source: role
       manufacturer:
         source: manufacturer
       device_type:

@@ -1,4 +1,4 @@
-device_name,manufacturer,device_type,serial,site_name,status
-Switch01,Cisco,Switch,ABC123,SiteA,active
-Switch02,Cisco,Switch,XYZ789,SiteB,inactive
-Router01,Cisco,Router,DEF456,SiteA,active
+device_name,manufacturer,device_type,serial,site_name,status,role
+Switch01,Cisco,Switch,ABC123,SiteA,active,switch/router
+Switch02,Cisco,Switch,XYZ789,SiteB,inactive,switch/router
+Router01,Cisco,Router,DEF456,SiteA,active,switch/router
