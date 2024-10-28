@@ -182,8 +182,8 @@ class DataTransferTool:
                             print(f"Mapped value for {dest_field}: {source_value}")
 
                             if ('transform_function' in field_info):
-                                print(f"Applying transform to field {dest_field} {source_value} {transform}")
                                 transform = field_info.get('transform_function')
+                                print(f"Applying transform to field {dest_field} {source_value} {transform}")
                                 mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
                             else:
                                 print(f"Directly mapping {source_value} to {dest_field}")
