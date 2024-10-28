@@ -119,6 +119,7 @@ class APIDataSource(DataSource):
                         elif isinstance(param, str) and param.startswith("eval(") and param.endswith(")"):
                             # Evaluate Python expression (e.g., eval([vim.VirtualMachine]))
                             eval_expression = param[5:-1]  # Strip off 'eval(' and ')'
+                            print(f"evaluating {eval_expression} as object")
                             resolved_params.append(eval(eval_expression))                        
                         else:
                             resolved_params.append(param)
