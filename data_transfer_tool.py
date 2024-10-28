@@ -159,8 +159,10 @@ class DataTransferTool:
                             
                             if ('transform_function' in field_info):
                                 transform = field_info.get('transform_function')
+                                print(f"Applying transform to field {dest_field} {source_value} {transform}")
                                 mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
                             else:
+                                print(f"mapping {source_value} to {dest_field}")
                                 mapped_data[dest_field] = source_value
                                 
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
