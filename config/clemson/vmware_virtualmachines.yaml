@@ -61,7 +61,7 @@ object_mappings:
    
       # Mapping VMware cluster to NetBox cluster (uses lookup to find or create)
       cluster:
-        source: "runtime.host.parent"
+        source: "runtime.host.parent.name"
         transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
       # Mapping host (VMware host) to NetBox device
@@ -91,5 +91,5 @@ object_mappings:
         source: "config.uuid"
 
       site:
-        source: "runtime.host.parent.name;parentFolder.parent.name"
+        source: "Clemson Network"
         transform_function: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
