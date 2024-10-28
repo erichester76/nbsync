@@ -79,25 +79,17 @@ class APIDataSource(DataSource):
 
     def fetch_data(self, obj_config, api_client):
         """
-        Fetch data from the API using either a direct fetch_data_function, steps, or a custom Python code block.
+        Fetch data from the API using either a direct fetch_data_function or a custom Python code block.
         """
 
         # Check if 'fetch_data_function' is defined
         fetch_data_function = obj_config.get('fetch_data_function')
         fetch_data_code = obj_config.get('fetch_data_code')
-        local_vars_from_yaml = obj_config.get('local_vars', {})
 
-        # Set up default local variables (e.g., api_client, pre-imported libraries like vim)
+        # Create the local_vars dictionary that will hold the `api_client` and its vim object
         local_vars = {
-            'api_client': api_client
+            'api_client': api_client,
         }
-
-        # Dynamically load the local_vars specified in the YAML (e.g., vim, other helper functions)
-        for var_name, var_value in local_vars_from_yaml.items():
-            if var_value in globals():
-                local_vars[var_name] = globals()[var_value]  # Add global variables like vim to local_vars
-            else:
-                raise ValueError(f"Global variable '{var_value}' not found for local_var '{var_name}'.")
 
         if fetch_data_function:
             print(f"Using fetch_data_function: {fetch_data_function}")
@@ -107,7 +99,7 @@ class APIDataSource(DataSource):
         if fetch_data_code:
             print(f"Using custom Python code for data fetch...")
 
-            # Execute the custom fetch_data_code with pre-imported libraries (like vim)
+            # Execute the custom fetch_data_code using api_client and its vim context
             exec(fetch_data_code, {}, local_vars)
 
             # Ensure the 'fetch_data' function is defined in the code

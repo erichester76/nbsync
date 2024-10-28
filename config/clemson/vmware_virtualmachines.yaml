@@ -40,12 +40,10 @@ object_mappings:
     find_function: virtualization.virtual_machines.filter
     create_function: virtualization.virtual_machines.create
     update_function: virtualization.virtual_machines.update
-    local_vars:
-      vim: vim  # Declare which pre-imported variables to use
     fetch_data_code: |
       def fetch_data(api_client):
           content = api_client.RetrieveContent()
-          container_view = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True)
+          container_view = content.viewManager.CreateContainerView(content.rootFolder, [api_client.vim.VirtualMachine], True)
           virtual_machines = container_view.view
           return virtual_machines
         
