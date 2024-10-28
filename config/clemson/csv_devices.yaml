@@ -41,7 +41,7 @@ object_mappings:
             create_if_missing: true
             transform_function: slugify
     
-      serial_number:
+      serial:
         source: serial
     
       site:
