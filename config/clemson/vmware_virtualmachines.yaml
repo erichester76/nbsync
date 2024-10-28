@@ -70,7 +70,7 @@ object_mappings:
         transform_function: 
           - regex_replace('.clemson.edu', '')
           - lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
-
+          
       # Mapping CPU count to NetBox vCPUs
       vcpus:
         source: "config.hardware.numCPU"
@@ -91,7 +91,7 @@ object_mappings:
       # Serial number from VMware to NetBox serial number (Optional)
       serial:
         source: "config.uuid"
-        
+
       site:
         source: "runtime.host.parent.name"
         transform_function: 
