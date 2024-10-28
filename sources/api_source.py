@@ -75,37 +75,53 @@ class APIDataSource(DataSource):
             
     def fetch_data(self, obj_config, api_client):
         """
-        Fetch data from the source API using the provided API client.
+        Fetch data dynamically based on either a single fetch_data_function or multiple fetch_data_steps.
 
-        :param obj_config: Mapping configuration for the object.
-        :param api_client: The API client instance to use for fetching the data.
-        :return: Retrieved and processed data.
+        :param obj_config: Object configuration that defines the fetch steps or single fetch function.
+        :param api_client: Authenticated API client (e.g., VMware, NetBox).
+        :return: List of objects (e.g., virtual machines).
         """
-        # Retrieve the fetch function from the API client (defined in object_mappings)
-        fetch_function = self.get_nested_function(api_client, obj_config['fetch_data_function'])
+        if 'fetch_data_function' in obj_config:
+            # Handle a single function call
+            function_path = obj_config['fetch_data_function']
+            parts = function_path.split('.')
+            
+            # Traverse the API client to get the function or attribute
+            func = api_client
+            for part in parts:
+                func = getattr(func, part, None)
+                if func is None:
+                    raise AttributeError(f"Function '{function_path}' not found in API client.")
+            
+            # Call the function and return the result (assume no params for simplicity)
+            return func()
 
-        # Check if there are any params defined in the YAML for this fetch function
-        params = obj_config.get('params', {})
-
-        # Call the fetch function with the parameters if they exist, or without if no params
-        if params:
-            # If there are custom parameters, pass them to the fetch function
-            data = fetch_function(**params)
+        elif 'fetch_data_steps' in obj_config:
+            # Handle multiple steps dynamically
+            obj = api_client  # Start with the API client (e.g., vmware connection)
+            for step in obj_config.get('fetch_data_steps', []):
+                method_name = step.get('method')
+                
+                if 'params' in step:
+                    params = []
+                    for param in step['params']:
+                        # Handle nested attributes (e.g., content.rootFolder)
+                        if isinstance(param, str) and '.' in param:
+                            attrs = param.split('.')
+                            param_value = api_client
+                            for attr in attrs:
+                                param_value = getattr(param_value, attr)
+                            params.append(param_value)
+                        else:
+                            params.append(eval(str(param)))
+                    obj = getattr(obj, method_name)(*params)
+                else:
+                    obj = getattr(obj, method_name, None)
+                    if obj is None:
+                        raise AttributeError(f"Step '{method_name}' not found in API client.")
+            return obj
         else:
-            # If no parameters are defined, call the fetch function without arguments
-            data = fetch_function()
-
-        # Process the data and map fields according to YAML
-        result = []
-        for item in data:
-            obj_data = {}
-            for dest_field, field_info in obj_config['mapping'].items():
-                # Dynamically fetch the nested attributes (e.g., runtime.powerState)
-                source_value = self.get_nested_attr(item, field_info['source'].split('.'))
-                obj_data[dest_field] = source_value
-            result.append(obj_data)
-
-        return result
+            raise ValueError("No valid 'fetch_data_function' or 'fetch_data_steps' found in the YAML configuration.")
 
 
     def get_nested_function(self, api_client, function_path):
