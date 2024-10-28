@@ -156,7 +156,7 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
             else:
                 update_function = self.get_nested_function(api_client, update_function_path)
-                update_function(existing_object.id, **mapped_data)
+                update_function(existing_object.id, **self.sanitize_data(mapped_data))
                 print(f"Updated object {existing_object.id} with data: {mapped_data}")
             return existing_object.id
         else:
@@ -164,9 +164,24 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would create new object with data: {mapped_data}")
             else:
                 create_function = self.get_nested_function(api_client, create_function_path)
-                new_object = create_function(mapped_data)
+                new_object = create_function(self.sanitize_data(mapped_data))
                 print(f"Created new object with data: {mapped_data}")
                 return new_object.id
+
+def sanitize_data(self, data):
+    """
+    Sanitize the mapped_data to ensure all values are serializable.
+    If any value is an object, extract its relevant attribute (e.g., 'id' or 'name').
+    """
+    sanitized_data = {}
+    for key, value in data.items():
+        if hasattr(value, 'id'):  # If it's an object with an 'id' attribute, use the 'id'
+            sanitized_data[key] = value.id
+        elif hasattr(value, 'name'):  # If it's an object with a 'name' attribute, use the 'name'
+            sanitized_data[key] = value.name
+        else:
+            sanitized_data[key] = value  # Otherwise, use the value as is
+    return sanitized_data
 
 def main():
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
