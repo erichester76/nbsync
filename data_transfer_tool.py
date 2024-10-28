@@ -292,7 +292,7 @@ class DataTransferTool:
                 mapped_data['id'] = existing_object.id
                 print(f"Updating object {existing_object.id} using {update_function_path} with data: {mapped_data}")
                 update_function = self.get_nested_function(api_client, update_function_path)
-                update_function(existing_object.id, **self.sanitize_data(mapped_data))
+                update_function(self.sanitize_data(mapped_data))
             return existing_object.id
         else:
             if self.dry_run:
