@@ -75,15 +75,15 @@ class DataTransferTool:
             if "regex_replace" in transform:
                 pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
                 value = re.sub(pattern, replacement, value)
-            elif "lookup_field" in transform:
-                section, field = re.findall(r"lookup_field\('(.*)',\s*'(.*)'\)", transform)[0]
-                value = self.mapped_data.get(section, {}).get(field, value)
             elif transform == "slugify":
                 value = re.sub(r'\W+', '-', value.lower())
             elif "lookup_object" in transform:
                 matches = re.findall(r"lookup_object\('(.*)',\s*'(.*)',\s*'(.*)'\)", transform)
                 if not matches:
-                    raise ValueError("Incorrect format for lookup_object transform.")
+                    raise ValueError(
+                        "Incorrect format for lookup_object transform. "
+                        "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
+                    )
                 lookup_type, find_function_path, create_function_path = matches[0]
                 api_client = self.sources[obj_config['destination_api']].api
                 find_function = self.get_nested_function(api_client, find_function_path)
@@ -98,11 +98,17 @@ class DataTransferTool:
 
                 found_object = find_function(**filter_params)
                 if found_object:
-                    value = found_object.first().id if hasattr(found_object, 'first') else found_object[0].id
+                    value = list(found_object)[0]
                 else:
-                    create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: additional_data}
+                    # If object does not exist, create it using the create_function
+                    if additional_data and field_name_for_nesting:
+                        create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
+                    else:
+                        create_data = {lookup_param_name: lookup_param_value}
+
                     created_object = create_function(create_data)
                     value = created_object.id if hasattr(created_object, 'id') else None
+                    
         return value
 
     def process_mappings(self):
