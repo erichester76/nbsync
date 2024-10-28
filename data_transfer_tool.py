@@ -99,6 +99,7 @@ class DataTransferTool:
         if transform:
             if "regex_replace" in transform:
                 # If transform is a string, convert it into a list with a single item
+                print("here")
                 if isinstance(transform, str):
                     transform = [transform]
                 
