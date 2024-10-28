@@ -211,7 +211,8 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
-            for source_client_info in self.clients:
+            
+            for source_client_info in source.clients:
                 source_client = source_client_info['client']
                 base_url = source_client_info['base_url']
                 
