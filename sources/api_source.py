@@ -116,6 +116,9 @@ class APIDataSource(DataSource):
                                 if value is None:
                                     raise ValueError(f"Could not resolve nested attribute '{part}' in {param}")
                             resolved_params.append(value)
+                        elif isinstance(param, str) and param.startswith('!eval'):
+                            # Evaluate Python expression (e.g., list of types)
+                            resolved_params.append(eval(param.split(' ', 1)[1]))
                         else:
                             resolved_params.append(param)
 
@@ -136,7 +139,6 @@ class APIDataSource(DataSource):
 
         return result
 
-    
     
     def get_nested_function(self, api_client, function_path):
         """

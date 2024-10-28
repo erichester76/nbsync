@@ -48,8 +48,8 @@ object_mappings:
       - method: CreateContainerView
         params:
           - '{content.rootFolder}'  # Use 'content.rootFolder' dynamically from the previous step
-          - "[vim.VirtualMachine]"
-          - "True"
+          - !eval "[vim.VirtualMachine]"  # Use !eval to evaluate this as a Python type
+          - True
         store_as: container_view  # Store the result as 'container_view'
       - method: view
         
