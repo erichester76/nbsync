@@ -90,17 +90,30 @@ class DataTransferTool:
                 create_function = self.get_nested_function(api_client, create_function_path)
                 lookup_param_name = lookup_type
                 lookup_param_value = value
+                
                 filter_params = {lookup_param_name: lookup_param_value}
-                additional_data = self.get_included_fields_data(obj_config, field_name, item)
-                field_name_for_nesting = next((f['field'] for f in obj_config['mapping'][field_name].get('included_fields', [])), None)
-                if field_name_for_nesting:
-                    filter_params[field_name_for_nesting] = additional_data
-
-                found_object = find_function(**filter_params)
+                additional_data = {}
+                if 'included_fields' in obj_config['mapping'][field_name]:
+                    additional_data = self.get_included_fields_data(obj_config, field_name, item)
+                   
+                    field_name_for_nesting = None
+                    for included_field in obj_config['mapping'][field_name].get('included_fields', []):
+                        field_name_for_nesting = included_field.get('field')
+                        break
+                    
+                for _, nested_value in additional_data.items():
+                    nested_value = re.sub(r'\W+', '-', nested_value.lower())
+                    filter_params[field_name_for_nesting] = nested_value
+                    break
+                try:
+                    found_object = find_function(**filter_params)
+                except Exception as e:
+                    print(f"Error calling find_function: {str(e)}")
+                    raise
+                
                 if found_object:
                     value = list(found_object)[0]
                 else:
-                    # If object does not exist, create it using the create_function
                     if additional_data and field_name_for_nesting:
                         create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
                     else:
