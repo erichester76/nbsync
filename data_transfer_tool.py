@@ -9,6 +9,8 @@ from sources.csv_source import CSVDataSource
 from sources.xls_source import XLSDataSource
 from sources.snmp_source import SNMPDataSource
 import jinja2
+import deepdiff
+
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
@@ -301,10 +303,17 @@ class DataTransferTool:
                 #mapped_data.pop('name', None)  # Remove 'name' field if it's not required
                 #mapped_data.pop('model', None)  # Remove 'model' field if not required
                 mapped_data['id'] = existing_object.id
-                print(f"Updating object {existing_object.id} using {update_function_path} with data: {mapped_data}")
-                update_function = self.get_nested_function(api_client, update_function_path)
-                update_function([self.sanitize_data(mapped_data)])  
-            return existing_object.id
+                current_data = self.sanitize_data(existing_object.serialize())
+                sanitized_mapped_data = self.sanitize_data(mapped_data)
+                differences = deepdiff.DeepDiff(current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True)
+                if differences:
+                    print(f"Differences found: {differences}")
+                    update_function = self.get_nested_function(api_client, update_function_path)
+                    print(f"Updating object {existing_object.id} using {update_function} with data: {sanitized_mapped_data}")
+                    update_function(existing_object.id, **sanitized_mapped_data)
+                else:
+                    print(f"No changes detected for object {existing_object.id}, skipping update.")
+                return existing_object.id
         else:
             if self.dry_run:
                 print(f"[DRY RUN] Would create new object with {create_function_path}: {mapped_data}")
