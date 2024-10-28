@@ -168,10 +168,34 @@ class DataTransferTool:
 
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """Create or update objects in the destination API."""
+       # Find function
         find_function = self.get_nested_function(api_client, find_function_path)
-        found_objects = find_function(mapped_data)
-        existing_object = list(found_objects)[0] if found_objects else None
+        
+        # Extract key field (like in the transform logic)
+        key_field = None
+        filter_params = {}
 
+        # Automatically extract the first field from mapped_data as the key field
+        for field_name, field_value in mapped_data.items():
+            if field_value is not None:
+                key_field = field_name
+                filter_params[key_field] = field_value
+                break
+
+        # Add additional fields to filter params based on 'included_fields', if present
+        for dest_field, field_info in self.config['object_mappings'].get('mapping', {}).items():
+            if 'included_fields' in field_info:
+                additional_data = self.get_included_fields_data(self.config['object_mappings'], dest_field, mapped_data)
+                filter_params.update(additional_data)
+
+        print(f"Looking up {key_field} with filter params: {filter_params}")
+        
+        # Search for the object using the find function (e.g., dcim.devices.filter)
+        found_objects = find_function(filter_params)
+
+        # Check if the result set is not empty (using .first() if available)
+        existing_object = list(found_objects[0]) 
+        
         if existing_object:
             if self.dry_run:
                 print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
