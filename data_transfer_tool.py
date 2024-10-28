@@ -133,7 +133,7 @@ class DataTransferTool:
                     if additional_data and field_name_for_nesting:
                         create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
                     else:
-                        create_data = {lookup_param_name: lookup_param_value}
+                        create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower())}
 
                     print(f'Creating object: {create_data}')
                     created_object = create_function(create_data)
