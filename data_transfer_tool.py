@@ -224,7 +224,14 @@ class DataTransferTool:
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
                                 print(f"Mapping source field {field_info['source']} to {dest_field}")
-                                source_value = self.get_nested_attribute(item, field_info['source'], None)
+                                
+                                # Check if the source is a list (for concatenation)
+                                if isinstance(field_info['source'], list):
+                                    # Handle concatenation by retrieving values from multiple fields
+                                    source_value_list = [self.get_nested_attribute(item, src, None) for src in field_info['source']]
+                                    source_value = ' '.join([str(v) for v in source_value_list if v])  # Join non-empty values with a space
+                                else:
+                                    source_value = self.get_nested_attribute(item, field_info['source'], None)
 
                             # Debugging: Log the value we're about to map
                             print(f"Mapped value for {dest_field}: {source_value}")
