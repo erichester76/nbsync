@@ -146,13 +146,14 @@ class DataTransferTool:
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                     
                 elif "extract_identifier" in transform:
+                    # Extract the identifier type (e.g., 'SerialNumberTag')
                     identifier_key = re.findall(r"extract_identifier\('(.*)'\)", transform)[0]
                     if isinstance(value, list):
                         for identifier in value:
                             identifier_value = getattr(identifier, 'identifierValue', None)
                             identifier_type = getattr(identifier.identifierType, 'key', None)
                             if identifier_type == identifier_key:
-                                return identifier_value  # Return the matched identifier value
+                                value = identifier_value
                         
                 elif "lookup_object" in trans:
                     matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", trans)
