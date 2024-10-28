@@ -62,6 +62,10 @@ object_mappings:
         source: "parent.name"
         transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
   
+      role: 
+        source: str:"Hypervisor Host"
+        transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
+
       site:
         source: "parent.name"
         transform_function: 
@@ -72,10 +76,10 @@ object_mappings:
           - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')    
   
       manufacturer:
-        source: "hardware.vendor"
+        source: "hardware.systemInfo.vendor"
   
       device_type:
-        source: "hardware.model"
+        source: "hardware.systemInfo.model"
         transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
         included_fields:
           - field: manufacturer
@@ -85,7 +89,6 @@ object_mappings:
             create_if_missing: true
             transform_function: slugify    
       
-      role: str:"Hypervisor Host"
 
       status:
         source: "runtime.connectionState"
