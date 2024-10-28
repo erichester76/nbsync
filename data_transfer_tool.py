@@ -177,21 +177,28 @@ class DataTransferTool:
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                 
                 elif 'extract_by_type' in trans:
-                    # Extract IP and additional fields (like prefixLength) into a list
-                    args = re.findall(r"extract_by_type\('(.*?)', '(.*?)', '(.*?)'\)", trans)[0]
-                    type, field, optional_field = args
+                    args = re.findall(r"extract_by_type\('(.*?)', '(.*?)'(?:, '(.*?)')?\)", trans)[0]
+                    item_type = args[0]
+                    item1 = args[1]
+                    item2 = args[2] if len(args) > 2 and args[2] else None
 
-                    # Process the value (assuming it's a list of dictionaries, like from guest.net)
+                    # Process the value (assuming it's a list of dictionaries)
                     if isinstance(value, list):
                         for entry in value:
-                            item = entry.get(field)
-                            if type == 'ipv4' and '.' in item:
-                                # Extract IP and prefix together into a list
-                                value = [entry.get(field), str(entry.get(optional_field))]
+                            value1 = entry.get(item1)
+                            if item_type == 'ipv4' and '.' in value1:
+                                # If item2 (e.g., prefix) exists, return both as a list
+                                if item2 and entry.get(item2):
+                                    value = [entry.get(item1), str(entry.get(item2))]
+                                else:
+                                    value = [entry.get(item1)]
                                 break
-                            elif type == 'ipv6' and ':' in item:
-                                value = [entry.get(field), str(entry.get(optional_field))]
-                                break
+                            elif item_type == 'ipv6' and ':' in value1:
+                                if item2 and entry.get(item2):
+                                    value = [entry.get(item1), str(entry.get(item2))]
+                                else:
+                                    value = [entry.get(item1)]
+                        break
                     
                         
                 elif "extract_identifier" in trans:
