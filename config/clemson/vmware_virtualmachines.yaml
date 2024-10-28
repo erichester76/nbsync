@@ -91,7 +91,12 @@ object_mappings:
       # Serial number from VMware to NetBox serial number (Optional)
       serial:
         source: "config.uuid"
-
+        
       site:
-        source: "Clemson Network"
-        transform_function: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
+        source: "runtime.host.parent.name"
+        transform_function: 
+          - regex_replace('^CU\-.+','Clemson Information Technology Center')
+          - regex_replace('^CUDR\-.+|^DR\-.+','University of California San Diego')
+          - regex_replace('^Poole\-.+','Poole')
+          - regex_replace('^Proto\-.+','Clemson Information Technology Center')
+          - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
