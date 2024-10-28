@@ -87,16 +87,21 @@ class APIDataSource(DataSource):
 
         # Dynamically import modules and make them available in the local_vars
         for import_path in imports:
-            module_name, attr_name = import_path.rsplit('.', 1)
-            module = __import__(module_name, fromlist=[attr_name])
-            local_vars[attr_name] = getattr(module, attr_name)
+            try:
+                module_name, attr_name = import_path.rsplit('.', 1)
+                module = __import__(module_name, fromlist=[attr_name])
+                local_vars[attr_name] = getattr(module, attr_name)
+            except ImportError as e:
+                print(f"Error importing {import_path}: {e}")
+                raise
 
+        # Fetch custom Python code to execute
         fetch_data_code = obj_config.get('fetch_data_code')
 
         if fetch_data_code:
             print(f"Using custom Python code for data fetch...")
 
-            # Execute the provided code
+            # Execute the provided code within the local scope
             exec(fetch_data_code, {}, local_vars)
 
             # Ensure the 'fetch_data' function is defined in the code
