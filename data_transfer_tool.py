@@ -32,6 +32,16 @@ class DataTransferTool:
         if not callable(func):
             raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
         return func
+    
+    def get_nested_attribute(obj, attr_path, default=None):
+        """ Recursively get nested attributes from an object using a dotted path. """
+        attrs = attr_path.split('.')
+        current_attr = obj
+        for attr in attrs:
+            current_attr = getattr(current_attr, attr, default)
+            if current_attr is None:
+                return default
+        return current_attr
 
     def sanitize_data(self, data):
         """
@@ -157,7 +167,6 @@ class DataTransferTool:
             for source_client in source.clients:
                 source_data = source.fetch_data(obj_config, source_client)
                 # Log the raw data fetched from the source
-                print(f"Raw data from source: {source_data}")
                 destination_api = self.sources[obj_config['destination_api']]
                 for destination_client in destination_api.clients:
                     create_function = obj_config.get('create_function')
@@ -176,7 +185,7 @@ class DataTransferTool:
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
                                 print(f"Mapping source field {field_info['source']} to {dest_field}")
-                                source_value = getattr(item, field_info['source'], None)
+                                source_value = get_nested_attribute(item, field_info['source'], None)
 
                             # Debugging: Log the value we're about to map
                             print(f"Mapped value for {dest_field}: {source_value}")
