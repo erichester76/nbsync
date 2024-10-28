@@ -124,11 +124,11 @@ class DataTransferTool:
                     if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
                     value = re.sub(pattern, replacement, value)
                 
-                elif trans == "slugify":
+                elif "slugify" in trans:
                     value = re.sub(r'\W+', '-', value.lower())
                     if self.DEBUG == 1: print(f'Slugifying value: {value}')
                 
-                elif trans == "expand":
+                elif 'expand' in trans:
                     expand_field = obj_config['mapping'].get(field_name, {}).get('expand_reference')
                     if expand_field:
                         value = {expand_field: value}
@@ -136,7 +136,7 @@ class DataTransferTool:
                     else:
                         raise ValueError(f"Expand transform requires 'expand_reference' key in mapping for {field_name}")
 
-                elif trans == 'concat':
+                elif 'concat' in trans:
                     # Get the list of source fields to concatenate
                     fields_to_concat = obj_config['mapping'][field_name]['source']
                     delimiter = trans.split('concat(')[1].strip(" )")
@@ -145,7 +145,7 @@ class DataTransferTool:
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                     
-                elif "extract_identifier" in transform:
+                elif "extract_identifier" in trans:
                     # Extract the identifier type (e.g., 'SerialNumberTag')
                     identifier_key = re.findall(r"extract_identifier\('(.*)'\)", transform)[0]
                     if isinstance(value, list):
