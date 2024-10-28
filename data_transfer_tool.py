@@ -156,6 +156,8 @@ class DataTransferTool:
             source = self.sources[obj_config['source_api']]
             for source_client in source.clients:
                 source_data = source.fetch_data(obj_config, source_client)
+                # Log the raw data fetched from the source
+                print(f"Raw data from source: {source_data}")
                 destination_api = self.sources[obj_config['destination_api']]
                 for destination_client in destination_api.clients:
                     create_function = obj_config.get('create_function')
@@ -173,14 +175,20 @@ class DataTransferTool:
 
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
+                                print(f"Mapping source field {field_info['source']} to {dest_field}")
                                 source_value = getattr(item, field_info['source'], None)
 
+                            # Debugging: Log the value we're about to map
+                            print(f"Mapped value for {dest_field}: {source_value}")
+
                             if ('transform_function' in field_info):
+                                print(f"Applying transform to field {dest_field} {source_value} {transform}")
                                 transform = field_info.get('transform_function')
                                 mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
                             else:
+                                print(f"Directly mapping {source_value} to {dest_field}")
                                 mapped_data[dest_field] = source_value
-                                        
+                        print(f"Looking up {mapped_data.get('name')} with filter params: {mapped_data}")
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         print(f"Processed object with ID: {object_id}")
 
