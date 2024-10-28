@@ -72,7 +72,7 @@ class APIDataSource(DataSource):
 
             # Store the authenticated client
             print(f"Connected to {self.name} at {base_url}")
-            self.clients.append(self.api)
+            self.clients.append({'client': self.api, 'base_url': base_url})
             
 
     def fetch_data(self, obj_config, api_client):
