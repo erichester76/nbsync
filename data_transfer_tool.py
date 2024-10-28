@@ -135,7 +135,7 @@ class DataTransferTool:
                     else:
                         raise ValueError(f"Expand transform requires 'expand_reference' key in mapping for {field_name}")
 
-                elif "concat" in transform:
+                elif trans == 'concat':
                     # Get the list of source fields to concatenate
                     fields_to_concat = obj_config['mapping'][field_name]['source']
                     delimiter = transform.split('concat(')[1].strip(" )")
