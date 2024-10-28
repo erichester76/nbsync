@@ -78,9 +78,8 @@ object_mappings:
   
       manufacturer:
         source: "hardware.systemInfo.vendor"
-        transform_function: lookup_object('name', 'dcim.manufacturer.filter', 'dcim.manufacturer.create')
+        transform_function: lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
 
-  
       device_type:
         source: "hardware.systemInfo.model"
         transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
@@ -91,7 +90,6 @@ object_mappings:
             key: slug
             create_if_missing: true
             transform_function: slugify    
-      
 
       status:
         source: "runtime.connectionState"
