@@ -97,76 +97,76 @@ class DataTransferTool:
             return value  # Skip transformation if value is None
 
         if transform:
-            if "regex_replace" in transform:
-                # If transform is a string, convert it into a list with a single item
-                print("here")
-                if isinstance(transform, str):
-                    transform = [transform]
-                
-                    # Apply all transformations in the list
-                    for trans in transform:
-                        # Extract pattern and replacement from the transform rule
-                        pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
-                        print(f'Applying regex: {value} {pattern} {replacement}')
-                        value = re.sub(pattern, replacement, value)
-                        
-            elif transform == "slugify":
-                value = re.sub(r'\W+', '-', value.lower())
-            elif transform == "expand":
-                expand_field = obj_config['mapping'].get(field_name, {}).get('expand_reference')
-                if expand_field:
-                    value = {expand_field: value}
-                    print(f"Expanding field {field_name} as reference: {value}")
-                else:
-                    raise ValueError(f"Expand transform requires 'expand_reference' key in mapping for {field_name}")
-            elif "lookup_object" in transform:
-                matches = re.findall(r"lookup_object\('(.*)',\s*'(.*)',\s*'(.*)'\)", transform)
-                if not matches:
-                    raise ValueError(
-                        "Incorrect format for lookup_object transform. "
-                        "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
-                    )
-                    
-         
-                lookup_type, find_function_path, create_function_path = matches[0]
-                api_client = self.sources[obj_config['destination_api']].api
-                find_function = self.get_nested_function(api_client, find_function_path)
-                create_function = self.get_nested_function(api_client, create_function_path)
-                lookup_param_name = lookup_type
-                lookup_param_value = value
-                
-                filter_params = {lookup_param_name: lookup_param_value}
-                additional_data = {}
-                if 'included_fields' in obj_config['mapping'][field_name]:
-                    additional_data = self.get_included_fields_data(obj_config, field_name, item)
-                   
-                    field_name_for_nesting = None
-                    for included_field in obj_config['mapping'][field_name].get('included_fields', []):
-                        field_name_for_nesting = included_field.get('field')
-                        break
-                    print(f"Added {additional_data} and {field_name_for_nesting}")
-                    
-                for _, nested_value in additional_data.items():
-                    nested_value = re.sub(r'\W+', '-', nested_value.lower())
-                    filter_params[field_name_for_nesting] = nested_value
-                    break
-                try:
-                    found_object = find_function(**filter_params)
-                except Exception as e:
-                    print(f"Error calling find_function: {str(e)}")
-                    raise
-                
-                if found_object:
-                    value = list(found_object)[0]
-                else:
-                    if additional_data and field_name_for_nesting:
-                        create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
-                    else:
-                        create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower())}
+            # If transform is a string, convert it into a list with a single item
+            if isinstance(transform, str):
+                transform = [transform]
 
-                    print(f'Creating object: {create_data}')
-                    created_object = create_function(create_data)
-                    value = created_object.id if hasattr(created_object, 'id') else None
+            # Apply all transformations in the list
+            for trans in transform:
+                if "regex_replace" in trans:
+                    # Extract pattern and replacement from the transform rule
+                    pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
+                    print(f'Applying regex: {value} {pattern} {replacement}')
+                    value = re.sub(pattern, replacement, value)
+                
+                elif trans == "slugify":
+                    value = re.sub(r'\W+', '-', value.lower())
+                    print(f'Slugifying value: {value}')
+                
+                elif trans == "expand":
+                    expand_field = obj_config['mapping'].get(field_name, {}).get('expand_reference')
+                    if expand_field:
+                        value = {expand_field: value}
+                        print(f"Expanding field {field_name} as reference: {value}")
+                    else:
+                        raise ValueError(f"Expand transform requires 'expand_reference' key in mapping for {field_name}")
+
+                elif "lookup_object" in trans:
+                    matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", trans)
+                    if not matches:
+                        raise ValueError(
+                            "Incorrect format for lookup_object transform. "
+                            "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
+                        )
+                    lookup_type, find_function_path, create_function_path = matches[0]
+                    api_client = self.sources[obj_config['destination_api']].api
+                    find_function = self.get_nested_function(api_client, find_function_path)
+                    create_function = self.get_nested_function(api_client, create_function_path)
+                    lookup_param_name = lookup_type
+                    lookup_param_value = value
+                    
+                    filter_params = {lookup_param_name: lookup_param_value}
+                    additional_data = {}
+                    if 'included_fields' in obj_config['mapping'][field_name]:
+                        additional_data = self.get_included_fields_data(obj_config, field_name, item)
+                    
+                        field_name_for_nesting = None
+                        for included_field in obj_config['mapping'][field_name].get('included_fields', []):
+                            field_name_for_nesting = included_field.get('field')
+                            break
+                        print(f"Added {additional_data} and {field_name_for_nesting}")
+                        
+                    for _, nested_value in additional_data.items():
+                        nested_value = re.sub(r'\W+', '-', nested_value.lower())
+                        filter_params[field_name_for_nesting] = nested_value
+                        break
+                    try:
+                        found_object = find_function(**filter_params)
+                    except Exception as e:
+                        print(f"Error calling find_function: {str(e)}")
+                        raise
+                    
+                    if found_object:
+                        value = list(found_object)[0]
+                    else:
+                        if additional_data and field_name_for_nesting:
+                            create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower()), field_name_for_nesting: {**additional_data}}
+                        else:
+                            create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower())}
+
+                        print(f'Creating object: {create_data}')
+                        created_object = create_function(create_data)
+                        value = created_object.id if hasattr(created_object, 'id') else None
                     
         return value
 
