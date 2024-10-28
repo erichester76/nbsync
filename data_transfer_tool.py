@@ -304,13 +304,14 @@ class DataTransferTool:
                 #mapped_data.pop('model', None)  # Remove 'model' field if not required
                 mapped_data['id'] = existing_object.id
                 current_data = self.sanitize_data(existing_object.serialize())
+                filtered_current_data = {key: current_data.get(key) for key in mapped_data}
                 sanitized_mapped_data = self.sanitize_data(mapped_data)
-                differences = deepdiff.DeepDiff(current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True)
+                differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True)
                 if differences:
                     print(f"Differences found: {differences}")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     print(f"Updating object {existing_object.id} using {update_function} with data: {sanitized_mapped_data}")
-                    update_function(existing_object.id, **sanitized_mapped_data)
+                    update_function([sanitized_mapped_data])
                 else:
                     print(f"No changes detected for object {existing_object.id}, skipping update.")
                 return existing_object.id
