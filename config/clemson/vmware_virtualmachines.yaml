@@ -67,7 +67,9 @@ object_mappings:
       # Mapping host (VMware host) to NetBox device
       host:
         source: "runtime.host.name"
-        transform_function: lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
+        transform_function: 
+          - regex_replace('.clemson.edu', '')
+          - lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
 
       # Mapping CPU count to NetBox vCPUs
       vcpus:
