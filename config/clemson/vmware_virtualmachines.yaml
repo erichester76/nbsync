@@ -45,9 +45,9 @@ object_mappings:
       - method: RetrieveContent
       - method: viewManager.CreateContainerView
         params:
-          - attr: content.rootFolder
-          - [vim.VirtualMachine]
-          - True
+          - attr: content.rootFolder  # This provides the container parameter
+          - [vim.VirtualMachine]  # This defines the type of objects we're looking for (Virtual Machines)
+          - True  # Recursive flag
       - method: view
 
     mapping:
