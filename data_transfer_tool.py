@@ -199,7 +199,7 @@ class DataTransferTool:
                         else:
                             create_data = {lookup_param_name: lookup_param_value, 'slug': re.sub(r'\W+', '-', lookup_param_value.lower())}
 
-                        if self.DEBUG == 1: print(f'Creating object: {create_data}')
+                        print(f'Creating sub object: {create_data}')
                         created_object = create_function(create_data)
                         value = created_object.id if hasattr(created_object, 'id') else None
                     
