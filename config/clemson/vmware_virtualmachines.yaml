@@ -101,9 +101,10 @@ object_mappings:
         source: "hardware.systemInfo.serialNumber"
   
       platform:
-        source: "config.product.name"
-        transform_function: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
-
+        source: ["config.product.name", "config.product.version"]
+        transform_function: 
+          - concat(" - ")
+          - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
   virtual_machines:
     source_api: vmware
@@ -159,10 +160,9 @@ object_mappings:
 
       # Mapping platform (could be OS type in VMware to NetBox platform)
       platform:
-        source: ["config.product.name", "config.product.version"]
-        transform_function: 
-          - concat(" - ")
-          - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+        source: "config.product.name"
+        transform_function: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+
 
       # UUID from VMware to NetBox serial number (Optional)
       serial:
