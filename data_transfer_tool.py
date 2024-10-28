@@ -310,7 +310,6 @@ class DataTransferTool:
                                 if self.DEBUG == 1: print(f"Directly mapping {source_value} to {dest_field}")
                                 mapped_data[dest_field] = source_value
                                 
-                        if self.DEBUG == 1: print(f"Looking up {mapped_data.get('name')} with filter params: {mapped_data}")
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
 
@@ -361,7 +360,7 @@ class DataTransferTool:
                 #check for changes in object to determine if we should update
                 differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True)
                 if differences:
-                    if self.DEBUG == 1:print(f"Differences found for {existing_object.name}: {differences}")
+                    print(f"Differences found for {existing_object.name}: {differences}")
                     print(f"Updating object {existing_object.name}: {sanitized_mapped_data}")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     update_function([sanitized_mapped_data])
