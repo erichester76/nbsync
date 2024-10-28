@@ -40,18 +40,12 @@ object_mappings:
     find_function: virtualization.virtual_machines.filter
     create_function: virtualization.virtual_machines.create
     update_function: virtualization.virtual_machines.update
-    fetch_data_steps:
-      - method: RetrieveContent
-        store_as: content  # Store the result of RetrieveContent as 'content'
-      - method: viewManager
-        store_as: view_manager  # Store viewManager as 'view_manager'
-      - method: CreateContainerView
-        params:
-          - '{content.rootFolder}'  # Use 'content.rootFolder' dynamically from the previous step
-          - eval("vim.VirtualMachine")  # Use !eval to evaluate this as a Python type
-          - True
-        store_as: container_view  # Store the result as 'container_view'
-      - method: view
+    fetch_data_code: |
+      def fetch_data(api_client):
+          content = api_client.RetrieveContent()
+          container_view = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True)
+          virtual_machines = container_view.view
+          return virtual_machines
         
     mapping:
       # Mapping VMware name to NetBox name
