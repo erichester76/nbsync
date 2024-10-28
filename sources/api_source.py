@@ -75,29 +75,45 @@ class APIDataSource(DataSource):
             self.clients.append(self.api)
             
 
+    import types
+
     def fetch_data(self, obj_config, api_client):
         """
         Fetch data from the API using either a direct fetch_data_function, steps, or a custom Python code block.
         """
+
+        # Check if 'fetch_data_function' is defined
         fetch_data_function = obj_config.get('fetch_data_function')
         fetch_data_code = obj_config.get('fetch_data_code')
-        
+        local_vars_from_yaml = obj_config.get('local_vars', {})
+
+        # Set up default local variables (e.g., api_client, pre-imported libraries like vim)
+        local_vars = {
+            'api_client': api_client
+        }
+
+        # Dynamically load the local_vars specified in the YAML (e.g., vim, other helper functions)
+        for var_name, var_value in local_vars_from_yaml.items():
+            if var_value in globals():
+                local_vars[var_name] = globals()[var_value]  # Add global variables like vim to local_vars
+            else:
+                raise ValueError(f"Global variable '{var_value}' not found for local_var '{var_name}'.")
+
         if fetch_data_function:
             print(f"Using fetch_data_function: {fetch_data_function}")
             func = self.get_nested_function(api_client, fetch_data_function)
-            return func()
-        
+            return func()  # Call the function directly
+
         if fetch_data_code:
             print(f"Using custom Python code for data fetch...")
-            
-            # Create a function from the code block
-            local_vars = {'api_client': api_client, 'vim': vim}
+
+            # Execute the custom fetch_data_code with pre-imported libraries (like vim)
             exec(fetch_data_code, {}, local_vars)
-            
+
             # Ensure the 'fetch_data' function is defined in the code
             if 'fetch_data' not in local_vars:
                 raise ValueError("The custom code must define a function 'fetch_data(api_client)'")
-            
+
             # Call the dynamically defined function
             fetch_func = local_vars['fetch_data']
             if isinstance(fetch_func, types.FunctionType):
@@ -106,8 +122,7 @@ class APIDataSource(DataSource):
                 raise TypeError("fetch_data is not a valid function")
         
         # If no fetch method is specified, raise an error
-        raise ValueError("No valid fetch method (fetch_data_function, fetch_data_steps, or fetch_data_code) found")
-
+        raise ValueError("No valid fetch method (fetch_data_function or fetch_data_code) found")
 
 
     
