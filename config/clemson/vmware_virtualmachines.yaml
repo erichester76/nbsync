@@ -48,8 +48,8 @@ object_mappings:
         store_as: view_manager
       - method: CreateContainerView
         params:
-          - "{content.rootFolder}"  # Special variable
-          - [vim.VirtualMachine]    # Pass as a list containing the class, not a string
+          - "{content.rootFolder}"
+          - ["vim.VirtualMachine"]  # Use a string placeholder for type, to be replaced in Python
           - True
         
     mapping:
