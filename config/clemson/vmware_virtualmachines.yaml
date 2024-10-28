@@ -114,15 +114,15 @@ object_mappings:
           content = api_client.RetrieveContent()
           vms = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view
 
-          for vm in vms:
-              print(f"Inspecting VM: {vm.config.name}")
-              # Debugging guest.net structure
-              if hasattr(vm, 'guest') and vm.guest.net:
-                  print(f"Guest net structure: {vm.guest.net}")
-                  if vm.guest.net[0].ipConfig and vm.guest.net[0].ipConfig.ipAddress:
-                      print(f"IP Address details: {vm.guest.net[0].ipConfig.ipAddress[0]}")
-              else:
-                  print(f"No network information found for {vm.config.name}")
+          # for vm in vms:
+          #     print(f"Inspecting VM: {vm.config.name}")
+          #     # Debugging guest.net structure
+          #     if hasattr(vm, 'guest') and vm.guest.net:
+          #         print(f"Guest net structure: {vm.guest.net}")
+          #         if vm.guest.net[0].ipConfig and vm.guest.net[0].ipConfig.ipAddress:
+          #             print(f"IP Address details: {vm.guest.net[0].ipConfig.ipAddress[0]}")
+          #     else:
+          #         print(f"No network information found for {vm.config.name}")
                   
           return vms
 
