@@ -152,7 +152,7 @@ object_mappings:
       memory:
         source: "config.hardware.memoryMB"
 
-      primary_ip4:
+      primary_ip:
         source: ["guest.net[0].ipConfig.ipAddress[0].ipAddress", "guest.net[0].ipConfig.ipAddress[0].prefixLength"]
         transform_function:
           - concat("/")
