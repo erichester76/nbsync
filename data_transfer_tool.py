@@ -194,7 +194,7 @@ class DataTransferTool:
         found_objects = find_function(filter_params)
 
         # Check if the result set is not empty (using .first() if available)
-        existing_object = list(found_objects[0]) 
+        existing_object = list(found_objects)[0] 
         
         if existing_object:
             if self.dry_run:
