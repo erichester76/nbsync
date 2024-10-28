@@ -154,6 +154,7 @@ class DataTransferTool:
                             identifier_type = getattr(identifier.identifierType, 'key', None)
                             if identifier_type == identifier_key:
                                 value = identifier_value
+                                break
                         
                 elif "lookup_object" in trans:
                     matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", trans)
