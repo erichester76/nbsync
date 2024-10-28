@@ -154,6 +154,8 @@ class DataTransferTool:
                     find_function = obj_config.get('find_function')
                     for item in source_data:
                         print(f"ROW: {item}")
+                        print(f"Available keys in CSV row: {item.keys()}")
+    
                         mapped_data = {}
                         for dest_field, field_info in obj_config['mapping'].items():
                             source_value = item.get(field_info['source'])

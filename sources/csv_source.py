@@ -49,5 +49,5 @@ class CSVDataSource(DataSource):
                     source_field = field_info['source']
                     obj_data[dest_field] = row.get(source_field)
                 all_data.append(obj_data)
-
+                
         return all_data
