@@ -73,72 +73,72 @@ class APIDataSource(DataSource):
             print(f"Connected to {self.name} at {base_url}")
             self.clients.append(self.api)
             
-def fetch_data(self, obj_config, api_client):
-    """
-    Fetch data from the source API using the provided API client.
+    def fetch_data(self, obj_config, api_client):
+        """
+        Fetch data from the source API using the provided API client.
 
-    :param obj_config: Mapping configuration for the object.
-    :param api_client: The API client instance to use for fetching the data.
-    :return: Retrieved and processed data.
-    """
-    # Retrieve the fetch function from the API client (defined in object_mappings)
-    fetch_function = self.get_nested_function(api_client, obj_config['fetch_data_function'])
+        :param obj_config: Mapping configuration for the object.
+        :param api_client: The API client instance to use for fetching the data.
+        :return: Retrieved and processed data.
+        """
+        # Retrieve the fetch function from the API client (defined in object_mappings)
+        fetch_function = self.get_nested_function(api_client, obj_config['fetch_data_function'])
 
-    # Check if there are any params defined in the YAML for this fetch function
-    params = obj_config.get('params', {})
+        # Check if there are any params defined in the YAML for this fetch function
+        params = obj_config.get('params', {})
 
-    # Call the fetch function with the parameters if they exist, or without if no params
-    if params:
-        # If there are custom parameters, pass them to the fetch function
-        data = fetch_function(**params)
-    else:
-        # If no parameters are defined, call the fetch function without arguments
-        data = fetch_function()
+        # Call the fetch function with the parameters if they exist, or without if no params
+        if params:
+            # If there are custom parameters, pass them to the fetch function
+            data = fetch_function(**params)
+        else:
+            # If no parameters are defined, call the fetch function without arguments
+            data = fetch_function()
 
-    # Process the data and map fields according to YAML
-    result = []
-    for item in data:
-        obj_data = {}
-        for dest_field, field_info in obj_config['mapping'].items():
-            # Dynamically fetch the nested attributes (e.g., runtime.powerState)
-            source_value = self.get_nested_attr(item, field_info['source'].split('.'))
-            obj_data[dest_field] = source_value
-        result.append(obj_data)
+        # Process the data and map fields according to YAML
+        result = []
+        for item in data:
+            obj_data = {}
+            for dest_field, field_info in obj_config['mapping'].items():
+                # Dynamically fetch the nested attributes (e.g., runtime.powerState)
+                source_value = self.get_nested_attr(item, field_info['source'].split('.'))
+                obj_data[dest_field] = source_value
+            result.append(obj_data)
 
-    return result
+        return result
 
 
-def get_nested_function(self, api_client, function_path):
-    """
-    Recursively get a function from the API client.
-    
-    :param api_client: The API client (e.g., NetBox client)
-    :param function_path: Path to the function (e.g., 'dcim.device_types.filter')
-    :return: The function object
-    """
-    parts = function_path.split('.')
-    func = api_client  # Start with the root client (e.g., pynetbox.NetBox())
+    def get_nested_function(self, api_client, function_path):
+        """
+        Recursively get a function from the API client.
+        
+        :param api_client: The API client (e.g., NetBox client)
+        :param function_path: Path to the function (e.g., 'dcim.device_types.filter')
+        :return: The function object
+        """
+        parts = function_path.split('.')
+        func = api_client  # Start with the root client (e.g., pynetbox.NetBox())
 
-    # Traverse down the client object tree
-    for part in parts:
-        try:
-            func = getattr(func, part)
-        except AttributeError:
-            raise AttributeError(f"Attribute '{part}' not found in API client at path '{function_path}'")
-    
-    # Ensure the final attribute is callable
-    if not callable(func):
-        raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
-    
-    return func
+        # Traverse down the client object tree
+        for part in parts:
+            try:
+                func = getattr(func, part)
+            except AttributeError:
+                raise AttributeError(f"Attribute '{part}' not found in API client at path '{function_path}'")
+        
+        # Ensure the final attribute is callable
+        if not callable(func):
+            raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
+        
+        return func
 
-def get_nested_attr(self, obj, attrs):
-    """
-    Recursively get attributes from an object based on a list of attribute names.
-    Handles attributes like 'runtime.powerState' from YAML.
-    """
-    for attr in attrs:
-        obj = getattr(obj, attr, None)
-        if obj is None:
-            break  # Stop if any attribute in the chain is None
-    return obj
+    def get_nested_attr(self, obj, attrs):
+        """
+        Recursively get attributes from an object based on a list of attribute names.
+        Handles attributes like 'runtime.powerState' from YAML.
+        """
+        for attr in attrs:
+            obj = getattr(obj, attr, None)
+            if obj is None:
+                break  # Stop if any attribute in the chain is None
+        return obj
