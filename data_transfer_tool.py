@@ -200,9 +200,11 @@ class DataTransferTool:
                                 transform = field_info.get('transform_function')
                                 print(f"Applying transform to field {dest_field} {source_value} {transform}")
                                 mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
+                                print(f'Value is now: {mapped_data[dest_field]}')
                             else:
                                 print(f"Directly mapping {source_value} to {dest_field}")
                                 mapped_data[dest_field] = source_value
+                                
                         print(f"Looking up {mapped_data.get('name')} with filter params: {mapped_data}")
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         print(f"Processed object with ID: {object_id}")
