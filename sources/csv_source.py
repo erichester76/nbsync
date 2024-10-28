@@ -31,7 +31,7 @@ class CSVDataSource(DataSource):
 
     def fetch_data(self, obj_config, file_path):
         """
-        Fetch data from the CSV file using the provided file path and delimiter.
+        Fetch raw data from the CSV file without applying any mapping.
         """
         # Retrieve delimiter from source_mapping (use self.config to access source_mapping)
         delimiter = self.config['source_mapping'].get('delimiter', ',')
@@ -42,14 +42,9 @@ class CSVDataSource(DataSource):
         with open(file_path, mode='r') as file:
             reader = csv.DictReader(file, delimiter=delimiter)
 
-            # Process each row in the CSV and map fields according to YAML mapping
+            # Collect raw rows without mapping
             for row in reader:
-                print(f"Raw row from CSV: {row}")  # Add this line to print each row
-                obj_data = {}
-                for dest_field, field_info in obj_config['mapping'].items():
-                    source_field = field_info['source']
-                    print(f"Mapping source field {source_field}")  # Debug the source field
-                    obj_data[dest_field] = row.get(source_field)
-                all_data.append(obj_data)
+                print(f"Raw row from CSV: {row}")  # Display the raw row from CSV
+                all_data.append(row)
 
         return all_data
