@@ -103,16 +103,14 @@ class APIDataSource(DataSource):
                 
                 # If it's callable (a method), invoke it
                 if callable(func):
-                    # Handle any special objects like 'content' or 'rootFolder'
-                    if params:
-                        print(f"Executing step: {method_name} with params: {params}")
-                        
-                        # Replace special variables (like content) with the actual object from earlier steps
-                        params = [special_vars.get(param.strip('{}'), param) for param in params]
-                        result = func(*params)
-                    else:
-                        print(f"Executing step: {method_name}")
-                        result = func()
+                    # Replace special variables (like content) with the actual object from earlier steps
+                    params = [
+                        special_vars.get(param.strip('{}'), param) if isinstance(param, str) else param
+                        for param in params
+                    ]
+                    
+                    print(f"Executing step: {method_name} with params: {params}")
+                    result = func(*params)
                 else:
                     # It's an attribute, just get the value
                     print(f"Accessing attribute: {method_name}")
@@ -120,11 +118,11 @@ class APIDataSource(DataSource):
             else:
                 raise AttributeError(f"{method_name} not found on {result}")
 
-            # Store result for later steps (e.g., content)
-            if method_name == 'RetrieveContent':
-                special_vars['content'] = result
-            elif method_name == 'rootFolder':
-                special_vars['rootFolder'] = result
+            # Store result for later steps if 'store_as' is provided
+            store_as = step.get('store_as')
+            if store_as:
+                print(f"Storing result of {method_name} as '{store_as}'")
+                special_vars[store_as] = result
 
         return result
 
