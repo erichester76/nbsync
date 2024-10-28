@@ -90,7 +90,7 @@ class APIDataSource(DataSource):
         fetch_steps = obj_config.get('fetch_data_steps', [])
         result = api_client  # Start from the base client (ServiceInstance)
 
-        # Track special objects like 'content' so they can be used in later steps
+        # Track special objects so they can be used in later steps
         special_vars = {}
 
         for step in fetch_steps:
@@ -100,17 +100,26 @@ class APIDataSource(DataSource):
             # Check if the method_name is an attribute (like viewManager) or a method (like CreateContainerView)
             if hasattr(result, method_name):
                 func = getattr(result, method_name)
-                
+
                 # If it's callable (a method), invoke it
                 if callable(func):
-                    # Replace special variables (like content) with the actual object from earlier steps
-                    params = [
-                        special_vars.get(param.strip('{}'), param) if isinstance(param, str) else param
-                        for param in params
-                    ]
+                    # Replace special variables (like content.rootFolder) with the actual object from earlier steps
+                    resolved_params = []
+                    for param in params:
+                        if isinstance(param, str) and param.startswith('{') and param.endswith('}'):
+                            # Resolve the nested attributes (e.g., content.rootFolder)
+                            parts = param.strip('{}').split('.')
+                            value = special_vars
+                            for part in parts:
+                                value = getattr(value, part, None)
+                                if value is None:
+                                    raise ValueError(f"Could not resolve special variable: {param}")
+                            resolved_params.append(value)
+                        else:
+                            resolved_params.append(param)
                     
-                    print(f"Executing step: {method_name} with params: {params}")
-                    result = func(*params)
+                    print(f"Executing step: {method_name} with params: {resolved_params}")
+                    result = func(*resolved_params)
                 else:
                     # It's an attribute, just get the value
                     print(f"Accessing attribute: {method_name}")
