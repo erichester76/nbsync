@@ -48,8 +48,8 @@ object_mappings:
           vms = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view
 
           # Print out raw structure for debugging purposes
-          for vm in vms[:1]:  # Only check the first VM for structure
-              print(f"VM raw structure: {vm}")
+          for vm in vms:
+               print(f"returned name: {vm.config.name}")
 
           return vms
     mapping:
