@@ -144,6 +144,7 @@ object_mappings:
       primary_ip4:
         source: ["guest.ipAddress", "guest.net[0].ipConfig.ipAddress[0].subnetMask"]
         transform_function:
+          - concat("/")
           - regex_replace("255.255.255.255", "32")
           - regex_replace("255.255.255.254", "31")
           - regex_replace("255.255.255.252", "30")
@@ -161,7 +162,6 @@ object_mappings:
           - regex_replace("255.255.192.0", "18")
           - regex_replace("255.255.128.0", "17")
           - regex_replace("255.255.0.0", "16")
-          - concat("/")
           - lookup_object('address', 'ipam.address.filter', 'ipam.address.create')
 
       platform:
