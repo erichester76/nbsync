@@ -91,6 +91,7 @@ class APIDataSource(DataSource):
                 module_name, attr_name = import_path.rsplit('.', 1)
                 module = __import__(module_name, fromlist=[attr_name])
                 local_vars[attr_name] = getattr(module, attr_name)
+                print(f"Successfully imported {attr_name} from {module_name}")
             except ImportError as e:
                 print(f"Error importing {import_path}: {e}")
                 raise
@@ -101,8 +102,8 @@ class APIDataSource(DataSource):
         if fetch_data_code:
             print(f"Using custom Python code for data fetch...")
 
-            # Execute the provided code within the local scope
-            exec(fetch_data_code, {}, local_vars)
+            # Execute the provided code within the local scope, passing in local_vars to exec
+            exec(fetch_data_code, globals(), local_vars)
 
             # Ensure the 'fetch_data' function is defined in the code
             if 'fetch_data' not in local_vars:
