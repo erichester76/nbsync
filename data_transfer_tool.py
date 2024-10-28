@@ -119,6 +119,7 @@ class DataTransferTool:
                     else:
                         create_data = {lookup_param_name: lookup_param_value}
 
+                    print(f'Creating object: {create_data}')
                     created_object = create_function(create_data)
                     value = created_object.id if hasattr(created_object, 'id') else None
                     
