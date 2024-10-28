@@ -191,7 +191,10 @@ class DataTransferTool:
                             # Handle dictionary-like data sources (e.g., CSV)
                             if isinstance(item, dict):
                                 source_value = item.get(field_info['source'])
-
+                                # Check if the source is a static string
+                                if field_info['source'].startswith('str:'):
+                                    source_value = field_info['source'].split("str:")[1].strip()
+                                    
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
                                 print(f"Mapping source field {field_info['source']} to {dest_field}")
