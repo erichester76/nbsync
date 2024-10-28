@@ -156,8 +156,13 @@ class DataTransferTool:
                         mapped_data = {}
                         for dest_field, field_info in obj_config['mapping'].items():
                             source_value = item.get(field_info['source'])
-                            transform = field_info.get('transform_function')
-                            mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
+                            
+                            if ('transform_function' in field_info):
+                                transform = field_info.get('transform_function')
+                                mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
+                            else:
+                                mapped_data[dest_field] = source_value
+                                
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         print(f"Processed object with ID: {object_id}")
 
