@@ -56,8 +56,8 @@ object_mappings:
       status:
         source: "runtime.powerState"
         transform_function: 
-          - "regex_replace('poweredOn', 'active') 
-          - "regex_replace('poweredOff', 'offline')"
+          - regex_replace('poweredOn', 'active')
+          - regex_replace('poweredOff', 'offline')
    
       # Mapping VMware cluster to NetBox cluster (uses lookup to find or create)
       cluster:
