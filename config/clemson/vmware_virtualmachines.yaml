@@ -56,7 +56,8 @@ object_mappings:
     mapping:
 
       name:
-        source: "name" 
+        source: "name"
+        transform_function: regex_replace('.clemson.edu', '')
   
       cluster:
         source: "parent.name"
