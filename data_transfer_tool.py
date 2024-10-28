@@ -185,7 +185,7 @@ class DataTransferTool:
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
                                 print(f"Mapping source field {field_info['source']} to {dest_field}")
-                                source_value = get_nested_attribute(item, field_info['source'], None)
+                                source_value = self.get_nested_attribute(item, field_info['source'], None)
 
                             # Debugging: Log the value we're about to map
                             print(f"Mapped value for {dest_field}: {source_value}")
