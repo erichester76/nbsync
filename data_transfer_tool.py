@@ -105,6 +105,7 @@ class DataTransferTool:
                         value = re.sub(pattern, replacement, value)
                 else:
                     pattern, replacement = re.findall(r"regex_replace\('(.*)',\s*'(.*)'\)", transform)[0]
+                    print(f'Processing regex replace: {value}: {pattern} = {replacement}')
                     value = re.sub(pattern, replacement, value)
                         
             elif transform == "slugify":
