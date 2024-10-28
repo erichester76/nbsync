@@ -45,8 +45,13 @@ object_mappings:
     fetch_data_code: |
       def fetch_data(api_client):
           content = api_client.RetrieveContent()
-          return content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view
+          vms = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view
 
+          # Print out raw structure for debugging purposes
+          for vm in vms[:1]:  # Only check the first VM for structure
+              print(f"VM raw structure: {vm}")
+
+          return vms
     mapping:
       # Mapping VMware name to NetBox name
       name:
