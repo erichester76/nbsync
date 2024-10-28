@@ -176,26 +176,24 @@ class DataTransferTool:
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                 
-                elif "extract_by_type" in trans:
-                    type, var_name = re.findall(r"extract_by_type\('(.*)',\s*'(.*)'\)", trans)[0]
+                elif 'extract_by_type' in trans:
+                    # Extract IP and additional fields (like prefixLength) into a list
+                    args = re.findall(r"extract_by_type\('(.*?)', '(.*?)', '(.*?)'\)", trans)[0]
+                    type, field, optional_field = args
+
+                    # Process the value (assuming it's a list of dictionaries, like from guest.net)
                     if isinstance(value, list):
-                        ipv4_regex = r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
-                        ipv6_regex = r"^[a-fA-F0-9:]+$"
+                        for entry in value:
+                            item = entry.get(field)
+                            if type == 'ipv4' and '.' in item:
+                                # Extract IP and prefix together into a list
+                                value = [entry.get(field), str(entry.get(optional_field))]
+                                break
+                            elif type == 'ipv6' and ':' in item:
+                                value = [entry.get(field), str(entry.get(optional_field))]
+                                break
+                    
                         
-                        if self.DEBUG == 1: print(f"Searching fields {var_name} for {type}")
-
-                        for item in value:
-                            field_value = getattr(item, var_name, None)  
-                            if not field_value:
-                                continue
-
-                            if type == 'ipv4' and re.match(ipv4_regex, field_value):
-                                print(f"found ipv4 address {field_value}")
-                                value = field_value
-                            elif type == 'ipv6' and re.match(ipv6_regex, field_value):
-                                print(f"found ipv6 address {field_value}")
-                                value = field_value
-                
                 elif "extract_identifier" in trans:
                     # Extract the identifier type (e.g., 'SerialNumberTag')
                     identifier_key = re.findall(r"extract_identifier\('(.*)'\)", trans)[0]

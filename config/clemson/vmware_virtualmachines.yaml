@@ -155,15 +155,17 @@ object_mappings:
       primary_ip4:
         source: "guest.net[0].ipConfig.ipAddress"
         transform_function:
-          - extract_by_type('ipv4', 'ipAddress')
+          - extract_by_type('ipv4', 'ipAddress', 'prefixLength') 
+          - concat('/')
           - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
-
-      primary_ip6:
+          
+      primary_ip4:
         source: "guest.net[0].ipConfig.ipAddress"
         transform_function:
-          - extract_by_type('ipv6', 'ipAddress')
+          - extract_by_type('ipv6', 'ipAddress', 'prefixLength')  
+          - concat('/')
           - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
-
+      
       platform:
         source: "guest.guestFullName"
         transform_function: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
