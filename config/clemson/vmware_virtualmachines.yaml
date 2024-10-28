@@ -124,7 +124,6 @@ object_mappings:
               else:
                   print(f"No network information found for {vm.config.name}")
                   
-
           return vms
 
     mapping:
@@ -154,26 +153,9 @@ object_mappings:
         source: "config.hardware.memoryMB"
 
       primary_ip4:
-        source: ["guest.ipAddress", "guest.net[0].ipConfig.ipAddress[0].subnetMask"]
+        source: ["guest.ipAddress", "guest.net[0].ipConfig.ipAddress[0].prefixLength"]
         transform_function:
           - concat("/")
-          - regex_replace('255.255.255.255', '32')
-          - regex_replace('255.255.255.254', '31')
-          - regex_replace('255.255.255.252', '30')
-          - regex_replace('255.255.255.248', '29')
-          - regex_replace('255.255.255.240', '28')
-          - regex_replace('255.255.255.224', '27')
-          - regex_replace('255.255.255.192', '26')
-          - regex_replace('255.255.255.128', '25')
-          - regex_replace('255.255.255.0', '24')
-          - regex_replace('255.255.254.0', '23')
-          - regex_replace('255.255.252.0', '22')
-          - regex_replace('255.255.248.0', '21')
-          - regex_replace('255.255.240.0', '20')
-          - regex_replace('255.255.224.0', '19')
-          - regex_replace('255.255.192.0', '18')
-          - regex_replace('255.255.128.0', '17')
-          - regex_replace('255.255.0.0', '16')
           - lookup_object('address', 'ipam.address.filter', 'ipam.address.create')
 
       platform:
