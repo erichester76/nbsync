@@ -44,7 +44,7 @@ object_mappings:
       - method: RetrieveContent  # Retrieve the content object
       - method: viewManager.CreateContainerView
         params:
-          - "{{ content.rootFolder }}"  # Root folder to start the view
+          - '{{ "{{ content.rootFolder }}" }}' #escaped to avoid jinja interpreter
           - "[vim.VirtualMachine]"  # Object type as a string for evaluation
           - "True"  # Recursive flag as a string
       - method: view
