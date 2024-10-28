@@ -175,7 +175,29 @@ class DataTransferTool:
                     # Get the values of the fields to concatenate
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
-                    
+                
+                elif "extract_by_type" in trans:
+                    type, field_name = re.findall(r"extract_by_type\('(.*)',\s*'(.*)'\)", trans)[0]
+                    fields = obj_config['mapping'][field_name]['source']
+                    value = None
+                    if isinstance(fields, list):
+                        ipv4_regex = r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+                        ipv6_regex = r"^[a-fA-F0-9:]+$"
+                        
+                        if self.DEBUG == 1: print(f"Searching fields {field_name} for {type}")
+
+                        for item in fields:
+                            field_value = getattr(item, field_name, None)  
+                            if not field_value:
+                                continue
+
+                            if type == 'ipv4' and re.match(ipv4_regex, field_value):
+                                print(f"found ipv4 address {field_value}")
+                                value = field_value
+                            elif type == 'ipv6' and re.match(ipv6_regex, field_value):
+                                print(f"found ipv6 address {field_value}")
+                                value = field_value
+                
                 elif "extract_identifier" in trans:
                     # Extract the identifier type (e.g., 'SerialNumberTag')
                     identifier_key = re.findall(r"extract_identifier\('(.*)'\)", trans)[0]
