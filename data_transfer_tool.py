@@ -99,6 +99,13 @@ class DataTransferTool:
                         "Incorrect format for lookup_object transform. "
                         "Expected format: lookup_object('object_type', 'find_function', 'create_function')."
                     )
+                    
+                # Handle expanded reference fields (e.g., { "name": "Cisco" } or { "model": "Switch" })
+                expand_reference_field = obj_config['mapping'].get(field_name, {}).get('expand_reference')
+                if expand_reference_field:
+                    value = {expand_reference_field: value}  # Expand the field using the specified field name
+                    print(f"Expanding field {field_name} as reference: {value}")
+
                 lookup_type, find_function_path, create_function_path = matches[0]
                 api_client = self.sources[obj_config['destination_api']].api
                 find_function = self.get_nested_function(api_client, find_function_path)

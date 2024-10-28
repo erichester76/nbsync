@@ -17,7 +17,7 @@ api_definitions:
     base_urls:
       - https://netbox.app.clemson.edu
 
-object_mappings:
+oobject_mappings:
   devices:
     source_api: csv
     destination_api: netbox
@@ -31,23 +31,25 @@ object_mappings:
         source: device_name
       role:
         source: role
-        transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create') 
+        transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
       manufacturer:
         source: manufacturer
+        expand_reference: name  
       device_type:
         source: device_type
         transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
-        included_fields: 
+        included_fields:
           - field: manufacturer
-            key: name  
+            key: name
           - field: manufacturer
-            key: slug  
-            create_if_missing: true 
-            transform_function: slugify  
-      serial:
+            key: slug
+            create_if_missing: true
+            transform_function: slugify
+      serial_number:
         source: serial
       site:
         source: site_name
         transform_function: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
+        expand_reference: name 
       status:
         source: status
