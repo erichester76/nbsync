@@ -28,7 +28,7 @@ object_mappings:
     update_function: dcim.devices.update
     mapping:
       name:
-        source: name
+        source: device_name
       role:
         source: role
         transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create') 
@@ -45,9 +45,9 @@ object_mappings:
             create_if_missing: true 
             transform_function: slugify  
       serial_number:
-        source: serial_number
+        source: serial
       site:
-        source: site
+        source: site_name
         transform_function: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
       status:
         source: status
