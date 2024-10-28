@@ -177,29 +177,34 @@ class DataTransferTool:
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                 
                 elif 'extract_by_type' in trans:
+                     # Adjusted regex to make the second item optional
                     args = re.findall(r"extract_by_type\('(.*?)', '(.*?)'(?:, '(.*?)')?\)", trans)[0]
                     item_type = args[0]
                     item1 = args[1]
                     item2 = args[2] if len(args) > 2 and args[2] else None
 
-                    # Process the value (assuming it's a list of dictionaries)
+                    # Process the value (assuming it's a list of dictionaries or objects)
                     if isinstance(value, list):
                         for entry in value:
-                            value1 = entry.get(item1)
-                            if item_type == 'ipv4' and '.' in value1:
+                            # Use getattr() for object-like access and dict.get() for dictionary access
+                            value1 = getattr(entry, item1, None) if hasattr(entry, item1) else entry.get(item1, None)
+                            
+                            if item_type == 'ipv4' and value1 and '.' in value1:
                                 # If item2 (e.g., prefix) exists, return both as a list
-                                if item2 and entry.get(item2):
-                                    value = [entry.get(item1), str(entry.get(item2))]
+                                if item2:
+                                    value2 = getattr(entry, item2, None) if hasattr(entry, item2) else entry.get(item2, None)
+                                    value = [value1, str(value2)] if value2 else [value1]
                                 else:
-                                    value = [entry.get(item1)]
+                                    value = [value1]
                                 break
-                            elif item_type == 'ipv6' and ':' in value1:
-                                if item2 and entry.get(item2):
-                                    value = [entry.get(item1), str(entry.get(item2))]
+                            elif item_type == 'ipv6' and value1 and ':' in value1:
+                                if item2:
+                                    value2 = getattr(entry, item2, None) if hasattr(entry, item2) else entry.get(item2, None)
+                                    value = [value1, str(value2)] if value2 else [value1]
                                 else:
-                                    value = [entry.get(item1)]
-                        break
-                    
+                                    value = [value1]
+                                break
+
                         
                 elif "extract_identifier" in trans:
                     # Extract the identifier type (e.g., 'SerialNumberTag')
