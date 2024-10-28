@@ -139,7 +139,7 @@ class DataTransferTool:
                     # Get the list of source fields to concatenate
                     fields_to_concat = obj_config['mapping'][field_name]['source']
                     delimiter = transform.split('concat(')[1].strip(" )")
-
+                    print(f"Concating fields {field_name} : {value}")
                     # Get the values of the fields to concatenate
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
