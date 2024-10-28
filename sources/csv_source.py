@@ -44,10 +44,12 @@ class CSVDataSource(DataSource):
 
             # Process each row in the CSV and map fields according to YAML mapping
             for row in reader:
+                print(f"Raw row from CSV: {row}")  # Add this line to print each row
                 obj_data = {}
                 for dest_field, field_info in obj_config['mapping'].items():
                     source_field = field_info['source']
+                    print(f"Mapping source field {source_field}")  # Debug the source field
                     obj_data[dest_field] = row.get(source_field)
                 all_data.append(obj_data)
-                
+
         return all_data
