@@ -212,11 +212,9 @@ class DataTransferTool:
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
             
-            for source_client_info in source.clients:
-                source_client = source_client_info['client']
-                base_url = source_client_info['base_url']
-                
-                print(f"Processing {obj_type} from {base_url}")
+            for source_client in self.source.clients:
+                api_host = self.config.get('auth_args', {}).get('host', 'Unknown Source')
+                print(f"Processing {obj_type} from {api_host}")
                 
                 source_data = source.fetch_data(obj_config, source_client)
                 # Log the raw data fetched from the source
