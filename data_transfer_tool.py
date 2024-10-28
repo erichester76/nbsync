@@ -134,7 +134,7 @@ class DataTransferTool:
                         print(f"Expanding field {field_name} as reference: {value}")
                     else:
                         raise ValueError(f"Expand transform requires 'expand_reference' key in mapping for {field_name}")
-                # Handle concat transformation
+
                 elif "concat" in transform:
                     # Get the list of source fields to concatenate
                     fields_to_concat = obj_config['mapping'][field_name]['source']
