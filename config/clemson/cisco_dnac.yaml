@@ -93,7 +93,7 @@ object_mappings:
             source: ["softwareType", "softwareVersion"]
             transform_function: 
               - concat(' ')
-              - regex_replace('^\d', 'IOS \1')    
+              - regex_replace('^(\d)', 'IOS \1')    
               - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
           serial:
