@@ -17,7 +17,7 @@ api_definitions:
     auth_method: login
     auth_function: connect.SmartConnect
     auth_args:
-      - host
+      - host: base_url
       - username: ${VMWARE_AUTH_USER}
       - password: ${VMWARE_AUTH_PW}
       - sslContext: ignore
