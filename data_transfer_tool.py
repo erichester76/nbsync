@@ -181,8 +181,10 @@ class DataTransferTool:
                     # Inject the split values into the mapping for future use
                     for idx, split_value in enumerate(split_values, 1):
                         key_name = f"{field_name}_{idx}"
+                        setattr(self, f"{field_name}_{index}", split_value)
                         obj_config['mapping'][key_name] = {'source': key_name}  # Inject as a new source field
-                    
+                    value = getattr(self, f"{field_name}_1")
+
                 elif "change_case" in trans:
                     case_type = re.findall(r"change_case\('(.*)'\)", trans)[0]
                     if case_type == 'lower': value = value.lower()
