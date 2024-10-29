@@ -25,6 +25,8 @@ api_definitions:
         value: ${DNAC_AUTH_PW}
       - name: version
         value: 2.3.3.0
+      - name: sslContext
+        value: ignore
 
     base_urls:
       - https://cisco-dnac.clemson.edu/
