@@ -56,7 +56,7 @@ object_mappings:
             source: "vendor"
             transform_function:
               - regex_replace(' Systems Inc','')
-              - regex_replace(None,'Cisco')
+              - regex_replace('^$','Cisco')
               - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
 
           device_type:
