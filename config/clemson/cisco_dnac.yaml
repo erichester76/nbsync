@@ -52,8 +52,8 @@ object_mappings:
           name:
             source: "hostname"
             transform_function:
-               - regex_replace('.clemson.edu.*','')
-               - change_case('lower')
+              - regex_replace('.clemson.edu.*','')
+              - change_case('lower')
 
           manufacturer:
             source: "vendor"
@@ -66,15 +66,15 @@ object_mappings:
           device_type:
             source: "platformId"
             transform_function: 
-                - regex_replace('^C', 'Catalyst ')
-                - regex_replace('^WS\-C', 'Catalyst ')
-                - regex_replace('^IE\-', 'Catalyst IE')
-                - regex_replace('^AIR\-AP', 'Catalyst ')
-                - regex_replace('^AIR\-CAP', 'Catalyst ')
-                - regex_replace('\-K9$', '')
-                - regex_replace('^([^\,]+)\,.+', '\1')    
-                - change_case('title')
-                - lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
+              - regex_replace('^C', 'Catalyst ')
+              - regex_replace('^WS\-C', 'Catalyst ')
+              - regex_replace('^IE\-', 'Catalyst IE')
+              - regex_replace('^AIR\-AP', 'Catalyst ')
+              - regex_replace('^AIR\-CAP', 'Catalyst ')
+              - regex_replace('\-K9$', '')
+              - regex_replace('^([^\,]+)\,.+', '\1')    
+              - change_case('title')
+              - lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
 
             included_fields:
               - field: manufacturer
@@ -99,10 +99,10 @@ object_mappings:
           status:
             source: "reachabilityStatus"
             transform_function:
-              - regex_replace('Reachable', 'active')
-              - regex_replace('Unreachable', 'offline')
+               - regex_replace('Reachable', 'active')
+               - regex_replace('Unreachable', 'offline')
 
           primary_ip4:
             source: "managementIpAddress"
             transform_function:
-              - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
+               - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
