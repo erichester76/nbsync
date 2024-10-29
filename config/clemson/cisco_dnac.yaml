@@ -50,20 +50,15 @@ object_mappings:
         while True:
             response = client.sites.get_site(offset=offset, limit=limit)
             sites.extend(response.response)
-            if len(response.response) < limit:
-                break
+            if len(response.response) < limit: break
             offset += limit
-        if not sites:
-            raise ValueError("No sites found in Cisco DNA Center.")
+        if not sites: raise ValueError("No sites found in Cisco DNA Center.")
         for site in sites:
             membership = self.client.sites.get_membership(site_id=site.id)
-            if not membership or not hasattr(membership, 'device'):
-                continue  
-            if membership.device is None:
-                continue  
+            if not membership or not hasattr(membership, 'device'): continue  
+            if membership.device is None: continue  
             for members in membership.device:
-                if not members or not hasattr(members, 'response'):
-                    continue  
+                if not members or not hasattr(members, 'response'): continue  
                 for device in members.response:
                     if hasattr(device, 'serialNumber'):
                         device['location'] = site.get('siteNameHierarchy')
