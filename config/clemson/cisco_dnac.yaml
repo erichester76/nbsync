@@ -67,7 +67,7 @@ object_mappings:
                 for device in members.response:
                     if hasattr(device, 'serialNumber'):
                         device['location'] = site.get('siteNameHierarchy')
-                        print(f"{items}ound device {device.hostname} in site {site.get('siteNameHierarchy')}")
+                        print(f"Site #{items}: Found device {device.hostname} in site {site.get('siteNameHierarchy')}")
                         devices.append(device)
         return devices
 
