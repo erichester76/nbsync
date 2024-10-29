@@ -11,7 +11,7 @@ class APIDataSource(DataSource):
         self.name = name  # Store the section name
         self.api = None
         self.clients = []  # Initialize the clients list
-        self.session_expiry = []  # Add session expiry tracking
+        self.session_expiry = {}  # Add session expiry tracking
 
 
     def is_session_valid(self,base_url):
