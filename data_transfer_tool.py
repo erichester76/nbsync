@@ -176,6 +176,7 @@ class DataTransferTool:
                     pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
                     if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
                     value = re.sub(pattern, replacement, value)
+                    
                 elif "skip_if_field_equals" in trans:
                     field, expected_value = re.findall(r"skip_if_field_equals\('(.*)',\s*(.*)\)", trans)[0]
                     # Retrieve the actual value of the specified field

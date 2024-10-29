@@ -78,7 +78,7 @@ class APIDataSource(DataSource):
                         self.clients.append(self.api)
                         print(f"Connected to {self.name} at {base_url}")
 
-                    self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=1)
+                    self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
 
                 elif auth_method == 'login':
                     if auth_args:
@@ -87,7 +87,7 @@ class APIDataSource(DataSource):
                             self.clients.append(self.api)
                             print(f"Connected to {self.name} at {base_url}")
 
-                        self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=1)
+                        self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
 
                     else:
                         raise ValueError("Login-based authentication requires auth_args to be set.")
