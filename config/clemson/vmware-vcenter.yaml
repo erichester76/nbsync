@@ -131,6 +131,7 @@ object_mappings:
     mapping:
       name:
         source: "config.name"
+        transform_function: regex_replace('.clemson.edu.*$', '')
 
       status:
         source: "runtime.powerState"
