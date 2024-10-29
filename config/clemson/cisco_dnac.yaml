@@ -20,9 +20,9 @@ api_definitions:
       - name: base_url
         value: base_urls
       - name: username
-        value: ${DNAC_USERNAME}
+        value: ${DNAC_AUTH_USER}
       - name: password
-        value: ${DNAC_PASSWORD}
+        value: ${DNAC_AUTH_PW}
       - name: version
         value: 2.3.3.0
 
