@@ -51,14 +51,15 @@ object_mappings:
         while items == limit:
             response = client.sites.get_site(offset=offset, limit=limit)
             sites.extend(response.response)
-            #items = len(response.response)
-            items = 0
+            items = len(response.response)
             offset += limit
         if not sites: raise ValueError("No sites found in Cisco DNA Center.")
         print(f"Found {len(sites)} sites")
         items=0
         for site in sites:
             items += 1
+            #site one is Global and just takes a while with no devices
+            if site == 1: continue
             membership = client.sites.get_membership(site_id=site.id)
             if not membership or not hasattr(membership, 'device'): continue  
             if membership.device is None: continue  
