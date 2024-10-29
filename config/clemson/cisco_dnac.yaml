@@ -55,11 +55,11 @@ object_mappings:
             items = 0
             offset += limit
         if not sites: raise ValueError("No sites found in Cisco DNA Center.")
-        print(f"Found {len(sites)} sites")
+        if self.DEBUG == 1: print(f"Found {len(sites)} sites")
         items=0
         for site in sites:
             items += 1
-            print(f"Working on Site# {items}: {site.get('siteNameHierarchy')}")
+            if self.DEBUG == 1: print(f"Working on Site# {items}: {site.get('siteNameHierarchy')}")
             membership = client.sites.get_membership(site_id=site.id)
             if not membership or not hasattr(membership, 'device'): continue  
             if membership.device is None: continue  
@@ -68,7 +68,7 @@ object_mappings:
                 for device in members.response:
                     if hasattr(device, 'serialNumber'):
                         device['siteNameHierarchy'] = site.get('siteNameHierarchy')
-                        print(f"Found device {device.hostname} in site {site.get('siteNameHierarchy')}")
+                        if self.DEBUG == 1: print(f"Found device {device.hostname} in site {site.get('siteNameHierarchy')}")
                         devices.append(device)
         return devices
 

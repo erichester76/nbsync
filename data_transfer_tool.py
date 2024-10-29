@@ -178,12 +178,10 @@ class DataTransferTool:
                 elif "split" in trans:
                     delimiter = trans.split('split(')[1].split(')')[0].strip("'")
                     split_values = value.split(delimiter)
-
-                    # Store split parts into new variables named `field_name_X`
-                    for index, split_value in enumerate(split_values, start=1):
-                        setattr(self, f"{field_name}_{index}", split_value)
-                        print(f"{field_name}_{index} = {split_value}")
-                    value = getattr(self, f"{field_name}_1")
+                    # Inject the split values into the mapping for future use
+                    for idx, split_value in enumerate(split_values, 1):
+                        key_name = f"{field_name}_{idx}"
+                        obj_config['mapping'][key_name] = {'source': key_name}  # Inject as a new source field
                     
                 elif "change_case" in trans:
                     case_type = re.findall(r"change_case\('(.*)'\)", trans)[0]
