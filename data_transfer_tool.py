@@ -213,7 +213,7 @@ class DataTransferTool:
                 elif 'concat' in trans:
                     # Get the list of source fields to concatenate
                     fields_to_concat = obj_config['mapping'][field_name]['source']
-                    delimiter = trans.split('concat([\'\"]')[1].strip("[\'\"])")
+                    delimiter = re.findall(r"concat\('(.*)')", trans)[0]
                     if self.DEBUG == 1:print(f"Concating fields {field_name} : {value}")
                     # Get the values of the fields to concatenate
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
@@ -344,13 +344,11 @@ class DataTransferTool:
                             
                             # Check if the source is a static string (applies to any data type)
                             if 'str:' in field_info['source']:
-                                source_value = field_info['source'].split("str:")[1].strip().strip("\"")   
-                                                     
+                                source_value = field_info['source'].split("str:")[1].strip().strip("'\"")                            
                             # Handle dictionary-like data sources (e.g., CSV)
                             elif isinstance(item, dict):
-                                print(f'{item}')
                                 source_value = item.get(field_info['source'])
-
+                                
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
                                 if self.DEBUG == 1: print(f"Mapping source field {field_info['source']} to {dest_field}")
