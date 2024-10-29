@@ -299,13 +299,8 @@ class DataTransferTool:
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
-            # Check if source_api exists in self.sources and is not a string
-            source_api = obj_config.get('source_api')
-            if source_api and source_api in self.sources:
-                source = self.sources[source_api]
-            else:
-                raise ValueError(f"Invalid source_api '{source_api}' in obj_config.")
-                
+            source = self.sources[obj_config['source_api']]
+            
             for source_client in source.clients:
                 api_host = self.config.get('auth_args', {}).get('host', 'Unknown Source')
                 print(f"Processing {obj_type} from {api_host}")
