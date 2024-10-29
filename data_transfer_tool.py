@@ -345,7 +345,6 @@ class DataTransferTool:
                             # Check if the source is a static string (applies to any data type)
                             if 'str:' in field_info['source']:
                                 source_value = field_info['source'].split("str:")[1].strip().strip("\'")   
-                                continue
                                                      
                             # Handle dictionary-like data sources (e.g., CSV)
                             elif isinstance(item, dict):
