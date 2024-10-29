@@ -59,7 +59,7 @@ object_mappings:
         source: "name"
         transform_fuction: regex_replace('.*\-gen\-.*','Tiger One Card Services')
         transform_fuction: regex_replace('.*\-(len|core|boot)\-.*'','Infrastructure Services & Ops')
-        transform_fuction: regex_replace('.*\-vdi\-.*,'')
+        transform_fuction: regex_replace('.*\-vdi\-.*,'Customer Rel & Learning Tech')
 
       cluster:
         source: "parent.name"
