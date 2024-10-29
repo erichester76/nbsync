@@ -41,7 +41,7 @@ class DataTransferTool:
         self.dry_run = dry_run  # Store the dry_run flag
         self.sources = {}
         self.mapped_data = {}
-        self.DEBUG = 0
+        self.DEBUG = 1
 
 
     def initialize_sources(self):
@@ -188,6 +188,7 @@ class DataTransferTool:
                     # Store split parts into new variables named `field_name_X`
                     for index, split_value in enumerate(split_values, start=1):
                         setattr(self, f"{field_name}_{index}", split_value)
+                        print(f"{field_name}_{index} = split_value")
                     value = split_values
                     
                 elif "change_case" in trans:
