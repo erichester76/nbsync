@@ -64,6 +64,7 @@ object_mappings:
           - regex_replace('.*\-core\-.*', 'Infrastructure Services & Ops')
           - regex_replace('.*\-boot\-.*', 'Infrastructure Services & Ops')
           - regex_replace('.*\-vdi\-.*', 'Customer Rel & Learning Tech')
+          # catch all (if it still has numbers its not been replaced - guess?)
           - regex_replace('.*\d.*', 'Infrastructure Services & Ops')
           - lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
@@ -805,11 +806,14 @@ object_mappings:
           - regex_replace('(?i)^89p.*','Flight Services')
           - regex_replace('(?i)^89r.*','Institutional Support')
           - regex_replace('^cisco.*','Network Services & Telecomm')
-          - regex_replace('^[^A-Z]|[\d\-]+','')
+          # catch all (if it doesnt start with a capital, or still has numbers or dashes.. seems like its not replaced)
+          - regex_replace('^[^A-Z]','')
+          - regex_replace('[\d\-]+','')
           - lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
         source: "config.hardware.numCPU"
+        #vmware returns an int, and netbox stores a float.. causes it to think there is a change
         transform_function: convert_to_type('float')
 
       memory:
