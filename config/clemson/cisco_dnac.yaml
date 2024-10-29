@@ -15,10 +15,12 @@ api_definitions:
     type: api
     module: dnacentersdk
     auth_method: login
-    auth_function: api
+    auth_function: dnacentersdk.DNACenterAPI
     auth_params:
       username: ${DNAC_AUTH_USER}
       password: ${DNAC_AUTH_PW}
+      version: '2.3.3'  # The version of DNAC API you are working with
+
     base_urls:
       - https://cisco-dnac.clemson.edu/
 
