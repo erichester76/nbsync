@@ -61,7 +61,6 @@ class APIDataSource(DataSource):
                         "pwd": self.config['auth_params']['password'],
                         "sslContext": ssl_context
                     }
-                    print(f"{auth_args}")
                     # Call the SmartConnect function with explicit arguments
                     self.api = auth_func(**auth_args)
                 else:
