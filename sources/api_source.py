@@ -74,18 +74,24 @@ class APIDataSource(DataSource):
                 # Handle authentication methods
                 if auth_method == 'token':
                     self.api = auth_func(base_url, token=self.config['auth_args']['token'])
+                    if base_url not in self.session_expiry: 
+                        self.clients.append(self.api)
+                        print(f"Connected to {self.name} at {base_url}")
+
                     self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=1)
 
                 elif auth_method == 'login':
                     if auth_args:
                         self.api = auth_func(**auth_args)
+                        if base_url not in self.session_expiry: 
+                            self.clients.append(self.api)
+                            print(f"Connected to {self.name} at {base_url}")
+
                         self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=1)
 
                     else:
                         raise ValueError("Login-based authentication requires auth_args to be set.")
 
-                print(f"Connected to {self.name} at {base_url}")
-                self.clients.append(self.api)
         
         
     def fetch_data(self, obj_config, api_client):
