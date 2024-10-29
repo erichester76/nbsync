@@ -6,7 +6,7 @@ api_definitions:
     auth_method: token
     auth_function: api  
     auth_params:
-      token: 25c89f4320476edf29a6cb24a1d2b085b1fd5264
+      token: ${NETBOX_API_KEY}
     base_urls:
       - https://netbox.app.clemson.edu
 
@@ -17,8 +17,8 @@ api_definitions:
     auth_method: login
     auth_function: connect.SmartConnect
     auth_params:
-      username: esacollector
-      password: Upward-Floral4-Avid
+      username: ${VMWARE_AUTH_USER}
+      password: ${VMWARE_AUTH_PW}
       sslContext: ignore
     auth_args:
       - host
