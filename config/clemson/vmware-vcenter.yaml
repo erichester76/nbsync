@@ -74,7 +74,7 @@ object_mappings:
         transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
   
       role: 
-        source: str:Hypervisor Host
+        source: str:"Hypervisor Host"
         transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
       site:
@@ -110,9 +110,9 @@ object_mappings:
 
 
       platform:
-        source: [config.product.name, config.product.version]
+        source: ["config.product.name", "config.product.version"]
         transform_function: 
-          - concat('' ')
+          - concat(' ')
           - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
   virtual_machines:
