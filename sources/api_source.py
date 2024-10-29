@@ -46,6 +46,9 @@ class APIDataSource(DataSource):
                             auth_args['sslContext'] = ssl._create_unverified_context()
                         elif auth_args['sslContext'] == 'None':
                             auth_args['sslContext'] = None
+                    if 'host' in auth_args:
+                        auth_args['host']=base_url
+                        
             else:
                 auth_args = {}
 
