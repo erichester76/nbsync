@@ -141,7 +141,7 @@ object_mappings:
         source: "runtime.host.parent.name"
         transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
-      host:
+      device:
         source: "runtime.host.name"
         transform_function: 
           - regex_replace('.clemson.edu', '')
