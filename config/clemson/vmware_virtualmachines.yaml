@@ -58,11 +58,11 @@ object_mappings:
       tenant:
         source: "name"
         transform_fuction: 
-          - regex_replace('.*\-gen\-.*','Tiger One Card Services')
-          - regex_replace('.*\-len\-.*'','Infrastructure Services & Ops')
-          - regex_replace('.*\-core\-.*'','Infrastructure Services & Ops')
-          - regex_replace('.*\-boot\-.*'','Infrastructure Services & Ops')
-          - regex_replace('.*\-vdi\-.*,'Customer Rel & Learning Tech')
+          - regex_replace('.*-gen-.*','Tiger One Card Services')
+          - regex_replace('.*-len-.*'','Infrastructure Services & Ops')
+          - regex_replace('.*-core-.*'','Infrastructure Services & Ops')
+          - regex_replace('.*-boot-.*'','Infrastructure Services & Ops')
+          - regex_replace('.*-vdi-.*,'Customer Rel & Learning Tech')
           - lookup_object('name', 'tenancy.tenant.filter', 'tenancy.tenant.create')
 
       cluster:
