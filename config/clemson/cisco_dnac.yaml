@@ -55,6 +55,7 @@ object_mappings:
             items = 0
             offset += limit
         if not sites: raise ValueError("No sites found in Cisco DNA Center.")
+        print(f"Found {len(sites)} sites")
         items=0
         for site in sites:
             items += 1
