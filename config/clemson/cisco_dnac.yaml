@@ -103,7 +103,7 @@ object_mappings:
                - change_case('upper')
 
           site:
-            source: str:Clemson Network
+            source: str:"Clemson Network"
             transform_function:
                - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
 

@@ -348,7 +348,6 @@ class DataTransferTool:
                             # Handle dictionary-like data sources (e.g., CSV)
                             elif isinstance(item, dict):
                                 source_value = item.get(field_info['source'])
-                                # Check if the source is a static string
 
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
