@@ -20,8 +20,7 @@ api_definitions:
       username: ${DNAC_AUTH_USER}
       password: ${DNAC_AUTH_PW}
       version: '2.3.3'  # The version of DNAC API you are working with
-      sslContext: ignore  
-    base_urls:
+\    base_urls:
       - https://cisco-dnac.clemson.edu/
 
 object_mappings:
