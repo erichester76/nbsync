@@ -87,7 +87,7 @@ object_mappings:
             source: role
           
           platform:
-            source: [softwareType, softwareVersion]
+            source: ["softwareType", "softwareVersion"]
             transform_function: 
               - concat(' ')
               - regex_replace('^ ','IOS ')
