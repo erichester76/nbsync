@@ -92,7 +92,7 @@ object_mappings:
           site:
             source: "locationName"
             transform_function:
-               - regex_replace('^$','Clemson Network')
+               - regex_replace('','Clemson Network')
                - change_case('title')
                - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
 
