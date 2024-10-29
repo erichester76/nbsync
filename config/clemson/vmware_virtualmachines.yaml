@@ -59,13 +59,13 @@ object_mappings:
       tenant:
         source: "name"
         transform_function: 
-          - regex_replace('.clemson.edu', '')
           - regex_replace('.*\-gen\-.*', 'Tiger One Card Services')
           - regex_replace('.*\-len\-.*', 'Infrastructure Services & Ops')
           - regex_replace('.*\-core\-.*', 'Infrastructure Services & Ops')
           - regex_replace('.*\-boot\-.*', 'Infrastructure Services & Ops')
           - regex_replace('.*\-vdi\-.*', 'Customer Rel & Learning Tech')
-          - lookup_object('name', 'tenancy.tenant.filter', 'tenancy.tenant.create')
+          - regex_replace('.*\d.*', 'Infrastructure Services & Ops')
+          - lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       cluster:
         source: "parent.name"
@@ -496,7 +496,7 @@ object_mappings:
           - regex_replace('6uk.*','Information Technology')
           - regex_replace('4gk.*','Infrastructure Services & Ops')
           - regex_replace('2tg.*','Inst Adv Materials')
-          - lookup_object('name', 'tenancy.tenant.filter', 'tenancy.tenant.create')
+          - lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
         source: "config.hardware.numCPU"
