@@ -5,7 +5,7 @@ api_definitions:
     module: pynetbox
     auth_method: token
     auth_function: api  
-    auth_params:
+    auth_args:
       token: ${NETBOX_API_KEY}
     base_urls:
       - https://netbox.app.clemson.edu
@@ -16,10 +16,6 @@ api_definitions:
     module: pyVim
     auth_method: login
     auth_function: connect.SmartConnect
-    auth_params:
-      username: ${VMWARE_AUTH_USER}
-      password: ${VMWARE_AUTH_PW}
-      sslContext: ignore
     auth_args:
       - host
       - username: ${VMWARE_AUTH_USER}

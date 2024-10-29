@@ -39,7 +39,7 @@ class APIDataSource(DataSource):
 
             if auth_method == 'token':
                 # Token-based authentication
-                token = self.config['auth_params'].get('token')
+                token = self.config['auth_args'].get('token')
                 if token is None:
                     raise ValueError("Token is required for token-based authentication.")
                 

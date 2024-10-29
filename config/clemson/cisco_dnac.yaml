@@ -5,7 +5,7 @@ api_definitions:
     module: pynetbox
     auth_method: token
     auth_function: api  
-    auth_params:
+    auth_args:
       token: ${NETBOX_API_KEY}
     base_urls:
       - https://netbox.app.clemson.edu
