@@ -496,6 +496,7 @@ object_mappings:
           - regex_replace('6uk.*','Information Technology')
           - regex_replace('4gk.*','Infrastructure Services & Ops')
           - regex_replace('2tg.*','Inst Adv Materials')
+          - regex_replace('.*\d.*','')
           - lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
