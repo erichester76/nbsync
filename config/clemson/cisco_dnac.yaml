@@ -51,7 +51,7 @@ object_mappings:
           
           name:
             source: "hostname"
-            
+
           device_type:
             source: "platformId"
             transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
