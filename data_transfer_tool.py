@@ -301,8 +301,8 @@ class DataTransferTool:
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
-            self.sources[obj_config['source_api'].authenticate()
-
+           
+            self.sources[obj_config['source_api']].authenticate()
             source = self.sources[obj_config['source_api']]
 
             for source_client in source.clients:
