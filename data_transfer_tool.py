@@ -11,12 +11,33 @@ from sources.snmp_source import SNMPDataSource
 import jinja2
 import deepdiff
 
+# Pattern to match environment variables in the format ${VAR_NAME}
+env_var_pattern = re.compile(r'\$\{([^}^{]+)\}')
+
+def env_var_constructor(loader, node):
+    """Extracts the environment variable from the node value."""
+    value = loader.construct_scalar(node)
+    matches = env_var_pattern.findall(value)
+    
+    for match in matches:
+        env_value = os.getenv(match, None)
+        if env_value:
+            value = value.replace(f"${{{match}}}", env_value)
+        else:
+            raise ValueError(f"Environment variable '{match}' not set.")
+    
+    return value
+
+# Register custom constructor for YAML
+yaml.add_implicit_resolver('!envvar', env_var_pattern)
+yaml.add_constructor('!envvar', env_var_constructor)
+
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
         env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
         template = env.get_template(yaml_file)
-        rendered_yaml = template.render()
+        rendered_yaml = template.render(os.environ)
         self.config = yaml.safe_load(rendered_yaml)
         self.dry_run = dry_run  # Store the dry_run flag
         self.sources = {}
