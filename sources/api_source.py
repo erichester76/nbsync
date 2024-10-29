@@ -67,7 +67,7 @@ class APIDataSource(DataSource):
                 auth_args['base_url'] = base_url
 
             if self.api and self.is_session_valid():
-                    print(f"Using existing session for {self.name}.")
+                    print(f"Using existing session for {self.name} at {base_url}.")
             else:
                 # Handle authentication methods
                 print(f"Connecting to {self.name} at {base_url}...")
