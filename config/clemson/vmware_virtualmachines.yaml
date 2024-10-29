@@ -34,70 +34,76 @@ api_definitions:
 
 object_mappings:
 
-  # hosts:
-  #   source_api: vmware
-  #   destination_api: netbox
-  #   destination_endpoint: dcim.devices
-  #   find_function: dcim.devices.filter
-  #   create_function: dcim.devices.create
-  #   update_function: dcim.devices.update
-  #   imports:
-  #     - pyVmomi.vim
-  #   fetch_data_code: |
-  #     def fetch_data(api_client):
-  #         content = api_client.RetrieveContent()
-  #         hosts = content.viewManager.CreateContainerView(content.rootFolder, [vim.HostSystem], True).view
-  #         return hosts
+  hosts:
+    source_api: vmware
+    destination_api: netbox
+    destination_endpoint: dcim.devices
+    find_function: dcim.devices.filter
+    create_function: dcim.devices.create
+    update_function: dcim.devices.update
+    imports:
+      - pyVmomi.vim
+    fetch_data_code: |
+      def fetch_data(api_client):
+          content = api_client.RetrieveContent()
+          hosts = content.viewManager.CreateContainerView(content.rootFolder, [vim.HostSystem], True).view
+          return hosts
 
-  #   mapping:
+    mapping:
 
-  #     name:
-  #       source: "name"
-  #       transform_function: regex_replace('.clemson.edu', '')
+      name:
+        source: "name"
+        transform_function: regex_replace('.clemson.edu', '')
   
-  #     cluster:
-  #       source: "parent.name"
-  #       transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
-  
-  #     role: 
-  #       source: str:"Hypervisor Host"
-  #       transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
+      tenant:
+        source: "name"
+        transform_fuction: regex_replace('.*\-gen\-.*','Tiger One Card Services')
+        transform_fuction: regex_replace('.*\-(len|core|boot)\-.*'','Infrastructure Services & Ops')
+        transform_fuction: regex_replace('.*\-vdi\-.*,'')
 
-  #     site:
-  #       source: "parent.name"
-  #       transform_function: 
-  #         - regex_replace('(?i)^CU\-.+','Clemson Information Technology Center')
-  #         - regex_replace('(?i)^CUDR\-.+|^DR\-.+','University of California San Diego')
-  #         - regex_replace('(?i)^Poole\-.+','Poole')
-  #         - regex_replace('(?i)^Proto\-.+','Clemson Information Technology Center')
-  #         - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')    
+      cluster:
+        source: "parent.name"
+        transform_function: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
   
-  #     device_type:
-  #       source: "hardware.systemInfo.model"
-  #       transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
-  #       included_fields:
-  #         - field: manufacturer
-  #           key: name
-  #         - field: manufacturer
-  #           key: slug
-  #           create_if_missing: true
-  #           transform_function: slugify    
+      role: 
+        source: str:"Hypervisor Host"
+        transform_function: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
-  #     status:
-  #       source: "runtime.connectionState"
-  #       transform_function: 
-  #         - regex_replace('connected', 'active')
-  #         - regex_replace('disconnected', 'offline')
+      site:
+        source: "parent.name"
+        transform_function: 
+          - regex_replace('(?i)^CU\-.+','Clemson Information Technology Center')
+          - regex_replace('(?i)^CUDR\-.+|^DR\-.+','University of California San Diego')
+          - regex_replace('(?i)^Poole\-.+','Poole')
+          - regex_replace('(?i)^Proto\-.+','Clemson Information Technology Center')
+          - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')    
   
-  #     serial:
-  #       source: summary.hardware.otherIdentifyingInfo
-  #       transform_function: extract_identifier('SerialNumberTag')  
+      device_type:
+        source: "hardware.systemInfo.model"
+        transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
+        included_fields:
+          - field: manufacturer
+            key: name
+          - field: manufacturer
+            key: slug
+            create_if_missing: true
+            transform_function: slugify    
 
-  #     platform:
-  #       source: ["config.product.name", "config.product.version"]
-  #       transform_function: 
-  #         - concat(" ")
-  #         - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+      status:
+        source: "runtime.connectionState"
+        transform_function: 
+          - regex_replace('connected', 'active')
+          - regex_replace('disconnected', 'offline')
+  
+      serial:
+        source: summary.hardware.otherIdentifyingInfo
+        transform_function: extract_identifier('SerialNumberTag')  
+
+      platform:
+        source: ["config.product.name", "config.product.version"]
+        transform_function: 
+          - concat(" ")
+          - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
   virtual_machines:
 
@@ -112,18 +118,7 @@ object_mappings:
     fetch_data_code: |
       def fetch_data(api_client):
           content = api_client.RetrieveContent()
-          vms = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view
-
-          # for vm in vms:
-          #     print(f"Inspecting VM: {vm.config.name}")
-          #     # Debugging guest.net structure
-          #     if hasattr(vm, 'guest') and vm.guest.net:
-          #         print(f"Guest net structure: {vm.guest.net}")
-          #         if vm.guest.net[0].ipConfig and vm.guest.net[0].ipConfig.ipAddress:
-          #             print(f"IP Address details: {vm.guest.net[0].ipConfig.ipAddress[0]}")
-          #     else:
-          #         print(f"No network information found for {vm.config.name}")
-                  
+          vms = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view                  
           return vms
 
     mapping:
@@ -146,25 +141,376 @@ object_mappings:
           - regex_replace('.clemson.edu', '')
           - lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
 
+      tenant:
+        source: "config.name"
+        transform_function:
+          - regex_replace('24z.*','VP for Economic Development')
+          - regex_replace('259.*','0109 PSA Fiscal Unit')
+          - regex_replace('258.*','4-H Youth Development')
+          - regex_replace('2gu.*','AAH Advisement Center')
+          - regex_replace('27x.*','Abbeville')
+          - regex_replace('6un.*','Acad Fiscal Bud Hol/Clos')
+          - regex_replace('6gf.*','Academic Services')
+          - regex_replace('6gs.*','Academic Success Center')
+          - regex_replace('5hw.*','Access Control')
+          - regex_replace('6m6.*','Accounting Services')
+          - regex_replace('6m4.*','Acct for Related Organizations')
+          - regex_replace('2ut.*','ACS Div CHED Exam Institute')
+          - regex_replace('2mz.*','Ad-Ac Supp Svs/Undgr St')
+          - regex_replace('2mx.*','Ad-Research/Grad Studies')
+          - regex_replace('6u6.*','Admin Sytems Initiative')
+          - regex_replace('6w9.*','Administrative Leases')
+          - regex_replace('6lx.*','Administrative Services')
+          - regex_replace('6y8.*','Adv Mat Res Lab (AMRL Bldg)')
+          - regex_replace('6yo.*','Advanced Materials')
+          - regex_replace('267.*','Advanced Plant Technology')
+          - regex_replace('6xe.*','Advancement General')
+          - regex_replace('6uu.*','Advancement Finance & Admin')
+          - regex_replace('37s.*','Aerospace Studies')
+          - regex_replace('2cy.*','AFWSC CO-OP Unit')
+          - regex_replace('254.*','Ag and Natural Resources')
+          - regex_replace('2cj.*','Agric & Biological Engr (Old)')
+          - regex_replace('29i.*','Agricultural Education')
+          - regex_replace('25l.*','Agricultural Personnel')
+          - regex_replace('26h.*','Agricultural Research')
+          - regex_replace('2b8.*','Agricultural Sciences')
+          - regex_replace('26z.*','Agricultural Support')
+          - regex_replace('2ch.*','Agriculture & Applied Economic')
+          - regex_replace('28c.*','Aiken')
+          - regex_replace('292.*','Allendale')
+          - regex_replace('6ut.*','Alumni Relations')
+          - regex_replace('37l.*','AM Spiro Ctr for Entr Leadersh')
+          - regex_replace('27y.*','Anderson')
+          - regex_replace('2cn.*','Animal & Veterinary Sci (Old)')
+          - regex_replace('2b7.*','Animal & Veterinary Sciences')
+          - regex_replace('2bo.*','Animal CoProd Res/Ed Ctr-ACREC')
+          - regex_replace('6uz.*','Annual Fund')
+          - regex_replace('2b9.*','Applied Economics & Statistics')
+          - regex_replace('2co.*','Aquaculture Fish and Wildlife')
+          - regex_replace('272.*','Aquaculture Research')
+          - regex_replace('2gz.*','Art')
+          - regex_replace('6hn.*','Assessment')
+          - regex_replace('6dj.*','Asset Stewardship')
+          - regex_replace('6dg.*','Assistant for Federal Reg')
+          - regex_replace('252.*','Assoc Vice President for PSA')
+          - regex_replace('873.*','Ath Building Maintenance')
+          - regex_replace('89n.*','Ath Facilities Improvements')
+          - regex_replace('876.*','Ath Grounds & Fields')
+          - regex_replace('86v.*','Athletic Administration')
+          - regex_replace('86w.*','Athletic Compliance')
+          - regex_replace('6rt.*','Audit Adjustments')
+          - regex_replace('293.*','Bamberg')
+          - regex_replace('294.*','Barnwell')
+          - regex_replace('87h.*','Baseball')
+          - regex_replace('87j.*','Basketball Men')
+          - regex_replace('87k.*','Basketball Women')
+          - regex_replace('295.*','Beaufort')
+          - regex_replace('2d8.*','Beef Unit')
+          - regex_replace('2bw.*','Belle W Baruch Forest Sci Inst')
+          - regex_replace('296.*','Berkeley')
+          - regex_replace('2sn.*','Bioengineering')
+          - regex_replace('2so.*','Bioengineering Alliance of SC')
+          - regex_replace('2tj.*','Biological Interfaces of Engr')
+          - regex_replace('2ba.*','Biological Sciences')
+          - regex_replace('2bl.*','Biology Instruction & Ag Ed')
+          - regex_replace('6de.*','Board of Visitors')
+          - regex_replace('6o3.*','Bookstore')
+          - regex_replace('88c.*','Bowl Expenditures')
+          - regex_replace('2hi.*','Brooks Center')
+          - regex_replace('6xx.*','Brooks Inst for Sports Sci')
+          - regex_replace('6uq.*','Budget Holding Closing - A+A')
+          - regex_replace('2au.*','Budget Holding Closing - CAFLS')
+          - regex_replace('2jo.*','Budget Holding Closing - ECDEV')
+          - regex_replace('75k.*','Budget Holding Closing - FAC')
+          - regex_replace('6xo.*','Budget Holding Closing - RES')
+          - regex_replace('2pj.*','Budget Holding Closing - SOE')
+          - regex_replace('72m.*','Budget Holding Closing - UTIL')
+          - regex_replace('6m8.*','Budgets and Financial Planning')
+          - regex_replace('2gv.*','CAAH Business Office')
+          - regex_replace('2ay.*','CAFLS Asso Dean for Aca Affair')
+          - regex_replace('2az.*','CAFLS Assoc Dean for Research')
+          - regex_replace('2b3.*','CAFLS Business Office')
+          - regex_replace('2ax.*','CAFLS Deans Office')
+          - regex_replace('2b4.*','CAFLS FTE Management')
+          - regex_replace('2b2.*','CAFLS Student Services')
+          - regex_replace('297.*','Calhoun')
+          - regex_replace('277.*','Calhoun Field Laboratory')
+          - regex_replace('2n7.*','Call Me Mister Program')
+          - regex_replace('25u.*','Campbell Geology Museum')
+          - regex_replace('2ta.*','Campbell Grad Engr Program')
+          - regex_replace('5jc.*','Campus Activities and Events')
+          - regex_replace('6lz.*','Campus Financial Planner')
+          - regex_replace('6tu.*','Campus Hazardous Waste')
+          - regex_replace('6tp.*','Campus Liability Insurance')
+          - regex_replace('5i5.*','Campus Recreation')
+          - regex_replace('6on.*','Campus Services')
+          - regex_replace('72n.*','Campus Utilities')
+          - regex_replace('6mx.*','Capital Planning & Financing')
+          - regex_replace('6mc.*','Cash and Treasury Services')
+          - regex_replace('37y.*','CBBS College Support Services')
+          - regex_replace('37z.*','CBBS Dev Alum &Communications')
+          - regex_replace('36u.*','CBBS International Programs')
+          - regex_replace('383.*','CBBS Mkt & Comm')
+          - regex_replace('37g.*','CBBS Service Center')
+          - regex_replace('36t.*','CBBSUAC')
+          - regex_replace('2ns.*','CBSHS AD-Acad Affairs/Under St')
+          - regex_replace('2oe.*','CBSHS AD-RESCH/Grad Studies')
+          - regex_replace('2nt.*','CBSHS Financial & HR Svcs')
+          - regex_replace('4gp.*','CCIT CITI')
+          - regex_replace('4gt.*','CCIT Data Analytics')
+          - regex_replace('4gj.*','CCIT ESA')
+          - regex_replace('4gs.*','CCIT HPC')
+          - regex_replace('4gg.*','CCIT Internal Operations')
+          - regex_replace('4gf.*','CCIT Planning')
+          - regex_replace('4go.*','CCIT Software Development')
+          - regex_replace('6uo.*','Cent Fiscal Unit Bud Hol/Clos')
+          - regex_replace('2je.*','Cent for Arch Stud Genoa&Charl')
+          - regex_replace('2t9.*','Center for Adv Manufacturing')
+          - regex_replace('36o.*','Center for Corporate Learning')
+          - regex_replace('38z.*','Center for Economic Education')
+          - regex_replace('392.*','Center for International Trade')
+          - regex_replace('38x.*','Center for Policy Studies')
+          - regex_replace('5jk.*','Center for Student Involvement')
+          - regex_replace('2n6.*','Center of Excellence-ALL')
+          - regex_replace('2ms.*','Center of Excellence-DML')
+          - regex_replace('2tr.*','CES Living Learning Community')
+          - regex_replace('2v6.*','CETL-Clemson Engr Tech Lab')
+          - regex_replace('6ij.*','Charles H. Houston Center')
+          - regex_replace('298.*','Charleston')
+          - regex_replace('2sr.*','Chemical & Biomolecular Eng')
+          - regex_replace('2un.*','Chemistry')
+          - regex_replace('27z.*','Cherokee')
+          - regex_replace('275.*','Cherry Farm Research')
+          - regex_replace('28d.*','Chester')
+          - regex_replace('28e.*','Chesterfield')
+          - regex_replace('6dk.*','Chief Diversity Officer')
+          - regex_replace('4gq.*','Chief Technology Office')
+          - regex_replace('4gh.*','CIO Office')
+          - regex_replace('6ya.*','CISCOL')
+          - regex_replace('2h3.*','City Planning &Real Estate Dev')
+          - regex_replace('2st.*','Civil Engineering')
+          - regex_replace('28o.*','Clarendon')
+          - regex_replace('6p4.*','Classified Staff Ombudsman')
+          - regex_replace('6xi.*','Clemson Advancement Foundation')
+          - regex_replace('6mu.*','Clemson Blue Cheese')
+          - regex_replace('2c2.*','Clemson Center Human Genetics')
+          - regex_replace('37q.*','Clemson Corps')
+          - regex_replace('6yc.*','Clemson Environmental Inst')
+          - regex_replace('2bu.*','Clemson Forest - Teach/Res/Mgt')
+          - regex_replace('2bs.*','Clemson Light Imaging Facility')
+          - regex_replace('6ys.*','Clemson Nanomaterials Inst.')
+          - regex_replace('6gt.*','Clemson Online')
+          - regex_replace('6gn.*','Clemson Telecampus')
+          - regex_replace('6xj.*','Clemson Univ Endowments')
+          - regex_replace('6xk.*','Clemson Univ Fdn Endowments')
+          - regex_replace('6uj.*','Clemson Univ Research Fdn')
+          - regex_replace('6xl.*','Clemson Univ Research Fdn')
+          - regex_replace('27l.*','Coastal Research & Educ Center')
+          - regex_replace('2n2.*','CoE Financial & HR Svcs')
+          - regex_replace('4gr.*','COE Next Gen Computing')
+          - regex_replace('2t2.*','COES Commitments')
+          - regex_replace('36b.*','College of Business')
+          - regex_replace('2pl.*','College of Science-Deans Offic')
+          - regex_replace('299.*','Colleton')
+          - regex_replace('6ux.*','Communications Center')
+          - regex_replace('2tc.*','Computational Res Lab (ACRL)')
+          - regex_replace('2sm.*','Computer & Network Services')
+          - regex_replace('2t7.*','COMSET')
+          - regex_replace('5jd.*','Concerts')
+          - regex_replace('2th.*','Conservation Center')
+          - regex_replace('2su.*','Construct Indus Coop Alliance')
+          - regex_replace('2gx.*','Construction Science and Mgmt')
+          - regex_replace('2o2.*','Continuing Education')
+          - regex_replace('6mj.*','Controllers Office')
+          - regex_replace('6gb.*','Cooperative Education Prog')
+          - regex_replace('25a.*','Cooperative Extension Services')
+          - regex_replace('6wd.*','Copy Cats')
+          - regex_replace('6di.*','Council on Diversity')
+          - regex_replace('2mw.*','Counseling & Educat Leadership')
+          - regex_replace('5ic.*','Counseling Center')
+          - regex_replace('25i.*','County Agent Work-1890 Prog SC')
+          - regex_replace('2hs.*','CRDC-Comm Rsch & Design Cntr')
+          - regex_replace('2cl.*','Crop & Soil Environmental Sci')
+          - regex_replace('883.*','Cross Country Women')
+          - regex_replace('6yb.*','CSAV Institute')
+          - regex_replace('374.*','Ctr Adv of Mkting & Soc Sci')
+          - regex_replace('2ss.*','Ctr for Adv Engr Fibers & Film')
+          - regex_replace('2he.*','Ctr for Elec & Digital Publish')
+          - regex_replace('2uv.*','Ctr for Excell in Math & Sci')
+          - regex_replace('2sy.*','Ctr for Rsch in Wireless Comm')
+          - regex_replace('2nz.*','Ctr for Rsrch and Collab Activ')
+          - regex_replace('2my.*','Ctr fr Res on Hlth Disparities')
+          - regex_replace('2h5.*','Ctr Health Fac Design & Test')
+          - regex_replace('6y9.*','CU Aging Driving Laboratory')
+          - regex_replace('5ke.*','CU Beach')
+          - regex_replace('6ym.*','CU Comp Ctr for Mobility Sys')
+          - regex_replace('2tl.*','CU CWD')
+          - regex_replace('6d9.*','CU Environ. Committee (CUEC)')
+          - regex_replace('2de.*','CU EPIC')
+          - regex_replace('2bj.*','CU Genomics & Comp Bio Lab')
+          - regex_replace('6xv.*','CU ICAR')
+          - regex_replace('36k.*','CU Inst - Study of Capitalism')
+          - regex_replace('2nm.*','CU Institute for Parks')
+          - regex_replace('2bi.*','CU Life Science Outreach Ctr')
+          - regex_replace('6o4.*','CU Postal Operations')
+          - regex_replace('262.*','CU Restoration Inst. (CURI)')
+          - regex_replace('6gg.*','CU Science (STEM) Outreach Co')
+          - regex_replace('6yv.*','CU/GHS Research Collaboration')
+          - regex_replace('6wx.*','CUB Productions')
+          - regex_replace('25h.*','CUFAN - Extension Admin')
+          - regex_replace('2mu.*','Curriculum and Instruction')
+          - regex_replace('4gi.*','Customer Rel & Learning Tech')
+          - regex_replace('2d6.*','Dairy Farm')
+          - regex_replace('28p.*','Darlington')
+          - regex_replace('2gr.*','Dean of Arch Arts&Humanities')
+          - regex_replace('2sj.*','Dean of Engineering & Science')
+          - regex_replace('6y3.*','Dean Of The Graduate School')
+          - regex_replace('2mn.*','Dean-Beh Social & Health Sci')
+          - regex_replace('2mo.*','Dean-College of Education')
+          - regex_replace('2hp.*','Department of Communications')
+          - regex_replace('25e.*','Dept of Agricultural Services')
+          - regex_replace('2gs.*','Development')
+          - regex_replace('6us.*','Development')
+          - regex_replace('6vh.*','Development Special Project')
+          - regex_replace('6y6.*','Digital Production Arts')
+          - regex_replace('28q.*','Dillon')
+          - regex_replace('27m.*','Dir Regulatory & Pub Serv Prog')
+          - regex_replace('4dh.*','Div of Admin Programming Serv')
+          - regex_replace('5iw.*','Diversity Education Programs')
+          - regex_replace('2o3.*','Division Collab Academic Svcs')
+          - regex_replace('6v4.*','Donor Services')
+          - regex_replace('29a.*','Dorchester')
+          - regex_replace('255.*','Economic Development')
+          - regex_replace('36j.*','Economics')
+          - regex_replace('2na.*','Ed & Org Leadership Dev')
+          - regex_replace('28f.*','Edgefield')
+          - regex_replace('27f.*','Edisto Research & Educ Center')
+          - regex_replace('2nb.*','Education & Human Dev')
+          - regex_replace('6ws.*','Elderhostel')
+          - regex_replace('2te.*','Electric Power Res Alliance')
+          - regex_replace('2sx.*','Electrical & Computer Engr')
+          - regex_replace('2um.*','Electron Microscope Facility')
+          - regex_replace('5i3.*','Emergency Preparedness')
+          - regex_replace('2td.*','Emerging Materials and Tech')
+          - regex_replace('6xr.*','Emerging Tech Dev & Market Ctr')
+          - regex_replace('6gw.*','Emeritus College')
+          - regex_replace('2uu.*','Engineering & Electronics Svcs')
+          - regex_replace('2u5.*','Engineering & Science Advising')
+          - regex_replace('2u6.*','Engineering & Science Educatio')
+          - regex_replace('2tb.*','Engineering Graphics Program')
+          - regex_replace('2hf.*','English')
+          - regex_replace('6gd.*','English as 2nd Language Cntr')
+          - regex_replace('6g5.*','Enrollment Managerment')
+          - regex_replace('6oz.*','Enterprise Risk Management')
+          - regex_replace('2cr.*','Entomology')
+          - regex_replace('2bb.*','Entomology Soils & Plant Sci')
+          - regex_replace('2u9.*','Environ Sci & Policy Prog ENSP')
+          - regex_replace('256.*','Environmental Conservation')
+          - regex_replace('2t3.*','Environmental Engr & Earth Sci')
+          - regex_replace('2cs.*','Environmental Toxicology')
+          - regex_replace('877.*','Equipment Room')
+          - regex_replace('37d.*','Erwin Center for Brand Comm')
+          - regex_replace('874.*','Event Promotions')
+          - regex_replace('2mp.*','Excell for Innov in Math & Sci')
+          - regex_replace('6ow.*','Exec Sec to Board of Trustees')
+          - regex_replace('6gm.*','Experiential Education')
+          - regex_replace('2ct.*','Experimental Statistics')
+          - regex_replace('25d.*','Ext Agriculture & Natural Res')
+          - regex_replace('25b.*','Extension Staff Development')
+          - regex_replace('6ue.*','External Audit Fees')
+          - regex_replace('6ul.*','Fac & Admin Rec Remitted to St')
+          - regex_replace('28g.*','Fairfield')
+          - regex_replace('2o7.*','Family Outreach')
+          - regex_replace('29j.*','Field Operations')
+          - regex_replace('36x.*','Finance')
+          - regex_replace('6nx.*','Finance - Shared Services')
+          - regex_replace('5hy.*','Fire & Emergency Medical Serv')
+          - regex_replace('6ms.*','Fiscal Affairs')
+          - regex_replace('89p.*','Flight Services')
+          - regex_replace('28r.*','Florence')
+          - regex_replace('2bc.*','Food Nutrition & Package Sci')
+          - regex_replace('257.*','Food Safety & Nutrition')
+          - regex_replace('2cx.*','Food Sci/Human Nutrition (Old)')
+          - regex_replace('6os.*','Food Services-Cash Operations')
+          - regex_replace('6o6.*','Food Services-Meal Plans')
+          - regex_replace('87n.*','Football')
+          - regex_replace('87m.*','Football Camp')
+          - regex_replace('87l.*','Football Championship')
+          - regex_replace('2br.*','Forest Resources')
+          - regex_replace('2bv.*','Forest Resources - Fed Coop Un')
+          - regex_replace('2bd.*','Forestry & Environment Conserv')
+          - regex_replace('2n3.*','Foundation & Special Education')
+          - regex_replace('5hx.*','Fraternity & Sorority Life')
+          - regex_replace('6um.*','FTE')
+          - regex_replace('5je.*','Gantt Center for Student Life')
+          - regex_replace('6dl.*','Gantt Multicultural Center')
+          - regex_replace('6d7.*','General Counsel')
+          - regex_replace('2sk.*','General Engineering')
+          - regex_replace('2bk.*','Genetics & Biochemistry (Old)')
+          - regex_replace('2be.*','Genetics and Biochemistry')
+          - regex_replace('28s.*','Georgetown')
+          - regex_replace('87p.*','Golf')
+          - regex_replace('87q.*','Golf Women')
+          - regex_replace('6dc.*','Governmental Affairs')
+          - regex_replace('266.*','Grant Support Services')
+          - regex_replace('6nj.*','Grants and Contracts Admin')
+          - regex_replace('37t.*','Graphic Communications')
+          - regex_replace('282.*','Greenville')
+          - regex_replace('37x.*','Greenville One')
+          - regex_replace('283.*','Greenwood')
+          - regex_replace('2bq.*','Greenwood Genetics Center')
+          - regex_replace('29b.*','Hampton')
+          - regex_replace('2nw.*','HEHD College Support Services')
+          - regex_replace('2o9.*','HEHD Office of Distance Educ')
+          - regex_replace('6v7.*','Historic Houses')
+          - regex_replace('4mc.*','Historical Objects')
+          - regex_replace('2hj.*','History')
+          - regex_replace('25n.*','Home & Garden Info Center-HGIC')
+          - regex_replace('25v.*','Home Economics - Winthrop')
+          - regex_replace('6g8.*','Honors Programs')
+          - regex_replace('28t.*','Horry')
+          - regex_replace('2d9.*','Horse Farm')
+          - regex_replace('2bf.*','Horticulture')
+          - regex_replace('2d3.*','Horticulture (Old)')
+          - regex_replace('5k3.*','Housing - Director')
+          - regex_replace('5kd.*','Housing - Executive Director')
+          - regex_replace('5k8.*','Housing - Sustainability')
+          - regex_replace('5jy.*','Housing Admin SVCS Assignments')
+          - regex_replace('5jz.*','Housing Admin SVCS Business Af')
+          - regex_replace('5k6.*','Housing Res Facil - Custodial')
+          - regex_replace('5k5.*','Housing Res Facilities - Dir')
+          - regex_replace('5k7.*','Housing Res Facilities - Maint')
+          - regex_replace('5kc.*','Housing Summer Programs')
+          - regex_replace('2n5.*','Houston Ctr-Black Exp in Ed')
+          - regex_replace('6mz.*','Human Resources')
+          - regex_replace('2h7.*','I.M.S.E.')
+          - regex_replace('6vm.*','Image Redesign')
+          - regex_replace('2t4.*','Industrial Engineering')
+          - regex_replace('4gm.*','Information Security & Privacy')
+          - regex_replace('6uk.*','Information Technology')
+          - regex_replace('4gk.*','Infrastructure Services & Ops')
+          - regex_replace('2tg.*','Inst Adv Materials')
+          - lookup_object('name', 'tenancy.tenant.filter', 'tenancy.tenant.create')
+
       vcpus:
         source: "config.hardware.numCPU"
 
       memory:
         source: "config.hardware.memoryMB"
 
-      primary_ip4:
-        source: "guest.net[0].ipConfig.ipAddress"
-        transform_function:
-          - extract_by_type('ipv4', 'ipAddress', 'prefixLength') 
-          - concat('/')
-          - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
+      # primary_ip4:
+      #   source: "guest.net[0].ipConfig.ipAddress"
+      #   transform_function:
+      #     - extract_by_type('ipv4', 'ipAddress', 'prefixLength') 
+      #     - concat('/')
+      #     - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
           
-      primary_ip4:
-        source: "guest.net[0].ipConfig.ipAddress"
-        transform_function:
-          - extract_by_type('ipv6', 'ipAddress', 'prefixLength')  
-          - concat('/')
-          - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
+      # primary_ip4:
+      #   source: "guest.net[0].ipConfig.ipAddress"
+      #   transform_function:
+      #     - extract_by_type('ipv6', 'ipAddress', 'prefixLength')  
+      #     - concat('/')
+      #     - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
       
       platform:
         source: "guest.guestFullName"
