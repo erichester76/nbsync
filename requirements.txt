@@ -13,3 +13,4 @@ azure-mgmt-resource
 azure-mgmt-storage
 boto3
 jinja2
+deepdiff==5.0
