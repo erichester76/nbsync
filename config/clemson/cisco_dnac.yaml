@@ -42,23 +42,34 @@ object_mappings:
     update_function: dcim.devices.update
     # Fetch device data from DNAC
     fetch_data_code: |
-      def fetch_data(api_client):
-            devices = []
-            offset = 1
-            limit = 500  # You can adjust this value based on DNAC pagination settings
-            while True:
-                response = api_client.devices.get_device_list(offset=offset, limit=limit)
-                if 'response' in response and response['response']:
-                    devices.extend(response['response'])
-                else:
-                    # No more devices to fetch
-                    break
-                # Check if the number of devices returned is less than the limit, which indicates the end
-                if len(response['response']) < limit:
-                    break
-                # Increment offset to get the next page
-                offset += limit
-            return devices
+      def fetch_data(client):
+        devices = []
+        sites = []
+        offset = 1
+        limit = 500
+        while True:
+            response = client.sites.get_site(offset=offset, limit=limit)
+            sites.extend(response.response)
+            if len(response.response) < limit:
+                break
+            offset += limit
+        if not sites:
+            raise ValueError("No sites found in Cisco DNA Center.")
+        for site in sites:
+            membership = self.client.sites.get_membership(site_id=site.id)
+            if not membership or not hasattr(membership, 'device'):
+                continue  
+            if membership.device is None:
+                continue  
+            for members in membership.device:
+                if not members or not hasattr(members, 'response'):
+                    continue  
+                for device in members.response:
+                    if hasattr(device, 'serialNumber'):
+                        device['location'] = site.get('siteNameHierarchy')
+                        print(f"found device {device.hostname} in site {site.get('siteNameHierarchy')}")
+                        devices.append(device)
+        return devices
 
     mapping:
           
