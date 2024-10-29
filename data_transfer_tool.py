@@ -175,7 +175,7 @@ class DataTransferTool:
             for trans in transform:
                 if "regex_replace" in trans:
                     # Extract pattern and replacement from the transform rule
-                    pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", transform)[0]
+                    pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", trans)[0]
                     if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
                     if replacement in vars(self):
                         replacement = getattr(self, replacement)       
@@ -203,8 +203,8 @@ class DataTransferTool:
                     else:
                         raise ValueError(f"Unknown case transformation type: {case_type}")
                     
-                elif "skip_if_field_equals" in trans:
-                    field, expected_value = re.findall(r"skip_if_field_equals\('(.*)',\s*(.*)\)", trans)[0]
+                elif "skip_on_field" in trans:
+                    field, expected_value = re.findall(r"skip_on_field\('(.*)',\s*(.*)\)", trans)[0]
                     # Retrieve the actual value of the specified field
                     actual_value = self.get_nested_attribute(item, field, None)
                     if str(actual_value) == expected_value:
