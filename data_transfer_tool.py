@@ -55,6 +55,7 @@ class DataTransferTool:
                 self.sources[name] = XLSDataSource(config)
             elif source_type == 'snmp':
                 self.sources[name] = SNMPDataSource(config)
+            self.sources[name].authenticate()
         
 
     def get_nested_function(self, api_client, function_path):
