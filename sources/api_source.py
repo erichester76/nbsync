@@ -2,6 +2,7 @@ import ssl
 import importlib
 from sources.base import DataSource
 import types
+import inspect
 
 class APIDataSource(DataSource):
     def __init__(self, name, config):
@@ -19,58 +20,48 @@ class APIDataSource(DataSource):
         # Function to handle both simple function names and paths with submodules (e.g., connect.SmartConnect)
         def get_auth_function(module, function_path):
             func_parts = function_path.split(".")
-            
-            # If it's a single part (no "."), we assume it's directly from the module
             if len(func_parts) == 1:
                 auth_func = getattr(module, func_parts[0])
             else:
-                # Otherwise, we treat it as a submodule or subpath (e.g., connect.SmartConnect)
                 submodule = importlib.import_module(f"{module.__name__}.{func_parts[0]}")
                 auth_func = getattr(submodule, func_parts[1])
-            
             return auth_func
 
-        # Retrieve the authentication function dynamically
-        auth_func = get_auth_function(module, self.config['auth_function'])
-
-        # Iterate through base URLs if there are multiple
         for base_url in self.config['base_urls']:
             print(f"Connecting to {self.name} at {base_url}...")
 
-            if auth_method == 'token':
-                # Token-based authentication
-                token = self.config['auth_args'].get('token')
-                if token is None:
-                    raise ValueError("Token is required for token-based authentication.")
-                
-                # Initialize the API client with token
-                self.api = auth_func(base_url, token=self.config['auth_args']['token'])
+            # Dynamically retrieve the authentication function
+            auth_func = get_auth_function(module, self.config['auth_function'])
             
-            elif auth_method == 'login':
-                # Login-based authentication
-                auth_args = self.config.get('auth_args', {})
-                
-                # Handle SSL context for VMware SmartConnect
-                if 'sslContext' in auth_args and auth_args['sslContext'] == 'ignore':
-                    ssl_context = ssl._create_unverified_context()
-                    auth_args['sslContext'] = ssl_context  # Replace 'ignore' with the actual context
-                elif 'sslContext' in auth_args:
-                    auth_args['sslContext'] = None  # Option to pass an empty context
-                
-                # Inject base_url into auth_args if necessary (for VMware, DNAC doesn't need it here)
-                if 'host' in auth_args:
-                    auth_args['host'] = base_url
+            if not callable(auth_func):
+                raise TypeError(f"{auth_func} is not callable. Please check your function path.")
 
-                # Dynamically call the auth function with auth_args
-                self.api = auth_func(**auth_args)
-            
+            # Convert auth_args from list to dictionary, if applicable
+            if 'auth_args' in self.config:
+                auth_args = self.config['auth_args']
+                if isinstance(auth_args, list):
+                    auth_args = {arg['name']: arg['value'] for arg in auth_args}
             else:
-                raise ValueError(f"Unsupported auth method: {auth_method}")
+                auth_args = {}
 
-            # Store the authenticated client
+            # Add base_url if required
+            if 'base_url' in inspect.signature(auth_func).parameters:
+                auth_args['base_url'] = base_url
+
+            # Handle authentication methods
+            if auth_method == 'token':
+                self.api = auth_func(base_url, token=self.config['auth_args']['token'])
+
+            elif auth_method == 'login':
+                if auth_args:
+                    self.api = auth_func(**auth_args)
+                else:
+                    raise ValueError("Login-based authentication requires auth_args to be set.")
+
             print(f"Connected to {self.name} at {base_url}")
             self.clients.append(self.api)
-
+        
+        
     def fetch_data(self, obj_config, api_client):
         """
         Fetch data from the API using either a direct fetch_data_function or a custom Python code block.

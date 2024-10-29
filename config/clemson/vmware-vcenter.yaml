@@ -17,10 +17,14 @@ api_definitions:
     auth_method: login
     auth_function: connect.SmartConnect
     auth_args:
-      - host: base_url
-      - username: ${VMWARE_AUTH_USER}
-      - password: ${VMWARE_AUTH_PW}
-      - sslContext: ignore
+      - name: host
+        value: base_urls
+      - name: user
+        value: ${VCENTER_USERNAME}
+      - name: pwd
+        value: ${VCENTER_PASSWORD}
+      - name: sslContext
+        value: ignore
     base_urls:
       - cu-vcenter.clemson.edu
       - poole-vcenter.clemson.edu
