@@ -100,7 +100,7 @@ object_mappings:
                - regex_replace('Reachable', 'active')
                - regex_replace('Unreachable', 'offline')
 
-          primary_ip4:
-            source: "managementIpAddress"
-            transform_function:
-               - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
+          # primary_ip4:
+          #   source: "managementIpAddress"
+          #   transform_function:
+          #      - lookup_object('address', 'ipam.ip_addresses.filter', 'ipam.ip_addresses.create')
