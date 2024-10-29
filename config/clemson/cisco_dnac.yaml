@@ -43,6 +43,7 @@ object_mappings:
     # Fetch device data from DNAC
     fetch_data_code: |
       def fetch_data(client):
+        DEBUG=1
         devices = []
         sites = []
         offset = 1
