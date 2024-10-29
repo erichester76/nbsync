@@ -188,7 +188,7 @@ class DataTransferTool:
                     # Store split parts into new variables named `field_name_X`
                     for index, split_value in enumerate(split_values, start=1):
                         setattr(self, f"{field_name}_{index}", split_value)
-                        print(f"{field_name}_{index} = split_value")
+                        print(f"{field_name}_{index} = {split_value}")
                     value = split_values
                     
                 elif "change_case" in trans:
