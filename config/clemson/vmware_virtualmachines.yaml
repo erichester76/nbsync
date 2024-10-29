@@ -807,8 +807,8 @@ object_mappings:
           - regex_replace('(?i)^89r.*','Institutional Support')
           - regex_replace('^cisco.*','Network Services & Telecomm')
           # catch all (if it doesnt start with a capital, or still has numbers or dashes.. seems like its not replaced)
-          - regex_replace('^[^A-Z].*$','')
-          - regex_replace('^.*[\d\-].*$','')
+          - regex_replace('^[^A-Z].*$','Unknown')
+          - regex_replace('^.+[\d\-].*$','Unknown')
           - lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
