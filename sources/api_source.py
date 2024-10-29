@@ -3,6 +3,7 @@ import importlib
 from sources.base import DataSource
 import types
 import inspect
+import datetime
 
 class APIDataSource(DataSource):
     def __init__(self, name, config):
@@ -10,7 +11,17 @@ class APIDataSource(DataSource):
         self.name = name  # Store the section name
         self.api = None
         self.clients = []  # Initialize the clients list
+        self.session_expiry = None  # Add session expiry tracking
 
+
+    def is_session_valid(self):
+        """Check if the current session is valid."""
+        if self.session_expiry:
+            current_time = datetime.datetime.now()
+            # Check if the current time is still before the session expiry
+            return current_time < self.session_expiry
+        return False
+    
     def authenticate(self):
         # Dynamically load the module specified in the YAML
         module_name = self.config['module']
@@ -63,10 +74,13 @@ class APIDataSource(DataSource):
                 # Handle authentication methods
                 if auth_method == 'token':
                     self.api = auth_func(base_url, token=self.config['auth_args']['token'])
+                    self.session_expiry = datetime.datetime.now() + datetime.timedelta(mins=5)
 
                 elif auth_method == 'login':
                     if auth_args:
                         self.api = auth_func(**auth_args)
+                        self.session_expiry = datetime.datetime.now() + datetime.timedelta(mins=5)
+
                     else:
                         raise ValueError("Login-based authentication requires auth_args to be set.")
 
