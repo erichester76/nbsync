@@ -22,9 +22,9 @@ api_definitions:
       sslContext: ignore
     auth_args:
       - host
-      - username
-      - password
-      - sslContext
+      - username: ${VMWARE_AUTH_USER}
+      - password: ${VMWARE_AUTH_PW}
+      - sslContext: ignore
     base_urls:
       - cu-vcenter.clemson.edu
       - poole-vcenter.clemson.edu

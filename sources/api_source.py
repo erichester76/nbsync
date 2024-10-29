@@ -30,49 +30,46 @@ class APIDataSource(DataSource):
             
             return auth_func
 
-        # Iterate through the base URLs (for multi-instance APIs, if needed)
+        # Retrieve the authentication function dynamically
+        auth_func = get_auth_function(module, self.config['auth_function'])
+
+        # Iterate through base URLs if there are multiple
         for base_url in self.config['base_urls']:
             print(f"Connecting to {self.name} at {base_url}...")
 
-            # Dynamically retrieve the authentication function (supports paths like connect.SmartConnect)
-            auth_func = get_auth_function(module, self.config['auth_function'])
-
-
-            if not callable(auth_func):
-                raise TypeError(f"{auth_func} is not callable. Please check your function path.")
-
             if auth_method == 'token':
-                # Token-based authentication, calling the auth_function dynamically
-                self.api = auth_func(base_url, token=self.config['auth_params']['token'])
-
+                # Token-based authentication
+                token = self.config['auth_params'].get('token')
+                if token is None:
+                    raise ValueError("Token is required for token-based authentication.")
+                
+                # Initialize the API client with token
+                self.api = auth_func(base_url=base_url, access_token=token, version=self.config['auth_params'].get('version', '2.3.3'))
+            
             elif auth_method == 'login':
                 # Login-based authentication
-                if 'auth_args' in self.config and self.config['auth_args']:
-                    # Handle SSL context (ignore if specified)
-                    if 'sslContext' in self.config['auth_params'] and self.config['auth_params']['sslContext'] == 'ignore':
-                        ssl_context = ssl._create_unverified_context()  # Ignore SSL errors
-                    else:
-                        ssl_context = None
-                    
-                    # Collect arguments for SmartConnect: host, user, pwd, and sslContext
-                    auth_args = {
-                        "host": base_url,
-                        "user": self.config['auth_params']['username'],
-                        "pwd": self.config['auth_params']['password'],
-                        "sslContext": ssl_context
-                    }
-                    # Call the SmartConnect function with explicit arguments
-                    self.api = auth_func(**auth_args)
-                else:
-                    raise ValueError("Login-based authentication requires auth_args to be set.")
-                    
+                auth_args = self.config.get('auth_args', {})
+                
+                # Handle SSL context for VMware SmartConnect
+                if 'sslContext' in auth_args and auth_args['sslContext'] == 'ignore':
+                    ssl_context = ssl._create_unverified_context()
+                    auth_args['sslContext'] = ssl_context  # Replace 'ignore' with the actual context
+                elif 'sslContext' in auth_args:
+                    auth_args['sslContext'] = None  # Option to pass an empty context
+                
+                # Inject base_url into auth_args if necessary (for VMware, DNAC doesn't need it here)
+                if 'host' in auth_args:
+                    auth_args['host'] = base_url
+
+                # Dynamically call the auth function with auth_args
+                self.api = auth_func(**auth_args)
+            
             else:
                 raise ValueError(f"Unsupported auth method: {auth_method}")
 
             # Store the authenticated client
             print(f"Connected to {self.name} at {base_url}")
             self.clients.append(self.api)
-            
 
     def fetch_data(self, obj_config, api_client):
         """
