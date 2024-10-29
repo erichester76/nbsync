@@ -53,9 +53,9 @@ object_mappings:
 
       name:
         source: "name"
-        transform_function: r
-        - regex_replace('.clemson.edu', '')
-        - skip_if_field_equals('config.template', True)
+        transform_function: 
+          - skip_if_field_equals('config.template', True)
+          - regex_replace('.clemson.edu', '')
   
       tenant:
         source: "name"
