@@ -47,11 +47,11 @@ object_mappings:
         sites = []
         offset = 1
         limit = 500
-        while True:
+        items = 500
+        while items == limit:
             response = client.sites.get_site(offset=offset, limit=limit)
             sites.extend(response.response)
-            if len(response.response) < limit: break
-            if offset > 500: break
+            items = len(response.response)
             offset += limit
         if not sites: raise ValueError("No sites found in Cisco DNA Center.")
         for site in sites:
@@ -75,17 +75,10 @@ object_mappings:
               - regex_replace('.clemson.edu.*','')
               - change_case('lower')
 
-          # manufacturer:
-          #   source: "vendor"
-          #   transform_function:
-          #     - regex_replace(' Systems Inc','')
-          #     - regex_replace('^$','Cisco')
-          #     - change_case('title')
-          #     - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
-
           device_type:
             source: "platformId"
             transform_function: 
+              #try to change to ciscos new Catalyst for everything naming
               - regex_replace('^C', 'Catalyst ')
               - regex_replace('^WS\-C', 'Catalyst ')
               - regex_replace('^IE\-', 'Catalyst IE')
@@ -120,12 +113,14 @@ object_mappings:
             source: ["softwareType", "softwareVersion"]
             transform_function: 
               - concat(' ')
+              #assume blank softwareType is IOS
               - regex_replace('^(\d)', 'IOS \1')    
               - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
           serial:
             source: "serialNumber"
             transform_function:
+               #Just capture first serial# from stacks
                - regex_replace('^([^\,]+)\,.+', '\1')
                - change_case('upper')
 
@@ -134,6 +129,7 @@ object_mappings:
             transform_function:
                #Global/Main Campus/Garrison Expo/First Floor
                - split('/')
+               # Splits name by / into siteNameHierarchy_1, siteNameHierarchy_2, siteNameHierarchy_3, siteNameHierarchy_4
                - regex_replace('^.*$',siteNameHierarchy_2)
                - change_case('title')
                - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
