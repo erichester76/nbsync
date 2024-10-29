@@ -348,7 +348,7 @@ class DataTransferTool:
                                                          
                             # Handle dictionary-like data sources (e.g., CSV)
                             elif isinstance(item, dict):
-                                print(f'{item.get(field_info['source'])}')
+                                print(f"{item.get(field_info['source'])}")
                                 source_value = item.get(field_info['source'])
                                 
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
