@@ -346,11 +346,6 @@ class DataTransferTool:
                             if 'str:' in field_info['source']:
                                 source_value = field_info['source'].split("str:")[1].strip().strip("'\"")   
                                                          
-                            # Handle dictionary-like data sources (e.g., CSV)
-                            elif isinstance(item, dict):
-                                print(f"{item.get(field_info['source'])}")
-                                source_value = item.get(field_info['source'])
-                                
                             # Handle object-like data sources (e.g., vim.VirtualMachine)
                             else:
                                 if self.DEBUG == 1: print(f"Mapping source field {field_info['source']} to {dest_field}")
