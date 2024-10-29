@@ -370,8 +370,6 @@ class DataTransferTool:
             if self.dry_run:
                 print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
             else:
-                #mapped_data.pop('name', None)  # Remove 'name' field if it's not required
-                #mapped_data.pop('model', None)  # Remove 'model' field if not required
                 mapped_data['id'] = existing_object.id
                 current_data = self.sanitize_data(existing_object.serialize())
                 filtered_current_data = {key: current_data.get(key) for key in mapped_data}
