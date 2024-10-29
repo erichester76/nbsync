@@ -26,7 +26,7 @@ api_definitions:
       - name: version
         value: 2.3.3.0
       - name: sslContext
-        value: ignore
+        value: None
 
     base_urls:
       - https://cisco-dnac.clemson.edu/
