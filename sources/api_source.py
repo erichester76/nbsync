@@ -16,7 +16,7 @@ class APIDataSource(DataSource):
 
     def is_session_valid(self,base_url):
         """Check if the current session is valid."""
-        if self.session_expiry[base_url]:
+        if base_url in self.session_expiry:
             current_time = datetime.datetime.now()
             # Check if the current time is still before the session expiry
             return current_time < self.session_expiry[base_url]
@@ -39,6 +39,7 @@ class APIDataSource(DataSource):
             return auth_func
 
         for base_url in self.config['base_urls']:
+            print(f"Connecting to {self.name} at {base_url}...")
 
             # Dynamically retrieve the authentication function
             auth_func = get_auth_function(module, self.config['auth_function'])
@@ -66,23 +67,24 @@ class APIDataSource(DataSource):
             if 'base_url' in inspect.signature(auth_func).parameters:
                 auth_args['base_url'] = base_url
 
-            if self.is_session_valid(base_url):
-                    print(f"Using existing session for {self.name} at {base_url}.")
+            if self.api and self.is_session_valid(base_url):
+                    print(f"Using existing session for {self.name} @ {base_url}.")
             else:
+                print(f"Re-authenticating for {self.name} @ {base_url}.")
                 # Handle authentication methods
-                print(f"Connecting to {self.name} at {base_url}...")
                 if auth_method == 'token':
                     self.api = auth_func(base_url, token=self.config['auth_args']['token'])
-                    self.session_expiry = datetime.datetime.now() + datetime.timedelta(minutes=5)
+                    self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=1)
 
                 elif auth_method == 'login':
                     if auth_args:
                         self.api = auth_func(**auth_args)
-                        self.session_expiry = datetime.datetime.now() + datetime.timedelta(minutes=5)
+                        self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=1)
 
                     else:
                         raise ValueError("Login-based authentication requires auth_args to be set.")
 
+                print(f"Connected to {self.name} at {base_url}")
                 self.clients.append(self.api)
         
         
