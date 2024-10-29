@@ -139,10 +139,8 @@ class DataTransferTool:
 
             # Get the source value based on the 'value' key, just like a normal source field
             source_value = None
-            if isinstance(item, dict):
-                source_value = item.get(source_value_field)
-            else:
-                source_value = self.get_nested_attribute(item, source_value_field, None)
+            if isinstance(item, dict): source_value = item.get(source_value_field)
+            else: source_value = self.get_nested_attribute(item, source_value_field, None)
 
             # Apply transformations, if specified
             if transform and source_value is not None:
@@ -154,8 +152,7 @@ class DataTransferTool:
             
             # Only add to included_data if the source value exists
             if source_value is not None:
-                if field not in included_data:
-                    included_data[field] = {}
+                if field not in included_data: included_data[field] = {}
                 included_data[field][key] = source_value
 
         return included_data
@@ -163,13 +160,11 @@ class DataTransferTool:
 
     def apply_transform_function(self, value, transform, obj_config, field_name, item):
         """Apply a transformation to a value, based on the transform rule."""
-        if value is None:
-            return value  # Skip transformation if value is None
+        if value is None: return value  # Skip transformation if value is None
 
         if transform:
             # If transform is a string, convert it into a list with a single item
-            if isinstance(transform, str):
-                transform = [transform]
+            if isinstance(transform, str): transform = [transform]
 
             # Apply all transformations in the list
             for trans in transform:
@@ -177,8 +172,7 @@ class DataTransferTool:
                     # Extract pattern and replacement from the transform rule
                     pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", trans)[0]
                     if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
-                    if replacement in vars(self):
-                        replacement = getattr(self, replacement)       
+                    if replacement in vars(self): replacement = getattr(self, replacement)       
                     value = re.sub(pattern, replacement, value)
 
                 elif "split" in trans:
@@ -193,16 +187,11 @@ class DataTransferTool:
                     
                 elif "change_case" in trans:
                     case_type = re.findall(r"change_case\('(.*)'\)", trans)[0]
-                    if case_type == 'lower':
-                        value = value.lower()
-                    elif case_type == 'upper':
-                        value = value.upper()
-                    elif case_type == 'title':
-                        value = value.title()
-                    elif case_type == 'camel':
-                        value = ''.join(word.capitalize() if i > 0 else word for i, word in enumerate(value.split()))
-                    else:
-                        raise ValueError(f"Unknown case transformation type: {case_type}")
+                    if case_type == 'lower': value = value.lower()
+                    elif case_type == 'upper': value = value.upper()
+                    elif case_type == 'title': value = value.title()
+                    elif case_type == 'camel': value = ''.join(word.capitalize() if i > 0 else word for i, word in enumerate(value.split()))
+                    else: raise ValueError(f"Unknown case transformation type: {case_type}")
                     
                 elif "skip_on_field" in trans:
                     field, expected_value = re.findall(r"skip_on_field\('(.*)',\s*(.*)\)", trans)[0]

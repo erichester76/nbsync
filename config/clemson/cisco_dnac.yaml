@@ -132,15 +132,15 @@ object_mappings:
           site:
             source: "siteNameHierarchy"
             transform_function:
-               #Global/Main Campus/Garrison Expo/First Floor
+               # Global/Main Campus/Garrison Expo/First Floor
+               # Splits name by / into site_1, site_2, site_3, site_4
                - split('/')
-               # Splits name by / into siteNameHierarchy_1, siteNameHierarchy_2, siteNameHierarchy_3, siteNameHierarchy_4
-               - regex_replace('^.*$',siteNameHierarchy_2)
+               - regex_replace('^.*$',site_2)
                - change_case('title')
                - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
            
           location:
-             source: "siteNameHierarchy_3"
+             source: "site_3"
              transform_function:
                - change_case('title')
                - lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
