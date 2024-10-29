@@ -43,9 +43,22 @@ object_mappings:
     # Fetch device data from DNAC
     fetch_data_code: |
       def fetch_data(api_client):
-          # Retrieve the list of devices from DNAC
-          devices = api_client.devices.get_device_list()
-          return devices['response']
+            devices = []
+            offset = 1
+            limit = 500  # You can adjust this value based on DNAC pagination settings
+            while True:
+                response = api_client.devices.get_device_list(offset=offset, limit=limit)
+                if 'response' in response and response['response']:
+                    devices.extend(response['response'])
+                else:
+                    # No more devices to fetch
+                    break
+                # Check if the number of devices returned is less than the limit, which indicates the end
+                if len(response['response']) < limit:
+                    break
+                # Increment offset to get the next page
+                offset += limit
+            return devices
 
     mapping:
           
