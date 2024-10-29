@@ -16,10 +16,10 @@ class APIDataSource(DataSource):
 
     def is_session_valid(self,base_url):
         """Check if the current session is valid."""
-        if self.session_expiry['base_url']:
+        if self.session_expiry[base_url]:
             current_time = datetime.datetime.now()
             # Check if the current time is still before the session expiry
-            return current_time < self.session_expiry['base_url']
+            return current_time < self.session_expiry[base_url]
         return False
     
     def authenticate(self):
