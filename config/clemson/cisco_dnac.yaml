@@ -85,7 +85,10 @@ object_mappings:
 
           role:
             source: role
-          
+            transform_function: 
+              - change_case('title')
+              - lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
+
           platform:
             source: ["softwareType", "softwareVersion"]
             transform_function: 
