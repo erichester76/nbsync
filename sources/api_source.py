@@ -11,15 +11,15 @@ class APIDataSource(DataSource):
         self.name = name  # Store the section name
         self.api = None
         self.clients = []  # Initialize the clients list
-        self.session_expiry = None  # Add session expiry tracking
+        self.session_expiry = []  # Add session expiry tracking
 
 
-    def is_session_valid(self):
+    def is_session_valid(self,base_url):
         """Check if the current session is valid."""
-        if self.session_expiry:
+        if self.session_expiry['base_url']:
             current_time = datetime.datetime.now()
             # Check if the current time is still before the session expiry
-            return current_time < self.session_expiry
+            return current_time < self.session_expiry['base_url']
         return False
     
     def authenticate(self):
@@ -66,7 +66,7 @@ class APIDataSource(DataSource):
             if 'base_url' in inspect.signature(auth_func).parameters:
                 auth_args['base_url'] = base_url
 
-            if self.api and self.is_session_valid():
+            if self.is_session_valid(base_url):
                     print(f"Using existing session for {self.name} at {base_url}.")
             else:
                 # Handle authentication methods
