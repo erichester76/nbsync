@@ -91,7 +91,6 @@ class APIDataSource(DataSource):
                 module_name, attr_name = import_path.rsplit('.', 1)
                 module = __import__(module_name, fromlist=[attr_name])
                 local_vars[attr_name] = getattr(module, attr_name)
-                print(f"Successfully imported {attr_name} from {module_name}")
             except ImportError as e:
                 print(f"Error importing {import_path}: {e}")
                 raise
@@ -100,13 +99,12 @@ class APIDataSource(DataSource):
         for var_name, var_value in local_vars.items():
             if var_name != 'api_client':  # Skip api_client to prevent accidental overwrites
                 globals()[var_name] = var_value
-                print(f"Injected {var_name} into global scope")
 
         # Fetch custom Python code to execute
         fetch_data_code = obj_config.get('fetch_data_code')
 
         if fetch_data_code:
-            print(f"Using custom Python code for data fetch...")
+            print(f"Using custom Python code for data fetch")
 
             # Execute the provided code within the local scope, passing in local_vars to exec
             exec(fetch_data_code, globals(), local_vars)
