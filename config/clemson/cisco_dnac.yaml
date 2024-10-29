@@ -32,7 +32,7 @@ api_definitions:
       - https://cisco-dnac.clemson.edu/
 
 object_mappings:
-  source_api: vmware
+  source_api: dnac
   destination_api: netbox
   destination_endpoint: dcim.devices
   find_function: dcim.devices.filter
