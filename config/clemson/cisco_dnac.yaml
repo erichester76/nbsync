@@ -15,7 +15,7 @@ api_definitions:
     type: api
     module: dnacentersdk
     auth_method: login
-    auth_function: dnacentersdk.DNACenterAPI
+    auth_function: DNACenterAPI
     auth_params:
       username: ${DNAC_AUTH_USER}
       password: ${DNAC_AUTH_PW}
