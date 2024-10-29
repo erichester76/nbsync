@@ -48,8 +48,6 @@ object_mappings:
           return devices['response']
 
     mapping:
-      # Mapping DNAC device data to NetBox objects
-      devices:
           
           name:
             source: "hostname"
