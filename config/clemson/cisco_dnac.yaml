@@ -51,6 +51,8 @@ object_mappings:
           
           name:
             source: "hostname"
+            transform_function:
+               - regex_replace('.clemson.edu.*','')
 
           manufacturer:
             source: "vendor"
