@@ -51,16 +51,17 @@ object_mappings:
           
           name:
             source: "hostname"
-
-          manufacturer:
-            source: "vendor"
-            transform_function:
-              - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
-
+            
           device_type:
             source: "platformId"
-            transform_function:
-              - lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
+            transform_function: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
+            included_fields:
+              - field: manufacturer
+                key: name
+              - field: manufacturer
+                key: slug
+                create_if_missing: true
+                transform_function: slugify 
 
           serial_number:
             source: "serialNumber"
