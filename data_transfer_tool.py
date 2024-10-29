@@ -173,10 +173,21 @@ class DataTransferTool:
             for trans in transform:
                 if "regex_replace" in trans:
                     # Extract pattern and replacement from the transform rule
-                    pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
+                    pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", transform)[0]
                     if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
+                    if replacement in vars(self):
+                        replacement = getattr(self, replacement)       
                     value = re.sub(pattern, replacement, value)
-            
+
+                elif "split" in trans:
+                    delimiter = trans.split('split(')[1].split(')')[0].strip("'")
+                    split_values = value.split(delimiter)
+
+                    # Store split parts into new variables named `field_name_X`
+                    for index, split_value in enumerate(split_values, start=1):
+                        setattr(self, f"{field_name}_{index}", split_value)
+                    value = split_values
+                    
                 elif "change_case" in trans:
                     case_type = re.findall(r"change_case\('(.*)'\)", trans)[0]
                     if case_type == 'lower':
@@ -219,11 +230,11 @@ class DataTransferTool:
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                 
-                elif "convert_to_type" in transform:
-                    if isinstance(transform, list):
+                elif "type" in trans:
+                    if isinstance(trans, list):
                         for trans in transform:
-                            if "convert_to_type" in trans:
-                                type_to_convert = re.findall(r"convert_to_type\('(.*?)'\)", trans)[0]
+                            if "type" in trans:
+                                type_to_convert = re.findall(r"type\('(.*?)'\)", trans)[0]
                                 if type_to_convert == 'int':
                                     value = int(value)
                                 elif type_to_convert == 'float':

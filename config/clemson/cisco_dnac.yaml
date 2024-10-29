@@ -125,9 +125,16 @@ object_mappings:
             source: "siteNameHierarchy"
             transform_function:
                #Global/Main Campus/Garrison Expo/First Floor
-               - regex_replace('Global\/','')
-               - change_case('upper')
+               - split('/')
+               - regex_replace('^.*$',siteNameHierarchy_2)
+               - change_case('title')
                - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
+           
+          location:
+             source: "siteNameHierarchy_3"
+             transform_function:
+               - change_case('title')
+               - lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
 
           status:
             source: "reachabilityStatus"
