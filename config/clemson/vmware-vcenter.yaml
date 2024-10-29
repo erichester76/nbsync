@@ -107,7 +107,7 @@ object_mappings:
         source: summary.hardware.otherIdentifyingInfo
         transform_function: 
          - extract_identifier('SerialNumberTag')  
-         - regex_replace('^([^\,]+)\,.+', '\1')
+
 
       platform:
         source: ["config.product.name", "config.product.version"]

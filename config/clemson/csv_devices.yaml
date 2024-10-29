@@ -26,6 +26,7 @@ object_mappings:
     find_function: dcim.devices.filter
     create_function: dcim.devices.create
     update_function: dcim.devices.update
+
     mapping:
       name:
         source: device_name
@@ -43,6 +44,7 @@ object_mappings:
     
       serial:
         source: serial
+
     
       site:
         source: site_name

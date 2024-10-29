@@ -55,6 +55,8 @@ object_mappings:
           manufacturer:
             source: "vendor"
             transform_function:
+              - regex_replace(' Systems Inc','')
+              - regex_replace(('^$','Cisco')
               - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
 
           device_type:
@@ -77,8 +79,10 @@ object_mappings:
                 create_if_missing: true
                 transform_function: slugify 
 
-          serial_number:
+          serial:
             source: "serialNumber"
+            transform_function:
+               - regex_replace('^([^\,]+)\,.+', '\1')
 
           site:
             source: "locationName"
