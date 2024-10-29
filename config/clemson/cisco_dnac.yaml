@@ -61,6 +61,7 @@ object_mappings:
             items += 1
             #site one is Global and just takes a while with no devices
             if site == 1: continue
+            print(f"Working on Site# {items}: {site.get('siteNameHierarchy')}")
             membership = client.sites.get_membership(site_id=site.id)
             if not membership or not hasattr(membership, 'device'): continue  
             if membership.device is None: continue  
@@ -69,7 +70,7 @@ object_mappings:
                 for device in members.response:
                     if hasattr(device, 'serialNumber'):
                         device['location'] = site.get('siteNameHierarchy')
-                        print(f"Site #{items}: Found device {device.hostname} in site {site.get('siteNameHierarchy')}")
+                        print(f"Found device {device.hostname} in site {site.get('siteNameHierarchy')}")
                         devices.append(device)
         return devices
 
