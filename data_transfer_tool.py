@@ -303,9 +303,8 @@ class DataTransferTool:
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
             for source_client in source.clients:
-                source.authenticate()
                 print(f"Processing {obj_type}..")
-                
+                source.authenticate()
                 source_data = source.fetch_data(obj_config, source_client)
                 # Log the raw data fetched from the source
                 destination_api = self.sources[obj_config['destination_api']]
@@ -418,6 +417,7 @@ class DataTransferTool:
 
 
 def main():
+    
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
     parser.add_argument('-f', '--file', required=True, help='YAML file to load configurations')
     parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode without making any changes')
