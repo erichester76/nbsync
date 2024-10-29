@@ -97,8 +97,15 @@ object_mappings:
             included_fields:
               - field: manufacturer
                 key: name
+                value: vendor
+                transform_function:
+                  - regex_replace(' Systems Inc','')
+                  - regex_replace('^$','Cisco')
+                  - change_case('title')
+                  - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
               - field: manufacturer
                 key: slug
+                value: vendor
                 create_if_missing: true
                 transform_function: slugify 
 

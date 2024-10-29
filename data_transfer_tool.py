@@ -129,32 +129,34 @@ class DataTransferTool:
         """Retrieve additional fields to be included in the create/update operation."""
         included_data = {}
         included_fields = obj_config['mapping'].get(field_name, {}).get('included_fields', [])
-
+        
         for field_info in included_fields:
-            field = field_info['field']
-            key = field_info.get('key', 'id')
-            transform = field_info.get('transform_function')
+            field = field_info['field']  # e.g., 'manufacturer'
+            key = field_info.get('key', 'id')  # e.g., 'name' or 'slug'
+            source_value_field = field_info['value']  # e.g., 'vendor' (which acts like a source)
             create_if_missing = field_info.get('create_if_missing', False)
+            transform = field_info.get('transform_function', None)
 
-            # Handle dictionary-like data sources
+            # Get the source value based on the 'value' key, just like a normal source field
+            source_value = None
             if isinstance(item, dict):
-                field_value = item.get(field)
+                source_value = item.get(source_value_field)
             else:
-                # Handle object-like data sources, retrieve nested attributes
-                field_value = self.get_nested_attribute(item, field, None)
+                source_value = self.get_nested_attribute(item, source_value_field, None)
 
-            # Handle creation or transformation of missing fields
-            if field_value is None and create_if_missing:
-                field_value = self.apply_transform_function(
-                    self.get_nested_attribute(item, field_name, None),  # Pass the field_name to apply transform on
-                    transform, obj_config, field_name, item
-                )
-            elif field_value is not None and transform:
-                field_value = self.apply_transform_function(field_value, transform, obj_config, field_name, item)
+            # Apply transformations, if specified
+            if transform and source_value is not None:
+                source_value = self.apply_transform_function(source_value, transform, obj_config, field_name, item)
 
-            # Add the key-value pair if field_value is not None
-            if field_value is not None:
-                included_data[key] = field_value
+            # If value is None and we allow creating the field, we can process it
+            if source_value is None and create_if_missing:
+                source_value = self.apply_transform_function(item.get(field_name), transform, obj_config, field_name, item)
+            
+            # Only add to included_data if the source value exists
+            if source_value is not None:
+                if field not in included_data:
+                    included_data[field] = {}
+                included_data[field][key] = source_value
 
         return included_data
 
