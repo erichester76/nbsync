@@ -74,12 +74,12 @@ class APIDataSource(DataSource):
                 # Handle authentication methods
                 if auth_method == 'token':
                     self.api = auth_func(base_url, token=self.config['auth_args']['token'])
-                    self.session_expiry = datetime.datetime.now() + datetime.timedelta(mins=5)
+                    self.session_expiry = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
                 elif auth_method == 'login':
                     if auth_args:
                         self.api = auth_func(**auth_args)
-                        self.session_expiry = datetime.datetime.now() + datetime.timedelta(mins=5)
+                        self.session_expiry = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
                     else:
                         raise ValueError("Login-based authentication requires auth_args to be set.")
