@@ -41,6 +41,11 @@ class APIDataSource(DataSource):
                 auth_args = self.config['auth_args']
                 if isinstance(auth_args, list):
                     auth_args = {arg['name']: arg['value'] for arg in auth_args}
+                    if 'sslContext' in auth_args:
+                        if auth_args['sslContext'] == 'ignore':
+                            auth_args['sslContext'] = ssl._create_unverified_context()
+                        elif auth_args['sslContext'] == 'None':
+                            auth_args['sslContext'] = None
             else:
                 auth_args = {}
 
