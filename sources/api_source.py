@@ -44,7 +44,7 @@ class APIDataSource(DataSource):
                     raise ValueError("Token is required for token-based authentication.")
                 
                 # Initialize the API client with token
-                self.api = auth_func(base_url=base_url, access_token=token)
+                self.api = auth_func(host=base_url, access_token=token)
             elif auth_method == 'login':
                 # Login-based authentication
                 auth_args = self.config.get('auth_args', {})
