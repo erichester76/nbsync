@@ -20,9 +20,9 @@ api_definitions:
       - name: host
         value: base_urls
       - name: user
-        value: ${VCENTER_USERNAME}
+        value: ${VMWARE_AUTH_USER}
       - name: pwd
-        value: ${VCENTER_PASSWORD}
+        value: ${VMWARE_AUTH_PW}
       - name: sslContext
         value: ignore
     base_urls:
