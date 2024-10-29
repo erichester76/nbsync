@@ -58,6 +58,7 @@ object_mappings:
       tenant:
         source: "name"
         transform_fuction: 
+          - regex_replace('.clemson.edu', '')
           - regex_replace('.*-gen-.*','Tiger One Card Services')
           - regex_replace('.*-len-.*'','Infrastructure Services & Ops')
           - regex_replace('.*-core-.*'','Infrastructure Services & Ops')
