@@ -189,7 +189,7 @@ class DataTransferTool:
                     for index, split_value in enumerate(split_values, start=1):
                         setattr(self, f"{field_name}_{index}", split_value)
                         print(f"{field_name}_{index} = {split_value}")
-                    value = split_values
+                    value = getattr(self, f"{field_name}_1")
                     
                 elif "change_case" in trans:
                     case_type = re.findall(r"change_case\('(.*)'\)", trans)[0]
