@@ -103,7 +103,7 @@ object_mappings:
                 transform_function: slugify 
 
           role:
-            source: role
+            source: "role"
             transform_function: 
               - change_case('title')
               - lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
@@ -122,7 +122,7 @@ object_mappings:
                - change_case('upper')
 
           site:
-            source: str:"Clemson Network"
+            source: "siteNameHierarchy"
             transform_function:
                - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
 
