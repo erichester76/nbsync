@@ -55,13 +55,13 @@ object_mappings:
               - regex_replace('.clemson.edu.*','')
               - change_case('lower')
 
-          manufacturer:
-            source: "vendor"
-            transform_function:
-              - regex_replace(' Systems Inc','')
-              - regex_replace('^$','Cisco')
-              - change_case('title')
-              - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
+          # manufacturer:
+          #   source: "vendor"
+          #   transform_function:
+          #     - regex_replace(' Systems Inc','')
+          #     - regex_replace('^$','Cisco')
+          #     - change_case('title')
+          #     - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
 
           device_type:
             source: "platformId"
@@ -82,6 +82,16 @@ object_mappings:
                 key: slug
                 create_if_missing: true
                 transform_function: slugify 
+
+          role:
+            source: role
+          
+          platform:
+            source: [softwareType, softwareVersion]
+            transform_function: 
+              - concat(' ')
+              - regex_replace('^ ','IOS ')
+              - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
           serial:
             source: "serialNumber"
