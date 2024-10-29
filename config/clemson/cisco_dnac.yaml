@@ -53,6 +53,7 @@ object_mappings:
             source: "hostname"
             transform_function:
                - regex_replace('.clemson.edu.*','')
+               - change_case: lower
 
           manufacturer:
             source: "vendor"
@@ -85,10 +86,12 @@ object_mappings:
             source: "serialNumber"
             transform_function:
                - regex_replace('^([^\,]+)\,.+', '\1')
+               - change_case: upper
 
           site:
             source: "locationName"
             transform_function:
+              - change_case: title
               - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
 
           status:

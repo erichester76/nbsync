@@ -176,6 +176,19 @@ class DataTransferTool:
                     pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
                     if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
                     value = re.sub(pattern, replacement, value)
+            
+                elif "change_case" in trans:
+                    case_type = re.findall(r"change_case\('(.*)'\)", trans)[0]
+                    if case_type == 'lower':
+                        value = value.lower()
+                    elif case_type == 'upper':
+                        value = value.upper()
+                    elif case_type == 'title':
+                        value = value.title()
+                    elif case_type == 'camel':
+                        value = ''.join(word.capitalize() if i > 0 else word for i, word in enumerate(value.split()))
+                    else:
+                        raise ValueError(f"Unknown case transformation type: {case_type}")
                     
                 elif "skip_if_field_equals" in trans:
                     field, expected_value = re.findall(r"skip_if_field_equals\('(.*)',\s*(.*)\)", trans)[0]
