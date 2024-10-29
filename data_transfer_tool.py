@@ -43,6 +43,21 @@ class DataTransferTool:
         self.mapped_data = {}
         self.DEBUG = 0
 
+
+    def initialize_sources(self):
+        for name, config in self.config['api_definitions'].items():
+            source_type = config['type']
+            if source_type == 'api':
+                self.sources[name] = APIDataSource(name, config)
+            elif source_type == 'csv':
+                self.sources[name] = CSVDataSource(name, config)
+            elif source_type == 'xls':
+                self.sources[name] = XLSDataSource(config)
+            elif source_type == 'snmp':
+                self.sources[name] = SNMPDataSource(config)
+            
+
+
     def get_nested_function(self, api_client, function_path):
         """Recursively get a function from the API client."""
         parts = function_path.split('.')
@@ -109,19 +124,6 @@ class DataTransferTool:
             else:
                 sanitized_data[key] = value  # Otherwise, use the value as is
         return sanitized_data
-
-    def initialize_sources(self):
-        for name, config in self.config['api_definitions'].items():
-            source_type = config['type']
-            if source_type == 'api':
-                self.sources[name] = APIDataSource(name, config)
-            elif source_type == 'csv':
-                self.sources[name] = CSVDataSource(name, config)
-            elif source_type == 'xls':
-                self.sources[name] = XLSDataSource(config)
-            elif source_type == 'snmp':
-                self.sources[name] = SNMPDataSource(config)
-            self.sources[name].authenticate()
 
     def get_included_fields_data(self, obj_config, field_name, item):
         """Retrieve additional fields to be included in the create/update operation."""
@@ -300,6 +302,7 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
+            source.authenticate()
             for source_client in source.clients:
                 api_host = self.config.get('auth_args', {}).get('host', 'Unknown Source')
                 print(f"Processing {obj_type} from {api_host}")
