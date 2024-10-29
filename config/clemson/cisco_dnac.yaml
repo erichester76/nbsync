@@ -51,7 +51,8 @@ object_mappings:
         while items == limit:
             response = client.sites.get_site(offset=offset, limit=limit)
             sites.extend(response.response)
-            items = len(response.response)-1
+            #items = len(response.response)
+            items = 0
             offset += limit
         if not sites: raise ValueError("No sites found in Cisco DNA Center.")
         for site in sites:
