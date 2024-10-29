@@ -804,7 +804,7 @@ object_mappings:
           - regex_replace('(?i)^89o.*','Unalloc Schol Costs Bonuses')
           - regex_replace('(?i)^89p.*','Flight Services')
           - regex_replace('(?i)^89r.*','Institutional Support')
-          - regex_replace('[^A-Z][\d\-]+','')
+          - regex_replace('^[^A-Z]|[\d\-]+','')
           - lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
