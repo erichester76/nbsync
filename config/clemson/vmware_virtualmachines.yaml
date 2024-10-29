@@ -808,6 +808,7 @@ object_mappings:
 
       vcpus:
         source: "config.hardware.numCPU"
+        transform_function: convert_to_type('float')
 
       memory:
         source: "config.hardware.memoryMB"

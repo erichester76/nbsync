@@ -176,6 +176,16 @@ class DataTransferTool:
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
                     value = delimiter.join([str(v) for v in values if v])  # Join non-empty values
                 
+                elif "convert_to_type" in transform:
+                    if isinstance(transform, list):
+                        for trans in transform:
+                            if "convert_to_type" in trans:
+                                type_to_convert = re.findall(r"convert_to_type\('(.*?)'\)", trans)[0]
+                                if type_to_convert == 'int':
+                                    value = int(value)
+                                elif type_to_convert == 'float':
+                                    value = float(value)
+                                    
                 elif 'extract_by_type' in trans:
                      # Adjusted regex to make the second item optional
                     args = re.findall(r"extract_by_type\('(.*?)', '(.*?)'(?:, '(.*?)')?\)", trans)[0]
