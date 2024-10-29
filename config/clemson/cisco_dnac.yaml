@@ -90,12 +90,7 @@ object_mappings:
                - change_case('upper')
 
           site:
-            source: "locationName"
-            transform_function:
-               - regex_replace('','Clemson Network')
-               - change_case('title')
-               - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
-
+            source: str:Clemson Network
           status:
             source: "reachabilityStatus"
             transform_function:
