@@ -50,7 +50,8 @@ object_mappings:
     mapping:
       # Mapping DNAC device data to NetBox objects
       devices:
-        - name:
+          
+          name:
             source: "hostname"
 
           manufacturer:
