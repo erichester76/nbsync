@@ -176,7 +176,14 @@ class DataTransferTool:
                     pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'(.*?)'\)", trans)[0]
                     if self.DEBUG == 1: print(f'Applying regex: {value} {pattern} {replacement}')
                     value = re.sub(pattern, replacement, value)
-                
+                elif "skip_if_field_equals" in trans:
+                    field, expected_value = re.findall(r"skip_if_field_equals\('(.*)',\s*(.*)\)", trans)[0]
+                    # Retrieve the actual value of the specified field
+                    actual_value = self.get_nested_attribute(item, field, None)
+                    if str(actual_value) == expected_value:
+                        print(f"Skipping item because {field} equals {expected_value}")
+                        return None  # Skip this item
+
                 elif "slugify" in trans:
                     value = re.sub(r'\W+', '-', value.lower())
                     if self.DEBUG == 1: print(f'Slugifying value: {value}')
