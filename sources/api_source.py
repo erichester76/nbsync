@@ -66,24 +66,24 @@ class APIDataSource(DataSource):
             if 'base_url' in inspect.signature(auth_func).parameters:
                 auth_args['base_url'] = base_url
 
-            # if self.api and self.is_session_valid():
-            #         print(f"Using existing session for {self.name} at {base_url}.")
-            # else:
-            # Handle authentication methods
-            print(f"Connecting to {self.name} at {base_url}...")
-            if auth_method == 'token':
-                self.api = auth_func(base_url, token=self.config['auth_args']['token'])
-                self.session_expiry = datetime.datetime.now() + datetime.timedelta(minutes=5)
-
-            elif auth_method == 'login':
-                if auth_args:
-                    self.api = auth_func(**auth_args)
+            if self.api and self.is_session_valid():
+                    print(f"Using existing session for {self.name} at {base_url}.")
+            else:
+                # Handle authentication methods
+                print(f"Connecting to {self.name} at {base_url}...")
+                if auth_method == 'token':
+                    self.api = auth_func(base_url, token=self.config['auth_args']['token'])
                     self.session_expiry = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
-                else:
-                    raise ValueError("Login-based authentication requires auth_args to be set.")
+                elif auth_method == 'login':
+                    if auth_args:
+                        self.api = auth_func(**auth_args)
+                        self.session_expiry = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
-            self.clients.append(self.api)
+                    else:
+                        raise ValueError("Login-based authentication requires auth_args to be set.")
+
+                self.clients.append(self.api)
         
         
     def fetch_data(self, obj_config, api_client):
