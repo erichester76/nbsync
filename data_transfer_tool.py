@@ -213,7 +213,7 @@ class DataTransferTool:
                 elif 'concat' in trans:
                     # Get the list of source fields to concatenate
                     fields_to_concat = obj_config['mapping'][field_name]['source']
-                    delimiter = re.findall(r"concat\('(.*)')", trans)[0]
+                    delimiter = re.findall(r"concat\([\'\"](.*)[\'\"])", trans)[0]
                     if self.DEBUG == 1:print(f"Concating fields {field_name} : {value}")
                     # Get the values of the fields to concatenate
                     values = [self.get_nested_attribute(item, field, None) for field in fields_to_concat]
