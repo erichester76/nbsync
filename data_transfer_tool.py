@@ -151,10 +151,9 @@ class DataTransferTool:
                         mapped_data = {}
                         rendered_item_config = self.render_item_config(mappings, item)
                         # Rendering all mappings together using item context
-                        rendered_mapping = self.render_source_mapping(mappings, item)
 
                         # Loop through rendered mappings and apply transformations/actions
-                        for dest_field, field_info in rendered_mapping.items():
+                        for dest_field, field_info in rendered_item_config.items():
                             source_value = field_info
 
                             if 'action' in field_info:
