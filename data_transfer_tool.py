@@ -143,13 +143,14 @@ class DataTransferTool:
                     update_function = obj_config.get('update_function')
                     find_function = obj_config.get('find_function')
                     mappings = obj_config['mapping']
-                    print(f"{mappings}")
 
                     # Render the entire mapping for each item in the source_data
                     for item in source_data:
                         # Render the mappings in one go with the entire item context
                         mapped_data = {}
                         rendered_item_config = self.render_item_config(mappings, item)
+                        print(f"{rendered_item_config}")
+
                         # Rendering all mappings together using item context
 
                         # Loop through rendered mappings and apply transformations/actions
