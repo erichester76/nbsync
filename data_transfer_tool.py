@@ -186,23 +186,25 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
-    def resolve_nested_context(self, obj, attr_path):
-        """
-        This function retrieves the value of a nested attribute from an object,
-        allowing dot notation (e.g., `parent.name`).
-        """
-        attrs = attr_path.split('.')
-        value = obj
-        for attr in attrs:
-            if '[' in attr and ']' in attr:  # Handle array indexing
-                attr_name, index = attr.split('[')
-                index = int(index[:-1])
-                value = getattr(value, attr_name)[index]
-            if 'const:' in attr:
-                value=attr.split("const:")[1].strip().strip("'\"") 
-            else:
-                value = getattr(value, attr)
-        return value
+    def resolve_nested_context(self, item):
+        """Resolve nested attributes in an object using dot notation."""
+        context = {}
+
+        def get_nested_value(obj, attr_path):
+            """Recursively get a nested value from an object or dict using dot notation."""
+            attrs = attr_path.split('.')
+            current_obj = obj
+            try:
+                for attr in attrs:
+                    if isinstance(current_obj, dict):
+                        current_obj = current_obj.get(attr)
+                    else:
+                        current_obj = getattr(current_obj, attr)
+                    if current_obj is None:
+                        break
+                return current_obj
+            except AttributeError:
+                return None
 
         # Build the context with dot notation support for nested attributes
         if isinstance(item, dict):
@@ -341,6 +343,7 @@ class DataTransferTool:
                 return new_object.id
 
 def main():
+    
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
     parser.add_argument('-f', '--file', required=True, help='YAML file to load configurations')
     parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode without making any changes')
