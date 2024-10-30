@@ -156,7 +156,7 @@ class DataTransferTool:
                         template_string = yaml.dump(mappings).replace('<<', '{{').replace('>>', '}}')
                         # Render the entire mappings block with Jinja2
                         template = env.from_string(template_string)
-                        rendered_item_config = template.render(item=self.resolve_dot_notation(item))
+                        rendered_item_config = template.render(self.resolve_dot_notation(item))
                         # Parse the rendered YAML to get the final mappings
                         rendered_mappings = yaml.safe_load(rendered_item_config)
                         # Debugging - Print the rendered mappings after Jinja2 processing
