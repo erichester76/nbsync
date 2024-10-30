@@ -176,8 +176,21 @@ class DataTransferTool:
                         print(f"Final mapped data for {obj_type}: {mapped_data}")
 
     
-    def resolve_dot_notation(self,item):
+    def resolve_dot_notation(item):
         """Resolve all dot notation variables in the item and return the corrected structure."""
+        
+        def object_to_dict(obj):
+            """Convert an object (like vim.HostSystem) to a dictionary."""
+            data = {}
+            for attr in dir(obj):
+                # Skip private attributes and methods
+                if not attr.startswith("_") and not callable(getattr(obj, attr)):
+                    try:
+                        data[attr] = getattr(obj, attr)
+                    except Exception as e:
+                        data[attr] = str(e)  # If attribute access fails, store the error message
+            return data
+        
         def get_nested_value(obj, attr_path):
             """Recursively get a nested value from an object or dict using dot notation."""
             attrs = attr_path.split('.')
@@ -187,7 +200,10 @@ class DataTransferTool:
                     if isinstance(current_obj, dict):
                         current_obj = current_obj.get(attr)
                     else:
-                        current_obj = getattr(current_obj, attr)
+                        # Convert non-dict objects like vim.HostSystem to dict before accessing
+                        if not isinstance(current_obj, dict):
+                            current_obj = object_to_dict(current_obj)
+                        current_obj = current_obj.get(attr)
                     if current_obj is None:
                         break
                 return current_obj
@@ -208,10 +224,14 @@ class DataTransferTool:
                 return resolved_dict
             elif isinstance(item, list):
                 return [resolve_values(elem) for elem in item]
+            elif not isinstance(item, dict):
+                # Convert object to dict if needed
+                return object_to_dict(item)
             else:
                 return item
         
         return resolve_values(item)
+
 
     
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
