@@ -135,11 +135,36 @@ class DataTransferTool:
         # Convert << and >> back to {{ and }} for Jinja2 rendering
         source_template = source_template.replace('<<', '{{').replace('>>', '}}')
 
-        # Render the Jinja2 vars in line, passing 'item' as the context for dynamic values
-        template = self.jinja_env.from_string(source_template)
-        # Render the Jinja template, passing 'item' as the context for dynamic values
-        return template.render(item=item)
+        # Use a helper function to resolve nested attributes in the item
+        context = self.resolve_nested_context(item)
 
+        # Render the Jinja2 template, passing the resolved context
+        template = self.jinja_env.from_string(source_template)
+        return template.render(context)
+
+    def resolve_nested_context(self, item):
+        """
+        Resolve a dictionary-like context that supports nested access for both attributes and keys.
+        """
+        def get_nested_value(obj, attr):
+            """Helper function to get a nested attribute or key."""
+            try:
+                for key in attr.split('.'):
+                    if isinstance(obj, dict):
+                        obj = obj.get(key)
+                    else:
+                        obj = getattr(obj, key, None)
+                return obj
+            except (AttributeError, KeyError, TypeError):
+                return None
+
+        # Flatten the item into a dictionary supporting dot notation
+        flat_item = {}
+        for key in item.__dict__.keys():  # Assuming item is an object-like structure
+            flat_item[key] = get_nested_value(item, key)
+
+        return flat_item
+    
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
