@@ -132,80 +132,69 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
+            
             for source_client in source.clients:
                 source_api = obj_config.get('source_api')
                 print(f"Fetching data from {source_api}...")
                 source_data = source.fetch_data(obj_config, source_client)
                 destination_api = self.sources[obj_config['destination_api']]
-                
+
                 for destination_client in destination_api.clients:
                     create_function = obj_config.get('create_function')
                     update_function = obj_config.get('update_function')
                     find_function = obj_config.get('find_function')
                     mappings = obj_config['mapping']
 
-                    # Render the entire mapping for each item in the source_data
+                    # Process each item in source_data
                     for item in source_data:
-                        # Render the mappings in one go with the entire item context
                         mapped_data = {}
+
+                        # Step 1: Resolve nested context for each field before rendering Jinja2
                         resolved_mappings = {}
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
+                                # Resolve any nested attributes first
+                                resolved_source = self.resolve_nested_context(item, source_value)
+                                # Store the resolved value in the mapping
+                                resolved_mappings[field] = {'source': resolved_source}
 
-                        resolved_mappings = self.resolve_nested_context(item)
+                        # Step 2: Render the entire mappings block with Jinja2
                         template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
                         template = env.from_string(template_string)
-                        rendered_item_config = template.render(resolved_mappings)
+                        rendered_item_config = template.render(item=item)
                         rendered_mappings = yaml.safe_load(rendered_item_config)
-                        print(f"{rendered_item_config}")
 
-                        # Rendering all mappings together using item context
-
-                        # Loop through rendered mappings and apply transformations/actions
+                        # Step 3: Loop through rendered mappings and apply transformations/actions
                         for dest_field, field_info in rendered_mappings.items():
-                            
-                            source_value = field_info
+                            source_value = field_info['source']
 
+                            # If there's an action (e.g., a transformation), apply it
                             if 'action' in field_info:
                                 action = field_info.get('action')
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
 
                             mapped_data[dest_field] = source_value
-                            
-                        # Create or update the object in the destination
+
+                        # Step 4: Create or update the object in the destination API
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
-    def resolve_nested_context(self,item):
+
+    def resolve_nested_context(self, item, attr_path):
         """Resolve nested attributes in an object using dot notation."""
-        context = {}
-
-        def get_nested_value(obj, attr_path):
-            """Recursively get a nested value from an object or dict using dot notation."""
-            attrs = attr_path.split('.')
-            current_obj = obj
-            try:
-                for attr in attrs:
-                    if isinstance(current_obj, dict):
-                        current_obj = current_obj.get(attr)
-                    else:
-                        current_obj = getattr(current_obj, attr)
-                    if current_obj is None:
-                        break
-                return current_obj
-            except AttributeError:
-                return None
-
-        # Build the context with dot notation support for nested attributes
-        if isinstance(item, dict):
-            for key in item:
-                context[key] = get_nested_value(item, key)
-        else:
-            for attr in dir(item):
-                if not attr.startswith('_') and not callable(getattr(item, attr)):
-                    context[attr] = get_nested_value(item, attr)
-
-        return context
+        attrs = attr_path.split('.')
+        current_obj = item
+        try:
+            for attr in attrs:
+                if isinstance(current_obj, dict):
+                    current_obj = current_obj.get(attr)
+                else:
+                    current_obj = getattr(current_obj, attr)
+                if current_obj is None:
+                    break
+            return current_obj
+        except AttributeError:
+            return None
 
     
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
