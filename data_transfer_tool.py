@@ -344,9 +344,11 @@ class DataTransferTool:
 
                     for item in source_data:
                         mapped_data = {}
-
+                        mappings= temp_mappings
+                        temp_mappings = {}
                         for dest_field, field_info in mappings.items():
                             source_value = None
+                            temp_mappings = mappings
                             
                             # Check if the source is a static string (applies to any data type)
                             if 'str:' in field_info['source']:
@@ -370,7 +372,7 @@ class DataTransferTool:
                             if ('transform_function' in field_info):
                                 transform = field_info.get('transform_function')
                                 if self.DEBUG == 1: print(f"Applying transform to field {dest_field} {source_value} {transform}")
-                                mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, mappings, dest_field, item)
+                                mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, temp_mappings, dest_field, item)
                                 if self.DEBUG == 1: print(f'Value is now: {mapped_data[dest_field]}')
                             else:
                                 if self.DEBUG == 1: print(f"Directly mapping {source_value} to {dest_field}")
