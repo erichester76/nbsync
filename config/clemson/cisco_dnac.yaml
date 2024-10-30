@@ -95,7 +95,7 @@ object_mappings:
             action: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
           platform:
-            source: {{ softwareType | regex_replace('^$', 'IOS') | upper }} {{ softwareVersion }}     
+            source: {{ softwareType | upper }} {{ softwareVersion }}     
             action: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
           serial:
