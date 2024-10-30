@@ -28,7 +28,7 @@ env.filters['slugify'] = slugify
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
         template = env.get_template(yaml_file)
-        rendered_yaml = template.render({k: v for k, v in os.environ.items()})
+        rendered_yaml = template.render({**{k: v for k, v in os.environ.items()}, 'render_mappings': False})
         self.config = yaml.load(rendered_yaml, Loader=yaml.FullLoader)
         self.dry_run = dry_run  # Store the dry_run flag
         self.sources = {}
