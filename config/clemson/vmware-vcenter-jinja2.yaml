@@ -68,7 +68,7 @@ object_mappings:
         action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
       role: 
-        source: "Hypervisor Host"
+        source: Hypervisor Host
         action: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
       site:
@@ -97,8 +97,7 @@ object_mappings:
             | replace('disconnected', 'offline') }}"
 
       serial:
-        source: {{ summary.hardware.otherIdentifyingInfo 
-            | extract_identifier('SerialNumberTag') }}
+        source: {{ summary.hardware.otherIdentifyingInfo }}
 
       platform:
         source: {{ config.product.name }} {{ config.product.version }}
