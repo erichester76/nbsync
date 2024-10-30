@@ -100,11 +100,6 @@ class DataTransferTool:
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
      
-        # Render the object_mappings section with Jinja2 dynamically
-        rendered_object_mappings = self.jinja_env.from_string(self.raw_object_mappings).render()
-        object_mappings_config = yaml.load(rendered_object_mappings, Loader=yaml.FullLoader)
-        self.config['object_mappings'] = object_mappings_config['object_mappings']
-        
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
 
