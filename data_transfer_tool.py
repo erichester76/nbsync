@@ -143,12 +143,6 @@ class DataTransferTool:
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
 
-    def render_source_value(self, source_template, item):
-        """Render the source value dynamically based on the item."""
-        template = self.jinja_env.from_string(source_template)
-        # Render the Jinja template, passing 'item' as the context for dynamic values
-        return template.render(item=item)
-
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
