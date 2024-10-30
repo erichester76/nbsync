@@ -152,15 +152,6 @@ class DataTransferTool:
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
-                                
-                                # If the source contains Jinja2-like placeholders, we will defer rendering
-                                if '<<' in source_value or '>>' in source_value:
-                                    resolved_source = source_value  # Keep it as a Jinja2 template string to render later
-                                else:
-                                    # Handle real data paths with dot notation
-                                    resolved_source = self.resolve_nested_context(item, source_value)
-                                    
-                                resolved_mappings[field] = {**field_info, 'source': resolved_source}
 
                         template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
                         template = env.from_string(template_string)
@@ -186,7 +177,7 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
-    def resolve_nested_context(item):
+    def resolve_nested_context(self,item):
         """Resolve nested attributes in an object using dot notation."""
         context = {}
 
