@@ -341,11 +341,16 @@ class DataTransferTool:
                     update_function = obj_config.get('update_function')
                     find_function = obj_config.get('find_function')
                     mappings = obj_config['mapping']
+                    temp_mappings = {}
 
                     for item in source_data:
                         mapped_data = {}
-                        mappings= temp_mappings
-                        temp_mappings = {}
+                        
+                        # some of the transforms can add new source values, need to update a local copy 
+                        # so as not to break the obj_config loop above or the mappings loop below
+                        if len(temp_mappings)>0:
+                           mappings = temp_mappings
+                           
                         for dest_field, field_info in mappings.items():
                             source_value = None
                             temp_mappings = mappings
