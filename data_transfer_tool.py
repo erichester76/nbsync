@@ -46,9 +46,10 @@ yaml.add_constructor('!envvar', env_var_constructor)
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
-        template = env.get_template(yaml_file)
-        #rendered_yaml = template.render({**{k: v for k, v in os.environ.items()}, 'render_mappings': False})
-        self.config = yaml.load(yaml_file, Loader=yaml.FullLoader)
+        with open(yaml_file) as file:
+            self.config = yaml.load(file, Loader=yaml.FullLoader)        
+        # Initialize the Jinja environment for later rendering
+        self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
         self.dry_run = dry_run  # Store the dry_run flag
         self.sources = {}
         self.mapped_data = {}
@@ -67,24 +68,9 @@ class DataTransferTool:
                 self.sources[name] = SNMPDataSource(config)
             self.sources[name].authenticate()
 
-    def render_source_value(field_info, item):
-        """
-        Renders the source string using Jinja2 and the current item.
-        Supports dot notation for accessing nested attributes in the item.
-        """
-        source_template = env.from_string(field_info['source'])
-        try:
-            # Render the template with the item
-            source_value = source_template.render(item=item)
-        except Exception as e:
-            print(f"Error rendering template {field_info['source']} with item: {str(e)}")
-            source_value = None
-        return source_value
-
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
-            
             source = self.sources[obj_config['source_api']]
 
             for source_client in source.clients:
@@ -103,7 +89,7 @@ class DataTransferTool:
 
                         for dest_field, field_info in mappings.items():
                             # Render the Jinja2 template with the item data
-                            source_value = self.render_source_value(field_info, item)
+                            source_value = self.render_source_value(field_info['source'], item)
 
                             if ('action' in field_info):
                                 action = field_info.get('action')
@@ -114,7 +100,11 @@ class DataTransferTool:
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
 
-    
+    def render_source_value(self, source_template, item):
+        """Render the source value dynamically based on the item."""
+        template = self.jinja_env.from_string(source_template)
+        # Render the Jinja template, passing 'item' as the context for dynamic values
+        return template.render(item=item)
 
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
