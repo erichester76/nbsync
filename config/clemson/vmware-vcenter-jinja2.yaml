@@ -113,7 +113,7 @@ object_mappings:
     mapping:
 
       name:
-        source: {{ config.name | replace('.clemson.edu', '') }}
+        source: {{ config.name | regex_replace('(.+).clemson.edu.+', '\\1') }}
 
       status:
         source: {{ runtime.powerState 

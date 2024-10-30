@@ -76,7 +76,7 @@ object_mappings:
     mapping:
           
           name:
-            source: {{ hostname | replace('.clemson.edu','') | lower }}
+            source: {{ hostname | regex_replace('(.+).clemson.edu.+', '\\1') | lower }}
 
           device_type:
             source: {{ platformId
@@ -86,7 +86,7 @@ object_mappings:
               | regex_replace('^AIR\-AP', 'Catalyst ')
               | regex_replace('^AIR\-CAP', 'Catalyst ')
               | regex_replace('\-K9$', '')
-              | regex_replace('^([^\,]+)\,.+', '\1') }}
+              | regex_replace('^([^\,]+)\,.+', '\\1') }}
 
             action: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
 
@@ -104,17 +104,15 @@ object_mappings:
 
           site:
             source: {{ siteNameHierarchy 
-               | slice(4,2) 
-               | first 
+               | regex_replace('^([^/]+)/([^/]+)/.*', '\\2')
                | regex_replace('(?<!^)(?=[A-Z])', ' ') 
                | default('Default',true) }}
             action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
            
           location:
             source: {{ siteNameHierarchy 
-               | slice(4,3) 
-               | first 
                | regex_replace('(?<!^)(?=[A-Z])', ' ') 
+               | regex_replace('^([^/]+)/[^/]+/([^/]+)/.*', '\\2')
                | default('Default',true) }} 
             action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
            
