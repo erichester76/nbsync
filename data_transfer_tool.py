@@ -161,6 +161,7 @@ class DataTransferTool:
     def apply_transform_function(self, value, transform, obj_config, field_name, item):
         """Apply a transformation to a value, based on the transform rule."""
         if value is None: return value  # Skip transformation if value is None
+        temp_mappings = {}
 
         if transform:
             # If transform is a string, convert it into a list with a single item
@@ -182,7 +183,7 @@ class DataTransferTool:
                     for idx, split_value in enumerate(split_values, 1):
                         key_name = f"{field_name}_{idx}"
                         setattr(self, f"{field_name}_{idx}", split_value)
-                        obj_config['mapping'][key_name] = {'source': key_name}  # Inject as a new source field
+                        temp_mappings[key_name] = {'source': key_name}  # Prepare the new source field
                     value = getattr(self, f"{field_name}_1")
 
                 elif "change_case" in trans:
@@ -319,7 +320,8 @@ class DataTransferTool:
                         print(f'Creating sub object: {create_data}')
                         created_object = create_function(create_data)
                         value = created_object.id if hasattr(created_object, 'id') else None
-                    
+  
+        obj_config['mapping'].update(temp_mappings)    
         return value
 
     def process_mappings(self):
