@@ -47,7 +47,7 @@ object_mappings:
         devices = []
         sites = []
         offset = 1
-        limit = 5
+        limit = 50
         items = 50
         while items == limit:
             response = client.sites.get_site(offset=offset, limit=limit)
