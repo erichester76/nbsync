@@ -208,7 +208,7 @@ class DataTransferTool:
                     value = getattr(value, attr, None)
                     
                 if value is not None:
-                    print(f"Found {value}")
+                    print(f"Found {attr}")
                     return value
 
         except AttributeError:
