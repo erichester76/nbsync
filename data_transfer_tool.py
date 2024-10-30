@@ -152,6 +152,8 @@ class DataTransferTool:
                                 source_value = field_info['source']
                         # Convert << >> to {{ }} for Jinja2 compatibility
                         template_string = yaml.dump(mappings).replace('<<', '{{').replace('>>', '}}')
+                        #sanitize out any special characters
+                        template_string = re.sub(r'[\x00-\x1F\x7F]', '', template_string)
                         # Render the entire mappings block with Jinja2
                         template = env.from_string(template_string)
                         rendered_item_config = template.render(self.resolve_dot_notation(item))
