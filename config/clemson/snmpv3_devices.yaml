@@ -1,0 +1,26 @@
+api_definitions:
+  # NetBox API Definition
+  netbox: 
+    type: api
+    module: pynetbox
+    auth_method: token
+    auth_function: api  
+    auth_args:
+      token: ${NETBOX_API_KEY}
+    base_urls:
+      - https://netbox.app.clemson.edu
+
+  snmp: 
+      type: snmp
+      module: pysnmp
+      auth_method: snmp_v3  # Or use 'snmp_v2' for v2c
+      auth_params:
+        version: v3
+        username: snmpuser
+        auth_key: ${SNMP_AUTH_KEY}
+        priv_key: ${SNMP_PRIV_KEY}
+        auth_protocol: usmHMACSHAAuthProtocol
+        priv_protocol: usmAesCfb128Protocol
+        targets:
+          - 192.168.1.100
+          - 192.168.1.101
