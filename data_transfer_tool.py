@@ -147,25 +147,16 @@ class DataTransferTool:
 
                     for item in source_data:
                         mapped_data = {}
-                        resolved_mappings = {}
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
-                                # if re.search(r' \b\w+(\.\w+)+\b', source_value):
-                                #     # Resolve any nested attributes first
-                                #     resolved_source = self.resolve_nested_context(item, source_value)
-                                #     # Store the resolved value in the mapping
-                                #     resolved_mappings[field] = {'source': ' {{ resolved_source }} '}
-                                #else:
-                                resolved_mappings[field] = {'source': source_value}
-
+                
 
                         # Convert << >> to {{ }} for Jinja2 compatibility
-                        template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
-                        print(f"Template string after conversion: {template_string}")
+                        template_string = yaml.dump(mappings).replace('<<', '{{').replace('>>', '}}')
                         # Render the entire mappings block with Jinja2
                         template = env.from_string(template_string)
-                        rendered_item_config = template.render(item=item)
+                        rendered_item_config = template.render(item=self.resolved_dot_notation(item))
                         # Parse the rendered YAML to get the final mappings
                         rendered_mappings = yaml.safe_load(rendered_item_config)
                         # Debugging - Print the rendered mappings after Jinja2 processing
@@ -185,33 +176,42 @@ class DataTransferTool:
                         print(f"Final mapped data for {obj_type}: {mapped_data}")
 
     
-    def resolve_nested_context(self, item, source_value):
-        """Resolve nested attributes in an object using dot notation."""
-        # If source_value is not a string or has no dot notation, return it directly
-        if not isinstance(source_value, str) or '.' not in source_value:
-            return source_value
+    def resolve_dot_notation(self, item):
+        """Resolve all dot notation variables in the item and return the corrected structure."""
+        def get_nested_value(obj, attr_path):
+            """Recursively get a nested value from an object or dict using dot notation."""
+            attrs = attr_path.split('.')
+            current_obj = obj
+            try:
+                for attr in attrs:
+                    if isinstance(current_obj, dict):
+                        current_obj = current_obj.get(attr)
+                    else:
+                        current_obj = getattr(current_obj, attr)
+                    if current_obj is None:
+                        break
+                return current_obj
+            except AttributeError:
+                return None
         
-        # Split the source_value by '.' to get the attribute path
-        attrs = source_value.replace('<< ', '').replace(' >>', '').split('.')
-        value = item
-
-        try:
-            # Traverse the attribute path to get the final value
-            for attr in attrs:
-                print(f"Trying: {attr} from {source_value}")
-
-                if isinstance(value, dict):
-                    value = value.get(attr)
-                else:
-                    value = getattr(value, attr, None)
-                    
-                if value is not None:
-                    print(f"Found {attr}")
-                    return value
-
-        except AttributeError:
-            print(f"Error finding nested variable: {source_value}")
-            return None
+        def resolve_values(item):
+            """Recursively resolve dot notation in dictionaries and lists."""
+            if isinstance(item, dict):
+                resolved_dict = {}
+                for key, value in item.items():
+                    if isinstance(value, str) and re.match(r'.*\b\w+(\.\w+)+\b.*', value):
+                        resolved_dict[key] = get_nested_value(item, value)
+                    elif isinstance(value, (dict, list)):
+                        resolved_dict[key] = resolve_values(value)
+                    else:
+                        resolved_dict[key] = value
+                return resolved_dict
+            elif isinstance(item, list):
+                return [resolve_values(elem) for elem in item]
+            else:
+                return item
+        
+        return resolve_values(item)
 
     
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
