@@ -173,7 +173,7 @@ class DataTransferTool:
         for field, field_info in mappings.items():
             # Replace << and >> with {{ and }} for Jinja2 templating
             template_string = yaml.dump(field_info['source']).replace('<<', '{{').replace('>>', '}}')
-            
+            print(f'{template_string}')
             # Create a Jinja2 template with the updated string
             template = env.from_string(template_string)
             
