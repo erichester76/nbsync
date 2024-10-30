@@ -136,8 +136,7 @@ object_mappings:
         action: lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
 
       tenant:
-        source: {{ config.name 
-            | include_yaml('department_translations.yaml') }}
+        source: {{ config.name }}
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
