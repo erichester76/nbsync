@@ -64,7 +64,7 @@ object_mappings:
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       cluster:
-        source: {{ parent.name | title }}
+        source: {{ parent.name }}
         action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
       role: 
@@ -80,7 +80,7 @@ object_mappings:
         action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
 
       device_type:
-        source: {{ hardware.systemInfo.model | title }}
+        source: {{ hardware.systemInfo.model }}
         action: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create') # need to add aditional info option here
 
 
