@@ -106,7 +106,7 @@ object_mappings:
             source: {{ siteNameHierarchy 
                | slice(4,2) 
                | first 
-               | replace_regex('([a-z])([A-Z])', '\1 \2') 
+               | replace_regex('(?<!^)(?=[A-Z])', ' ')
                | title
                | default('Default',true) }}
             action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
@@ -115,7 +115,7 @@ object_mappings:
             source: {{ siteNameHierarchy 
                | slice(4,3) 
                | first 
-               | replace_regex('([a-z])([A-Z])', '\1 \2') 
+               | replace_regex('(?<!^)(?=[A-Z])', ' ') 
                | title
                | default('Default',true) }} 
             action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
