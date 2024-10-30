@@ -235,7 +235,21 @@ class DataTransferTool:
             print(f"Error calling create_function: {str(e)}")
             return None
 
-
+    def sanitize_data(self, data):
+        """
+        Sanitize the mapped_data to ensure all values are serializable.
+        If any value is an object, extract its relevant attribute (e.g., 'id' or 'name').
+        """
+        sanitized_data = {}
+        for key, value in data.items():
+            if hasattr(value, 'id'):  # If it's an object with an 'id' attribute, use the 'id'
+                sanitized_data[key] = value.id
+            elif hasattr(value, 'name'):  # If it's an object with a 'name' attribute, use the 'name'
+                sanitized_data[key] = value.name
+            else:
+                sanitized_data[key] = value  # Otherwise, use the value as is
+        return sanitized_data
+    
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """Create or update objects in the destination API."""
         # Find function
@@ -252,13 +266,26 @@ class DataTransferTool:
 
         if found_object:
             existing_object = list(found_object)[0]
-            if self.dry_run:
-                print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
+            
+            mapped_data['id'] = existing_object.id
+            current_data = self.sanitize_data(existing_object.serialize())
+            filtered_current_data = {key: current_data.get(key) for key in mapped_data}
+            sanitized_mapped_data = self.sanitize_data(mapped_data)
+            
+            # Check for changes in object to determine if we should update
+            differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, float)])
+            if differences:
+                print(f"Differences found for {existing_object.name}: {differences}")
+                if self.dry_run:
+                    print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
+                else: 
+                    print(f"Updating object {existing_object.name}: {sanitized_mapped_data}")
+                    update_function = self.get_nested_function(api_client, update_function_path)
+                    update_function([sanitized_mapped_data])
             else:
-                mapped_data['id'] = existing_object.id
-                update_function = self.get_nested_function(api_client, update_function_path)
-                update_function([mapped_data])
-                return existing_object.id
+                print(f"No changes detected for object {existing_object.name}, skipping update.")
+            return existing_object.id
+        
         else:
             if self.dry_run:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}: {mapped_data}")
