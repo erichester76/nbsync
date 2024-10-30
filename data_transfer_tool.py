@@ -181,7 +181,7 @@ class DataTransferTool:
                     # Inject the split values into the mapping for future use
                     for idx, split_value in enumerate(split_values, 1):
                         key_name = f"{field_name}_{idx}"
-                        setattr(self, f"{field_name}_{index}", split_value)
+                        setattr(self, f"{field_name}_{idx}", split_value)
                         obj_config['mapping'][key_name] = {'source': key_name}  # Inject as a new source field
                     value = getattr(self, f"{field_name}_1")
 
