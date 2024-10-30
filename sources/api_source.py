@@ -70,7 +70,7 @@ class APIDataSource(DataSource):
             if self.api and self.is_session_valid(base_url):
                     print(f"Using existing session for {self.name} @ {base_url}.")
             else:
-                print(f"Re-authenticating for {self.name} @ {base_url}.")
+                print(f"(re)authenticating for {self.name} @ {base_url}.")
                 # Handle authentication methods
                 if auth_method == 'token':
                     self.api = auth_func(base_url, token=self.config['auth_args']['token'])
