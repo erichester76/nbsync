@@ -151,13 +151,17 @@ class DataTransferTool:
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
-                                print(f"Field '{field}' before conversion: {source_value}")
-                                # Resolve any nested attributes first
-                                resolved_source = self.resolve_nested_context(item, source_value)
-                                # Debugging - Print resolved source before conversion
-                                print(f"Resolved source for field '{field}' after conversion: {resolved_source}")
-                                # Store the resolved value in the mapping
-                                resolved_mappings[field] = {'source': resolved_source}
+                                if "." in source_value:
+                                    print(f"Field '{field}' before conversion: {source_value}")
+                                    # Resolve any nested attributes first
+                                    resolved_source = self.resolve_nested_context(item, source_value)
+                                    # Debugging - Print resolved source before conversion
+                                    print(f"Resolved source for field '{field}' after conversion: {resolved_source}")
+                                    # Store the resolved value in the mapping
+                                    resolved_mappings[field] = {'source': resolved_source}
+                                else:
+                                    resolved_mappings[field] = {'source': source_value}
+
 
                         # Convert << >> to {{ }} for Jinja2 compatibility
                         template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
