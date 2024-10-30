@@ -35,11 +35,30 @@ def extract_item(value, key_name, identifier_key):
                 return identifier_value
     return None
 
+def replace_map(value, filename):
+    """
+    Apply a series of regex replacements from a file to the value.
+    Each line in the file should be in the format: pattern,replacement
+    """
+    try:
+        with open(filename, 'r') as f:
+            # Read the file line by line
+            for line in f:
+                # Split each line into pattern and replacement
+                pattern, replacement = line.strip().split(',')
+                # Apply the regex replacement
+                value = re.sub(pattern, replacement, value)
+        return value
+    except Exception as e:
+        print(f"Error in replace_map: {e}")
+        return value  # Return the value unchanged in case of an error
+    
 # Create a new Jinja2 environment and add the filters
 env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
 env.filters['regex_replace'] = regex_replace
 env.filters['slugify'] = slugify
 env.filters['extract_item'] = extract_item
+env.filters['replace_map'] = replace_map
 
 def env_var_constructor(loader, node):
     """Extracts the environment variable from the node value."""
