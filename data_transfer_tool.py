@@ -143,6 +143,7 @@ class DataTransferTool:
                     update_function = obj_config.get('update_function')
                     find_function = obj_config.get('find_function')
                     mappings = obj_config['mapping']
+                    print(f"{mappings}")
 
                     # Render the entire mapping for each item in the source_data
                     for item in source_data:
