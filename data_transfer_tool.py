@@ -160,6 +160,19 @@ class DataTransferTool:
             
         return value
 
+    def get_nested_function(self, api_client, function_path):
+        """Recursively get a function from the API client."""
+        parts = function_path.split('.')
+        func = api_client  # Start with the root client (e.g., pynetbox.NetBox())
+        for part in parts:
+            try:
+                func = getattr(func, part)
+            except AttributeError:
+                raise AttributeError(f"Attribute '{part}' not found in API client at path '{function_path}'")
+        if not callable(func):
+            raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
+        return func
+
     def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item):
         """Perform API lookup or create an object on the server side."""
         api_client = self.sources[obj_config['destination_api']].api
