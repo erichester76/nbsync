@@ -226,8 +226,11 @@ class DataTransferTool:
         # If not found, create the object
         try:
             create_data = {lookup_type: value, 'slug': re.sub(r'\W+', '-', value.lower())} #, **additional_data}
-            created_object = create_function(create_data)
-            return created_object.id if hasattr(created_object, 'id') else None
+            if self.dry_run:
+                print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
+            else:
+                created_object = create_function(create_data)
+                return created_object.id if hasattr(created_object, 'id') else None
         except Exception as e:
             print(f"Error calling create_function: {str(e)}")
             return None
