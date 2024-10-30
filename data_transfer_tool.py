@@ -20,13 +20,16 @@ def regex_replace(value, pattern, replacement):
 def slugify(value):
     return re.sub(r'\W+', '-', value.lower())
 
-def extract_item(value, identifier_key):
+def extract_item(value, key_name, identifier_key):
     """
     Extract a specific item from a list of dictionaries or objects based on an identifier key.
+    value: the list of items (automatically passed by Jinja)
+    key_name: the attribute name to extract (e.g., 'identifierValue')
+    identifier_key: the attribute name to match against (e.g., 'SerialNumberTag')
     """
     if isinstance(value, list):
         for identifier in value:
-            identifier_value = getattr(identifier, 'identifierValue', None)
+            identifier_value = getattr(identifier, key_name, None)
             identifier_type = getattr(identifier.identifierType, 'key', None)
             if identifier_type == identifier_key:
                 return identifier_value
