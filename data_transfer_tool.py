@@ -144,9 +144,9 @@ class DataTransferTool:
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
-
+        
         if isinstance(actions, str):
-            actions = [action]
+            actions = [actions]
 
         for action in actions:
             if 'regex_replace' in action:
