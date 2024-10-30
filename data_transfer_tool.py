@@ -102,7 +102,7 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
      
         # Render the object_mappings section with Jinja2 dynamically
-        rendered_object_mappings = env(self.raw_object_mappings).render()
+        rendered_object_mappings = env.from_string(self.raw_object_mappings).render()
         object_mappings_config = yaml.load(rendered_object_mappings, Loader=yaml.FullLoader)
         self.config['object_mappings'] = object_mappings_config['object_mappings']
         
