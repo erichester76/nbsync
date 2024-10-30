@@ -151,7 +151,7 @@ class DataTransferTool:
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
-                                if re.search(r' .+\.[^ ]+', source_value):  
+                                if re.search(r' .+\.[^ ]+ ', source_value):  
                                     print(f"Field '{field}' before conversion: {source_value}")
                                     # Resolve any nested attributes first
                                     resolved_source = self.resolve_nested_context(item, source_value)
