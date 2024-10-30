@@ -153,11 +153,10 @@ class DataTransferTool:
                             if 'source' in field_info:
                                 source_value = field_info['source']
 
+                        resolved_mappings = self.resolve_nested_context(item)
                         template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
                         template = env.from_string(template_string)
-                        context = self.resolve_nested_context(item)
-
-                        rendered_item_config = template.render(context)
+                        rendered_item_config = template.render(resolved_mappings)
                         rendered_mappings = yaml.safe_load(rendered_item_config)
                         print(f"{rendered_item_config}")
 
