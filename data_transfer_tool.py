@@ -159,7 +159,6 @@ class DataTransferTool:
                             mapped_data[dest_field] = source_value
                                 
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
-                        if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
 
     def render_source_value(self, source_template, item):
         """Render the source value dynamically based on the item."""
