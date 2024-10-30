@@ -48,18 +48,21 @@ def jinja_placeholder_constructor(loader, node):
 env_var_pattern = re.compile(r'\$\{([^}^{]+)\}')
 jinja_placeholder_pattern = re.compile(r'{{.+}}')
 
-yaml.add_implicit_resolver('!envvar', env_var_pattern)
-yaml.add_constructor('!envvar', env_var_constructor)
 yaml.add_implicit_resolver('!jinja_placeholder', jinja_placeholder_pattern)
 yaml.add_constructor('!jinja_placeholder', jinja_placeholder_constructor)
+yaml.add_implicit_resolver('!envvar', env_var_pattern)
+yaml.add_constructor('!envvar', env_var_constructor)
 
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
+        
         with open(yaml_file) as file:
-            self.config = yaml.load(file, Loader=yaml.FullLoader)        
+            self.config = yaml.load(file, Loader=yaml.FullLoader)  
+                  
         # Initialize the Jinja environment for later rendering
         self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
+        
         self.dry_run = dry_run  # Store the dry_run flag
         self.sources = {}
         self.mapped_data = {}
