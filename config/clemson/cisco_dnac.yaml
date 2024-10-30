@@ -76,81 +76,45 @@ object_mappings:
     mapping:
           
           name:
-            source: "hostname"
-            transform_function:
-              - regex_replace('.clemson.edu.*','')
-              - change_case('lower')
+            source: {{ hostname | regex_replace('.clemson.edu.*','') | lower }}
 
           device_type:
-            source: "platformId"
-            transform_function: 
-              #try to change to ciscos new Catalyst for everything naming
-              - regex_replace('^C', 'Catalyst ')
-              - regex_replace('^WS\-C', 'Catalyst ')
-              - regex_replace('^IE\-', 'Catalyst IE')
-              - regex_replace('^AIR\-AP', 'Catalyst ')
-              - regex_replace('^AIR\-CAP', 'Catalyst ')
-              - regex_replace('\-K9$', '')
-              - regex_replace('^([^\,]+)\,.+', '\1')    
-              - lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
+            source: {{ platformId
+              | regex_replace('^C', 'Catalyst ')
+              | regex_replace('^WS\-C', 'Catalyst ')
+              | regex_replace('^IE\-', 'Catalyst IE')
+              | regex_replace('^AIR\-AP', 'Catalyst ')
+              | regex_replace('^AIR\-CAP', 'Catalyst ')
+              | regex_replace('\-K9$', '')
+              | regex_replace('^([^\,]+)\,.+', '\1') }}
 
-            included_fields:
-              - field: manufacturer
-                key: name
-                value: vendor
-                transform_function:
-                  - regex_replace(' Systems Inc','')
-                  - regex_replace('^$','Cisco')
-                  - change_case('title')
-                  - lookup_object('name', 'dcim.manufacturers.filter', 'dcim.manufacturers.create')
-              - field: manufacturer
-                key: slug
-                value: vendor
-                create_if_missing: true
-                transform_function: slugify 
+            action: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
 
           role:
-            source: "role"
-            transform_function: 
-              - change_case('title')
-              - lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
+            source: {{ role | title }}
+            action: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
           platform:
-            source: ["softwareType", "softwareVersion"]
-            transform_function: 
-              - concat(' ')
-              #assume blank softwareType is IOS
-              - regex_replace('^(\d)', 'IOS \1')    
-              - lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+            source: {{softwareType | regex_replace('^$', 'IOS') | upper }} {{ softwareVersion }}     
+            action: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
           serial:
-            source: "serialNumber"
-            transform_function:
-               #Just capture first serial# from stacks
-               - regex_replace('^([^\,]+)\,.+', '\1')
-               - change_case('upper')
+            source: {{ serialNumber
+               | regex_replace('^([^\,]+)\,.+', '\1')
+               | upper }}
 
           site:
-            source: "siteNameHierarchy"
-            transform_function:
-               # Global/Main Campus/Garrison Expo/First Floor
-               # Splits name by / into site_1, site_2, site_3, site_4
-               - split('/')
-               - regex_replace('^.*$',site_2)
-               - change_case('title')
-               - lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
+            source: {{ siteNameHierarchy | slice(4,'Default')[2] | title }}
+            action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
            
           location:
-             source: "site_3"
-             transform_function:
-               - change_case('title')
-               - lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
-
+            source: {{ siteNameHierarchy | slice(4,'Default')[3] | title }}
+            action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
+           
           status:
-            source: "reachabilityStatus"
-            transform_function:
-               - regex_replace('Reachable', 'active')
-               - regex_replace('Unreachable', 'offline')
+            source: {{ reachabilityStatus
+               | regex_replace('Reachable', 'active')
+               | regex_replace('Unreachable', 'offline') }}
 
           # primary_ip4:
           #   source: "managementIpAddress"
