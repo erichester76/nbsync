@@ -176,7 +176,7 @@ class DataTransferTool:
                         print(f"Final mapped data for {obj_type}: {mapped_data}")
 
     
-    def resolve_dot_notation(item):
+    def resolve_dot_notation(self,item):
         """Resolve all dot notation variables in the item and return the corrected structure."""
         
         def object_to_dict(obj):
