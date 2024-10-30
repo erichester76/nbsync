@@ -20,7 +20,7 @@ def regex_replace(value, pattern, replacement):
 def slugify(value):
     return re.sub(r'\W+', '-', value.lower())
 
-def extract_item(value, item_key, identifier_key):
+def extract_item(value, identifier_key):
     """
     Extract a specific item from a list of dictionaries or objects based on an identifier key.
     """
