@@ -174,7 +174,12 @@ class DataTransferTool:
 
                         # Loop through rendered mappings and apply transformations/actions
                         for dest_field, field_info in rendered_mappings.items():
-                            source_value = field_info
+                            
+                            # Check if the source is a static string (applies to any data type)
+                            if 'const:' in field_info['source']:
+                                source_value = field_info['source'].split("const:")[1].strip().strip("'\"") 
+                            else: 
+                                source_value = field_info
 
                             if 'action' in field_info:
                                 action = field_info.get('action')
