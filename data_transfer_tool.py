@@ -150,7 +150,6 @@ class DataTransferTool:
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
-                        print("TOP")
                         # Convert << >> to {{ }} for Jinja2 compatibility
                         template_string = yaml.dump(mappings).replace('<<', '{{').replace('>>', '}}')
                         # Render the entire mappings block with Jinja2
@@ -164,15 +163,12 @@ class DataTransferTool:
                         # Loop through rendered mappings and apply transformations/actions
                         for dest_field, field_info in rendered_mappings.items():
                             source_value = field_info['source']
-                            print(f"Before {dest_field} {source_value} {field_info}")
                             if 'action' in field_info:
                                 action = field_info.get('action')
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
                             mapped_data[dest_field] = source_value
-                            print(f"After {dest_field} {source_value} {field_info}")
-                            print("MIDDLE")
-                        print("BOTTOM")
-
+                       
+                        print(f"{mapped_data}")
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         # Debugging - Print final mapped data for the object
@@ -321,12 +317,15 @@ class DataTransferTool:
         """Create or update objects in the destination API."""
         # Find function
         find_function = self.get_nested_function(api_client, find_function_path)
+        
         # Automatically extract the first field from mapped_data as the key field
         key_field = list(mapped_data.keys())[0]
         filter_params = {key_field: mapped_data[key_field]}
 
         try:
             found_object = find_function(**filter_params)
+            print(f"Found {found_object}")
+            
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
@@ -338,7 +337,7 @@ class DataTransferTool:
             current_data = self.sanitize_data(existing_object.serialize())
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(mapped_data)
-            
+            print(f"checking for differences")
             # Check for changes in object to determine if we should update
             differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, float)])
             if differences:
