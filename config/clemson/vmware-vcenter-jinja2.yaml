@@ -35,9 +35,6 @@ api_definitions:
       - cudr-vcenter.clemson.edu
       - vdi-vcenter.clemson.edu
 
-
-{% if render_mappings %}
-
 object_mappings:
 
   hosts:
@@ -162,5 +159,3 @@ object_mappings:
             | regex_replace('(?i)^Poole-.+','Poole') 
             | regex_replace('(?i)^Proto-.+','Clemson Information Technology Center') }}
         action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create') 
-
-{% endif %}
