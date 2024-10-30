@@ -39,25 +39,15 @@ def env_var_constructor(loader, node):
     
     return value
 
-# Custom constructor to handle Jinja-like fields
-def jinja_placeholder_constructor(loader, node):
-    """This constructor will simply return the string for Jinja fields like '{{ }}'."""
-    value = loader.construct_scalar(node)
-    return value
 
 env_var_pattern = re.compile(r'\$\{([^}^{]+)\}')
-jinja_placeholder_pattern = re.compile(r'{{.+}}')
 
-yaml.add_implicit_resolver('!jinja_placeholder', jinja_placeholder_pattern)
-yaml.add_constructor('!jinja_placeholder', jinja_placeholder_constructor)
 yaml.add_implicit_resolver('!envvar', env_var_pattern)
 yaml.add_constructor('!envvar', env_var_constructor)
 
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
-        # Initialize the Jinja environment
-        self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
 
         # Read the YAML file line by line and build yaml_content until object_mappings
         yaml_content = []
@@ -112,7 +102,7 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
      
         # Render the object_mappings section with Jinja2 dynamically
-        rendered_object_mappings = self.jinja_env.from_string(self.raw_object_mappings).render()
+        rendered_object_mappings = env(self.raw_object_mappings).render()
         object_mappings_config = yaml.load(rendered_object_mappings, Loader=yaml.FullLoader)
         self.config['object_mappings'] = object_mappings_config['object_mappings']
         
