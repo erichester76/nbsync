@@ -320,17 +320,19 @@ class DataTransferTool:
         
         # Automatically extract the first field from mapped_data as the key field
         key_field = list(mapped_data.keys())[0]
+        print(f"selected key_field {key_field}")
         filter_params = {key_field: mapped_data[key_field]}
-
+        print(f"filter params = {filter_params}")
+       
         try:
             found_object = find_function(**filter_params)
-            print(f"Found {found_object}")
             
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
 
         if found_object:
+            print(f"# {len(found_object)}")
             existing_object = list(found_object)[0]
             print(f"Found {existing_object.id}")
 
