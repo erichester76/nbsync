@@ -137,6 +137,7 @@ class DataTransferTool:
                 source_api = obj_config.get('source_api')
                 print(f"Fetching data from {source_api}...")
                 source_data = source.fetch_data(obj_config, source_client)
+                
                 destination_api = self.sources[obj_config['destination_api']]
                 for destination_client in destination_api.clients:
                     create_function = obj_config.get('create_function')
@@ -150,10 +151,11 @@ class DataTransferTool:
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
+                                print(f"Field '{field}' before conversion: {source_value}")
                                 # Resolve any nested attributes first
                                 resolved_source = self.resolve_nested_context(item, source_value)
                                 # Debugging - Print resolved source before conversion
-                                print(f"Resolved source for field '{field}' before conversion: {resolved_source}")
+                                print(f"Resolved source for field '{field}' after conversion: {resolved_source}")
                                 # Store the resolved value in the mapping
                                 resolved_mappings[field] = {'source': resolved_source}
 
@@ -182,19 +184,26 @@ class DataTransferTool:
                         print(f"Final mapped data for {obj_type}: {mapped_data}")
 
     
-    def resolve_nested_context(self, item, attr_path):
+    def resolve_nested_context(self, item, source_value):
         """Resolve nested attributes in an object using dot notation."""
-        attrs = attr_path.split('.')
-        current_obj = item
+        # If source_value is not a string or has no dot notation, return it directly
+        if not isinstance(source_value, str) or '.' not in source_value:
+            return source_value
+        
+        # Split the source_value by '.' to get the attribute path
+        attrs = source_value.split('.')
+        value = item
+
         try:
+            # Traverse the attribute path to get the final value
             for attr in attrs:
-                if isinstance(current_obj, dict):
-                    current_obj = current_obj.get(attr)
+                if isinstance(value, dict):
+                    value = value.get(attr)
                 else:
-                    current_obj = getattr(current_obj, attr)
-                if current_obj is None:
+                    value = getattr(value, attr, None)
+                if value is None:
                     break
-            return current_obj
+            return value
         except AttributeError:
             return None
 
