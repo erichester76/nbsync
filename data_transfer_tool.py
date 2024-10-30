@@ -197,14 +197,20 @@ class DataTransferTool:
         try:
             # Traverse the attribute path to get the final value
             for attr in attrs:
+                print(f"Trying: {attr} from {source_value}")
+
                 if isinstance(value, dict):
                     value = value.get(attr)
+                    print(f"Dict: {attr} {value}")
                 else:
                     value = getattr(value, attr, None)
-                if value is None:
-                    break
-            return value
+                    print(f"String: {attr} {value}")
+                    
+                if value is not None:
+                    return value
+
         except AttributeError:
+            print(f"Error finding nested variable: {source_value}")
             return None
 
     
