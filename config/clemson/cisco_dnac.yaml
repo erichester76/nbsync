@@ -76,7 +76,7 @@ object_mappings:
     mapping:
           
           name:
-            source: {{ hostname | regex_replace('.clemson.edu.*','') | lower }}
+            source: {{ hostname | replace('.clemson.edu','') | lower }}
 
           device_type:
             source: {{ platformId
