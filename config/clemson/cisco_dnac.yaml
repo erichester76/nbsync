@@ -43,34 +43,30 @@ object_mappings:
     # Fetch device data from DNAC
     fetch_data_code: |
       def fetch_data(client):
-        DEBUG=1
-        devices = []
-        sites = []
+        DEBUG = 1
+        devices = sites = []
         offset = 1
-        limit = 5
-        items = 5
+        limit = 500
         while items == limit:
             response = client.sites.get_site(offset=offset, limit=limit)
             sites.extend(response.response)
             items = len(response.response)
-            items = 0
             offset += limit
         if not sites: raise ValueError("No sites found in Cisco DNA Center.")
         if DEBUG == 1: print(f"Found {len(sites)} sites")
-        items=0
+        items = 0
         for site in sites:
             items += 1
             if DEBUG == 1: print(f"Working on Site# {items}: {site.get('siteNameHierarchy')}")
             membership = client.sites.get_membership(site_id=site.id)
-            if not membership or not hasattr(membership, 'device'): continue  
-            if membership.device is None: continue  
             for members in membership.device:
-                if not members or not hasattr(members, 'response'): continue  
-                for device in members.response:
-                    if hasattr(device, 'serialNumber'):
-                        device['siteNameHierarchy'] = site.get('siteNameHierarchy')
-                        if DEBUG == 1: print(f"Found device {device.hostname} in site {site.get('siteNameHierarchy')}")
-                        devices.append(device)
+                if hasattr(members, 'response'):   
+                  for device in members.response:
+                      if hasattr(device, 'serialNumber'):
+                          device['siteNameHierarchy'] = site.get('siteNameHierarchy')
+                          if DEBUG == 1: print(f"Found device {device.hostname} in site {site.get('siteNameHierarchy')}")
+                          devices.append(device)
+        if DEBUG == 1: print(f"Found {len(devices)} devices")
         return devices
 
     mapping:
