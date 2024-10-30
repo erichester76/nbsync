@@ -69,7 +69,7 @@ class DataTransferTool:
 
                         for dest_field, field_info in mappings.items():
                             # Render the Jinja2 template with the item data
-                            source_value = env.from_string(field_info['source']).render(item=item)
+                            source_value = render_source_value(field_info, item)
 
                             if ('action' in field_info):
                                 action = field_info.get('action')
@@ -79,6 +79,20 @@ class DataTransferTool:
                                 
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
+
+    def render_source_value(field_info, item):
+        """
+        Renders the source string using Jinja2 and the current item.
+        Supports dot notation for accessing nested attributes in the item.
+        """
+        source_template = env.from_string(field_info['source'])
+        try:
+            # Render the template with the item
+            source_value = source_template.render(item=item)
+        except Exception as e:
+            print(f"Error rendering template {field_info['source']} with item: {str(e)}")
+            source_value = None
+        return source_value
 
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
