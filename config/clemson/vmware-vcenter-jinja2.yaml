@@ -120,6 +120,8 @@ object_mappings:
             | replace('poweredOn', 'active') 
             | replace('poweredOff', 'offline') }}
 
+      custom_fields: {}
+
       cluster:
         source: {{ runtime.host.parent.name }}
         action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
