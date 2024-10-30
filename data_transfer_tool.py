@@ -150,8 +150,7 @@ class DataTransferTool:
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
-                
-
+                        print("TOP")
                         # Convert << >> to {{ }} for Jinja2 compatibility
                         template_string = yaml.dump(mappings).replace('<<', '{{').replace('>>', '}}')
                         # Render the entire mappings block with Jinja2
@@ -171,6 +170,8 @@ class DataTransferTool:
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
                             mapped_data[dest_field] = source_value
                             print(f"After {dest_field} {source_value} {field_info}")
+                            print("MIDDLE")
+                        print("BOTTOM")
 
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
