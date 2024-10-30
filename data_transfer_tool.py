@@ -56,13 +56,9 @@ yaml.add_constructor('!envvar', env_var_constructor)
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
-        # Initialize the Jinja environment
-        self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
-
         # Read the YAML file line by line and build yaml_content until object_mappings
         yaml_content = []
         object_mappings = []
-        is_object_mappings = False
 
         with open(yaml_file, 'r') as file:
             yaml_content = file.read()
@@ -139,7 +135,7 @@ class DataTransferTool:
         context = self.resolve_nested_context(item)
 
         # Render the Jinja2 template, passing the resolved context
-        template = self.jinja_env.from_string(source_template)
+        template = env.from_string(source_template)
         return template.render(context)
 
     def resolve_nested_context(self, item):

@@ -81,15 +81,8 @@ object_mappings:
 
       device_type:
         source: {{ hardware.systemInfo.model | title }}
-        action: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
-        included_fields:
-          - field: manufacturer
-            key: name
-            value: 
-          - field: manufacturer
-            key: slug
-            create_if_missing: true
-            action: slugify
+        action: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create') # need to add aditional info option here
+
 
       status:
         source: "{{ runtime.connectionState 
