@@ -20,10 +20,23 @@ def regex_replace(value, pattern, replacement):
 def slugify(value):
     return re.sub(r'\W+', '-', value.lower())
 
+def extract_item(value, item_key, identifier_key):
+    """
+    Extract a specific item from a list of dictionaries or objects based on an identifier key.
+    """
+    if isinstance(value, list):
+        for identifier in value:
+            identifier_value = getattr(identifier, 'identifierValue', None)
+            identifier_type = getattr(identifier.identifierType, 'key', None)
+            if identifier_type == identifier_key:
+                return identifier_value
+    return None
+
 # Create a new Jinja2 environment and add the filters
 env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
 env.filters['regex_replace'] = regex_replace
 env.filters['slugify'] = slugify
+env.filters['extract_item'] = extract_item
 
 def env_var_constructor(loader, node):
     """Extracts the environment variable from the node value."""

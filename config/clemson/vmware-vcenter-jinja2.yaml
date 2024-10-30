@@ -90,7 +90,7 @@ object_mappings:
             | replace('disconnected', 'offline') }}"
 
       serial:
-        source: {{ summary.hardware.otherIdentifyingInfo | upper }}
+        source: {{ summary.hardware.otherIdentifyingInfo | extract_value('SerialNumberTag') }}
 
       platform:
         source: {{ config.product.name }} {{ config.product.version }}
@@ -112,7 +112,7 @@ object_mappings:
           return vms
 
     mapping:
-    
+
       name:
         source: {{ config.name | replace('.clemson.edu', '') }}
 
