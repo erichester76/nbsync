@@ -69,7 +69,7 @@ class DataTransferTool:
 
                         for dest_field, field_info in mappings.items():
                             # Render the Jinja2 template with the item data
-                            source_value = render_source_value(field_info, item)
+                            source_value = self.render_source_value(field_info, item)
 
                             if ('action' in field_info):
                                 action = field_info.get('action')
