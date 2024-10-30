@@ -158,7 +158,6 @@ class DataTransferTool:
                         # Parse the rendered YAML to get the final mappings
                         rendered_mappings = yaml.safe_load(rendered_item_config)
                         # Debugging - Print the rendered mappings after Jinja2 processing
-                        print(f"Rendered mappings after Jinja2 processing: {rendered_mappings}")
 
                         # Loop through rendered mappings and apply transformations/actions
                         for dest_field, field_info in rendered_mappings.items():
@@ -172,7 +171,6 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         # Debugging - Print final mapped data for the object
-                        print(f"Final mapped data for {obj_type} {object_id}: {mapped_data}")
 
     
     def resolve_dot_notation(self,item):
