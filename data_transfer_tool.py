@@ -191,7 +191,7 @@ class DataTransferTool:
             return source_value
         
         # Split the source_value by '.' to get the attribute path
-        attrs = source_value.split('.')
+        attrs = source_value.replace('<<', '{{').replace('>>', '}}').split('.')
         value = item
 
         try:
