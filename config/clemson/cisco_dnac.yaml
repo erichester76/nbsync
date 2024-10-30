@@ -44,9 +44,11 @@ object_mappings:
     fetch_data_code: |
       def fetch_data(client):
         DEBUG = 1
-        devices = sites = []
+        devices = []
+        sites = []
         offset = 1
-        items = limit = 5
+        items = 5
+        limit = 5
         while items == limit:
             response = client.sites.get_site(offset=offset, limit=limit)
             sites.extend(response.response)
