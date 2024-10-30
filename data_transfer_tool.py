@@ -204,12 +204,11 @@ class DataTransferTool:
 
                 if isinstance(value, dict):
                     value = value.get(attr)
-                    print(f"Dict: {attr} {value}")
                 else:
                     value = getattr(value, attr, None)
-                    print(f"String: {attr} {value}")
                     
                 if value is not None:
+                    print(f"Found {value}")
                     return value
 
         except AttributeError:
