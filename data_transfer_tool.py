@@ -181,9 +181,9 @@ class DataTransferTool:
         
         filter_params = {lookup_type: value}
         
-        # Handle additional fields from the mapping
-        additional_data = self.get_included_fields_data(obj_config, field_name, item)
-        filter_params.update(additional_data)
+        # # Handle additional fields from the mapping
+        # additional_data = self.get_included_fields_data(obj_config, field_name, item)
+        # filter_params.update(additional_data)
 
         # Try finding the object
         try:
