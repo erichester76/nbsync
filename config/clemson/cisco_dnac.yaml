@@ -95,7 +95,7 @@ object_mappings:
             action: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
           platform:
-            source: {{ softwareType | upper }} {{ softwareVersion }}     
+            source: {{ softwareType | default:"IOS" | upper }} {{ softwareVersion }}     
             action: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
           serial:
@@ -103,11 +103,11 @@ object_mappings:
                | upper }}
 
           site:
-            source: {{ siteNameHierarchy | slice(4,'Default')[2] | title }}
+            source: {{ siteNameHierarchy | slice(4,2) | first | default("Clemson Network") | title} 
             action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
            
           location:
-            source: {{ siteNameHierarchy | slice(4,'Default')[3] | title }}
+            source: {{ siteNameHierarchy | slice(4,3) | first | default('Default') | title} 
             action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
            
           status:
