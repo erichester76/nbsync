@@ -149,7 +149,7 @@ class DataTransferTool:
                     for item in source_data:
                         # Render the mappings in one go with the entire item context
                         mapped_data = {}
-                        
+                        rendered_item_config = self.render_item_config(mappings, item)
                         # Rendering all mappings together using item context
                         rendered_mapping = self.render_source_mapping(mappings, item)
 
@@ -166,16 +166,16 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
-    def render_source_mapping(self, mappings, item):
-        """Render the entire mapping section using Jinja2, with the item as context."""
-        rendered_mapping = {}
-
-        for dest_field, field_info in mappings.items():
-            # Render the Jinja2 template for each field in the mapping
-            rendered_value = self.render_source_value(field_info['source'], item)
-            rendered_mapping[dest_field] = rendered_value
-
-        return rendered_mapping
+    def render_item_config(self, mappings, item):
+        """Render the mappings block for each data item with Jinja2."""
+        rendered_mappings = {}
+        for field, field_info in mappings.items():
+            # Render the source field using the current data item context
+            template = self.env.from_string(yaml.dump(field_info['source']))
+            rendered_source = template.render(item=item)  # Pass the data item to render
+            field_info['source'] = yaml.safe_load(rendered_source)
+            rendered_mappings[field] = field_info
+        return rendered_mappings
 
     def resolve_nested_context(self, item):
         """Resolve nested attributes in an object using dot notation."""

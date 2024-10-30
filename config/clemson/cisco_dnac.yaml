@@ -106,17 +106,15 @@ object_mappings:
             source: {{ siteNameHierarchy 
                | slice(4,2) 
                | first 
-               | regex_replace('(?<!^)(?=[A-Z])', ' ')
-               | title
+               | regex_replace('(?<!^)(?=[A-Z])', ' ') #De-CamelCase
                | default('Default',true) }}
             action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
            
           location:
             source: {{ siteNameHierarchy 
-               | slice(4,3) 
+               | slice(4,3) #get third element
                | first 
-               | regex_replace('(?<!^)(?=[A-Z])', ' ') 
-               | title
+               | regex_replace('(?<!^)(?=[A-Z])', ' ') #De-CamelCase
                | default('Default',true) }} 
             action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
            
