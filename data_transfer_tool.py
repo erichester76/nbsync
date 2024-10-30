@@ -153,7 +153,7 @@ class DataTransferTool:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](value, pattern, replacement)
             elif 'lookup_object' in action:
-                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", trans)
+                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     lookup_type, find_function_path, create_function_path = matches[0]
                     value = self.lookup_object(value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item)
