@@ -340,11 +340,12 @@ class DataTransferTool:
                     create_function = obj_config.get('create_function')
                     update_function = obj_config.get('update_function')
                     find_function = obj_config.get('find_function')
+                    mappings = obj_config['mapping']
+
                     for item in source_data:
                         mapped_data = {}
-                        mappings = obj_config['mapping']
 
-                        for dest_field, field_info in obj_config['mapping'].items():
+                        for dest_field, field_info in mappings.items():
                             source_value = None
                             
                             # Check if the source is a static string (applies to any data type)
@@ -377,7 +378,6 @@ class DataTransferTool:
                                 
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
-                        obj_config['mapping'] = mappings
 
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """Create or update objects in the destination API."""
