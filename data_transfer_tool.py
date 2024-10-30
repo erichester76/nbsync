@@ -148,10 +148,10 @@ class DataTransferTool:
                     for item in source_data:
                         # Render the mappings in one go with the entire item context
                         mapped_data = {}
-                        template = env.from_string(mappings)
-                        rendered_item_config = template.render(item=item)  # Pass the data item to render
+                        template_string = yaml.dump(mappings).replace('<<', '{{').replace('>>', '}}')
+                        template = self.env.from_string(template_string)
+                        rendered_item_config = template.render(item=item)
                         rendered_mappings = yaml.safe_load(rendered_item_config)
-
                         print(f"{rendered_item_config}")
 
                         # Rendering all mappings together using item context
