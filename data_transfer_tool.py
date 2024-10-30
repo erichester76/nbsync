@@ -158,7 +158,7 @@ class DataTransferTool:
         return included_data
 
 
-    def apply_transform_function(self, value, transform, obj_config, mappings, field_name, item):
+    def apply_transform_function(self, value, transform, obj_config, map, field_name, item):
         """Apply a transformation to a value, based on the transform rule."""
         if value is None: return value  # Skip transformation if value is None
 
@@ -182,7 +182,7 @@ class DataTransferTool:
                     for idx, split_value in enumerate(split_values, 1):
                         key_name = f"{field_name}_{idx}"
                         setattr(self, f"{field_name}_{idx}", split_value)
-                        mappings[key_name] = {'source': key_name}  # Prepare the new source field
+                        map[key_name] = {'source': key_name}  # Prepare the new source field
                     value = getattr(self, f"{field_name}_1")
 
                 elif "change_case" in trans:
@@ -206,7 +206,7 @@ class DataTransferTool:
                     if self.DEBUG == 1: print(f'Slugifying value: {value}')
                 
                 elif 'expand' in trans:
-                    expand_field = mappings.get(field_name, {}).get('expand_reference')
+                    expand_field = map.get(field_name, {}).get('expand_reference')
                     if expand_field:
                         value = {expand_field: value}
                         if self.DEBUG == 1: print(f"Expanding field {field_name} as reference: {value}")
@@ -215,7 +215,7 @@ class DataTransferTool:
 
                 elif 'concat' in trans:
                     # Get the list of source fields to concatenate
-                    fields_to_concat = mappings[field_name]['source']
+                    fields_to_concat = map[field_name]['source']
                     delimiter = re.findall(r"concat\([\'\"](.*)[\'\"]\)", trans)[0]
                     if self.DEBUG == 1:print(f"Concating fields {field_name} : {value}")
                     # Get the values of the fields to concatenate
@@ -289,11 +289,11 @@ class DataTransferTool:
                     
                     filter_params = {lookup_param_name: lookup_param_value}
                     additional_data = {}
-                    if 'included_fields' in mappings[field_name]:
+                    if 'included_fields' in map[field_name]:
                         additional_data = self.get_included_fields_data(obj_config, field_name, item)
                     
                         field_name_for_nesting = None
-                        for included_field in mappings[field_name].get('included_fields', []):
+                        for included_field in map[field_name].get('included_fields', []):
                             field_name_for_nesting = included_field.get('field')
                             break
                         if self.DEBUG == 1: print(f"Added {additional_data} and {field_name_for_nesting}")

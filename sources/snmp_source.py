@@ -1,5 +1,9 @@
-from pysnmp.hlapi import *
 from sources.base import DataSource
+from pysnmp.hlapi import (
+    SnmpEngine, CommunityData, UsmUserData, UdpTransportTarget, ContextData, 
+    ObjectType, ObjectIdentity, nextCmd, usmHMACMD5AuthProtocol, 
+    usmDESPrivProtocol
+)
 
 class SNMPDataSource(DataSource):
     def __init__(self, config):
