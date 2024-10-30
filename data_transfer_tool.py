@@ -176,7 +176,7 @@ class DataTransferTool:
                         print(f"Final mapped data for {obj_type}: {mapped_data}")
 
     
-    def resolve_dot_notation(self, item):
+    def resolve_dot_notation(item):
         """Resolve all dot notation variables in the item and return the corrected structure."""
         def get_nested_value(obj, attr_path):
             """Recursively get a nested value from an object or dict using dot notation."""
