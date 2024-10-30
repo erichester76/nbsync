@@ -114,7 +114,7 @@
 ('?i)^29v.*,Reg Bus Cntr 7 at Gville
 ('?i)^2au.*,Budget Holding Closing - CAFLS
 ('?i)^2ax.*,CAFLS Deans Office
-('?i)^2ay.*,CAFLS Asso Dean for Aca Affair
+('?i)^2ay.*,CAFLS Asso Dean for Aca Affairs
 ('?i)^2az.*,CAFLS Assoc Dean for Research
 ('?i)^2b2.*,CAFLS Student Services
 ('?i)^2b3.*,CAFLS Business Office
@@ -124,8 +124,8 @@
 ('?i)^2b8.*,Agricultural Sciences
 ('?i)^2b9.*,Applied Economics & Statistics
 ('?i)^2ba.*,Biological Sciences
-('?i)^2bb.*,Entomology, Soils & Plant Sci
-('?i)^2bc.*,Food, Nutrition & Package Sci
+('?i)^2bb.*,Entomology, Soils & Plant Science
+('?i)^2bc.*,Food, Nutrition & Package Science
 ('?i)^2bd.*,Forestry & Environment Conserv
 ('?i)^2be.*,Genetics and Biochemistry
 ('?i)^2bf.*,Horticulture
@@ -135,23 +135,23 @@
 ('?i)^2bj.*,CU Genomics & Comp Bio Lab
 ('?i)^2bk.*,Genetics & Biochemistry (Old)
 ('?i)^2bl.*,Biology Instruction & Ag Ed
-('?i)^2bn.*,Microbiology & Molecular Medic
+('?i)^2bn.*,Microbiology & Molecular Medicine
 ('?i)^2bo.*,Animal CoProd Res/Ed Ctr-ACREC
-('?i)^2bp.*,Sonoco Inst Pkg Design & Graph
+('?i)^2bp.*,Sonoco Inst Pkg Design & Graphics
 ('?i)^2bq.*,Greenwood Genetics Center
 ('?i)^2br.*,Forest Resources
 ('?i)^2bs.*,Clemson Light Imaging Facility
-('?i)^2bt.*,Wood Utilization + Design Inst
+('?i)^2bt.*,Wood Utilization + Design Institute
 ('?i)^2bu.*,Clemson Forest - Teach/Res/Mgt
-('?i)^2bv.*,Forest Resources - Fed Coop Un
-('?i)^2bw.*,Belle W Baruch Forest Sci Inst
+('?i)^2bv.*,Forest Resources - Fed Coop 
+('?i)^2bw.*,Belle W Baruch Forest Sci Institute
 ('?i)^2bx.*,National Bobwhite Conservation Initiatiive
 ('?i)^2c2.*,Clemson Center Human Genetics
 ('?i)^2ch.*,Agriculture & Applied Economic
 ('?i)^2cj.*,Agric & Biological Engr (Old)
-('?i)^2cl.*,Crop & Soil Environmental Sci
+('?i)^2cl.*,Crop & Soil Environmental Science
 ('?i)^2cn.*,Animal & Veterinary Sci (Old)
-('?i)^2co.*,Aquaculture, Fish and Wildlife
+('?i)^2co.*,Aquaculture Fish and Wildlife
 ('?i)^2cr.*,Entomology
 ('?i)^2cs.*,Environmental Toxicology
 ('?i)^2ct.*,Experimental Statistics
@@ -168,7 +168,7 @@
 ('?i)^2dd.*,Research Farm Services
 ('?i)^2de.*,CU EPIC
 ('?i)^2df.*,Sheep Farm
-('?i)^2gr.*,Dean of Arch,Arts&Humanities
+('?i)^2gr.*,Dean of Arch Arts & Humanities
 ('?i)^2gs.*,Development
 ('?i)^2gt.*,School of Architecture
 ('?i)^2gu.*,AAH Advisement Center
@@ -178,12 +178,12 @@
 ('?i)^2gy.*,Office of Off Campus Programs
 ('?i)^2gz.*,Art
 ('?i)^2h2.*,Lee Gallery
-('?i)^2h3.*,City Planning &Real Estate Dev
+('?i)^2h3.*,City Planning &Real Estate Development
 ('?i)^2h4.*,Landscape Architecture
 ('?i)^2h5.*,Ctr Health Fac Design & Test
 ('?i)^2h7.*,I.M.S.E.
-('?i)^2hb.*,Planning, Design & Built Envir
-('?i)^2hc.*,Rhetorics,Communication & Inf
+('?i)^2hb.*,Planning Design & Built Environment
+('?i)^2hc.*,Rhetorics Communication & Information
 ('?i)^2he.*,Ctr for Elec & Digital Publish
 ('?i)^2hf.*,English
 ('?i)^2hg.*,Pearce Center for Prof Comm
@@ -197,12 +197,12 @@
 ('?i)^2hs.*,CRDC-Comm Rsch & Design Cntr
 ('?i)^2ht.*,Womens Leadership
 ('?i)^2ix.*,Russian Program
-('?i)^2je.*,Cent for Arch Stud Genoa&Charl
+('?i)^2je.*,Cent for Arch Stud Genoa&Charles
 ('?i)^2jo.*,Budget Holding Closing - ECDEV
-('?i)^2mn.*,Dean-Beh, Social, & Health Sci
+('?i)^2mn.*,Dean-Beh Social & Health Science
 ('?i)^2mo.*,Dean-College of Education
-('?i)^2mp.*,Excell for Innov in Math & Sci
-('?i)^2mq.*,SC Trn Ctr-Rd Rcvry/Early Lit
+('?i)^2mp.*,Excell for Innov in Math & Science
+('?i)^2mq.*,SC Trn Ctr-Rd Rcvry/Early Literature
 ('?i)^2mr.*,Teacher Education
 ('?i)^2ms.*,Center of Excellence-DML
 ('?i)^2mt.*,Leadrshp,Counsl Ed,Hum&Org Dev
@@ -334,7 +334,7 @@
 ('?i)^37w.*,Sociology and Anthropology
 ('?i)^37x.*,Greenville One
 ('?i)^37y.*,CBBS College Support Services
-('?i)^37z.*,CBBS Dev, Alum,&Communications
+('?i)^37z.*,CBBS Dev Alumni & Communications
 ('?i)^383.*,CBBS Mkt & Comm
 ('?i)^384.*,Social Analytics Institute
 ('?i)^38x.*,Center for Policy Studies
