@@ -158,10 +158,9 @@ class DataTransferTool:
         return included_data
 
 
-    def apply_transform_function(self, value, transform, obj_config, field_name, item):
+    def apply_transform_function(self, value, transform, obj_config, mappings, field_name, item):
         """Apply a transformation to a value, based on the transform rule."""
         if value is None: return value  # Skip transformation if value is None
-        temp_mappings = {}
 
         if transform:
             # If transform is a string, convert it into a list with a single item
@@ -183,7 +182,7 @@ class DataTransferTool:
                     for idx, split_value in enumerate(split_values, 1):
                         key_name = f"{field_name}_{idx}"
                         setattr(self, f"{field_name}_{idx}", split_value)
-                        temp_mappings[key_name] = {'source': key_name}  # Prepare the new source field
+                        mappings[key_name] = {'source': key_name}  # Prepare the new source field
                     value = getattr(self, f"{field_name}_1")
 
                 elif "change_case" in trans:
@@ -207,7 +206,7 @@ class DataTransferTool:
                     if self.DEBUG == 1: print(f'Slugifying value: {value}')
                 
                 elif 'expand' in trans:
-                    expand_field = obj_config['mapping'].get(field_name, {}).get('expand_reference')
+                    expand_field = mappings.get(field_name, {}).get('expand_reference')
                     if expand_field:
                         value = {expand_field: value}
                         if self.DEBUG == 1: print(f"Expanding field {field_name} as reference: {value}")
@@ -216,7 +215,7 @@ class DataTransferTool:
 
                 elif 'concat' in trans:
                     # Get the list of source fields to concatenate
-                    fields_to_concat = obj_config['mapping'][field_name]['source']
+                    fields_to_concat = mappings[field_name]['source']
                     delimiter = re.findall(r"concat\([\'\"](.*)[\'\"]\)", trans)[0]
                     if self.DEBUG == 1:print(f"Concating fields {field_name} : {value}")
                     # Get the values of the fields to concatenate
@@ -290,11 +289,11 @@ class DataTransferTool:
                     
                     filter_params = {lookup_param_name: lookup_param_value}
                     additional_data = {}
-                    if 'included_fields' in obj_config['mapping'][field_name]:
+                    if 'included_fields' in mappings[field_name]:
                         additional_data = self.get_included_fields_data(obj_config, field_name, item)
                     
                         field_name_for_nesting = None
-                        for included_field in obj_config['mapping'][field_name].get('included_fields', []):
+                        for included_field in mappings[field_name].get('included_fields', []):
                             field_name_for_nesting = included_field.get('field')
                             break
                         if self.DEBUG == 1: print(f"Added {additional_data} and {field_name_for_nesting}")
@@ -321,7 +320,6 @@ class DataTransferTool:
                         created_object = create_function(create_data)
                         value = created_object.id if hasattr(created_object, 'id') else None
   
-        obj_config['mapping'].update(temp_mappings)    
         return value
 
     def process_mappings(self):
@@ -344,6 +342,8 @@ class DataTransferTool:
                     find_function = obj_config.get('find_function')
                     for item in source_data:
                         mapped_data = {}
+                        mappings = obj_config['mapping']
+
                         for dest_field, field_info in obj_config['mapping'].items():
                             source_value = None
                             
@@ -369,7 +369,7 @@ class DataTransferTool:
                             if ('transform_function' in field_info):
                                 transform = field_info.get('transform_function')
                                 if self.DEBUG == 1: print(f"Applying transform to field {dest_field} {source_value} {transform}")
-                                mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, dest_field, item)
+                                mapped_data[dest_field] = self.apply_transform_function(source_value, transform, obj_config, mappings, dest_field, item)
                                 if self.DEBUG == 1: print(f'Value is now: {mapped_data[dest_field]}')
                             else:
                                 if self.DEBUG == 1: print(f"Directly mapping {source_value} to {dest_field}")
@@ -377,6 +377,7 @@ class DataTransferTool:
                                 
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
+                        obj_config['mapping'] = mappings
 
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """Create or update objects in the destination API."""
