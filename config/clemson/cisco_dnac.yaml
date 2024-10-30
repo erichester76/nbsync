@@ -76,7 +76,7 @@ object_mappings:
     mapping:
           
           name:
-            source: {{ hostname | regex_replace('(.+).clemson.edu.+', '\\1') | lower }}
+            source: {{ hostname | regex_replace('(.+).clemson.edu.+', '\1') | lower }}
 
           device_type:
             source: {{ platformId
@@ -104,7 +104,7 @@ object_mappings:
 
           site:
             source: {{ siteNameHierarchy 
-               | regex_replace('^([^/]+)/([^/]+)/.*', '\\2')
+               | regex_replace('^([^/]+)/([^/]+)/.*', '\2')
                | regex_replace('(?<!^)(?=[A-Z])', ' ') 
                | default('Default',true) }}
             action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
@@ -112,7 +112,7 @@ object_mappings:
           location:
             source: {{ siteNameHierarchy 
                | regex_replace('(?<!^)(?=[A-Z])', ' ') 
-               | regex_replace('^([^/]+)/[^/]+/([^/]+)/.*', '\\2')
+               | regex_replace('^([^/]+)/[^/]+/([^/]+)/.*', '\2')
                | default('Default',true) }} 
             action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
            
