@@ -151,13 +151,13 @@ class DataTransferTool:
                         for field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_value = field_info['source']
-                                if re.search(r' \b\w+(\.\w+)+\b', source_value):
-                                    # Resolve any nested attributes first
-                                    resolved_source = self.resolve_nested_context(item, source_value)
-                                    # Store the resolved value in the mapping
-                                    resolved_mappings[field] = {'source': resolved_source}
-                                else:
-                                    resolved_mappings[field] = {'source': source_value}
+                                # if re.search(r' \b\w+(\.\w+)+\b', source_value):
+                                #     # Resolve any nested attributes first
+                                #     resolved_source = self.resolve_nested_context(item, source_value)
+                                #     # Store the resolved value in the mapping
+                                #     resolved_mappings[field] = {'source': ' {{ resolved_source }} '}
+                                #else:
+                                resolved_mappings[field] = {'source': source_value}
 
 
                         # Convert << >> to {{ }} for Jinja2 compatibility
