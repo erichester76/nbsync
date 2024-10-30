@@ -332,7 +332,8 @@ class DataTransferTool:
 
         if found_object:
             existing_object = list(found_object)[0]
-            
+            print(f"Found {existing_object}")
+
             print("1")
             mapped_data['id'] = existing_object.id
             print("2")
