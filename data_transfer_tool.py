@@ -39,15 +39,25 @@ def env_var_constructor(loader, node):
     
     return value
 
+# Custom constructor to handle Jinja-like fields
+def jinja_placeholder_constructor(loader, node):
+    """This constructor will simply return the string for Jinja fields like '{{ }}'."""
+    value = loader.construct_scalar(node)
+    return value
 
 env_var_pattern = re.compile(r'\$\{([^}^{]+)\}')
+jinja_placeholder_pattern = re.compile(r'{{.+}}')
 
+yaml.add_implicit_resolver('!jinja_placeholder', jinja_placeholder_pattern)
+yaml.add_constructor('!jinja_placeholder', jinja_placeholder_constructor)
 yaml.add_implicit_resolver('!envvar', env_var_pattern)
 yaml.add_constructor('!envvar', env_var_constructor)
 
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
+        # Initialize the Jinja environment
+        self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
 
         # Read the YAML file line by line and build yaml_content until object_mappings
         yaml_content = []
@@ -55,26 +65,15 @@ class DataTransferTool:
         is_object_mappings = False
 
         with open(yaml_file, 'r') as file:
-            for line in file:
-                # Once we hit the object_mappings section, we stop adding lines to yaml_content
-                if line.strip().startswith('object_mappings:'):
-                    is_object_mappings = True
+            yaml_content = file.read()
 
-                if is_object_mappings:
-                    # Collect object_mappings into a separate list
-                    object_mappings.append(line)
-                else:
-                    # Collect all other lines into yaml_content
-                    yaml_content.append(line)
-
-        # Join the non-object_mappings section into a full YAML string
-        yaml_content_str = ''.join(yaml_content)
+        yaml_content = yaml_content.replace('{{', '<<').replace('}}', '>>')
 
         # Substitute environment variables in the YAML content
-        yaml_content_str = os.path.expandvars(yaml_content_str)
+        yaml_content = os.path.expandvars(yaml_content)
 
         # Load the YAML content (excluding object_mappings) into self.config
-        self.config = yaml.load(yaml_content_str, Loader=yaml.FullLoader)
+        self.config = yaml.load(yaml_content, Loader=yaml.FullLoader)
 
         # Keep the object_mappings section as a string (to be rendered later)
         self.raw_object_mappings = ''.join(object_mappings)
@@ -102,7 +101,7 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
      
         # Render the object_mappings section with Jinja2 dynamically
-        rendered_object_mappings = env.from_string(self.raw_object_mappings).render()
+        rendered_object_mappings = self.jinja_env.from_string(self.raw_object_mappings).render()
         object_mappings_config = yaml.load(rendered_object_mappings, Loader=yaml.FullLoader)
         self.config['object_mappings'] = object_mappings_config['object_mappings']
         
@@ -124,14 +123,27 @@ class DataTransferTool:
                         mapped_data = {}
 
                         for dest_field, field_info in mappings.items():
-                            source_value = field_info['source']
+                            # Render the Jinja2 template with the item data
+                            source_value = self.render_source_value(field_info['source'], item)
+
                             if ('action' in field_info):
                                 action = field_info.get('action')
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
+
                             mapped_data[dest_field] = source_value
                                 
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         if self.DEBUG == 1: print(f"Processed object with ID: {object_id}")
+
+    def render_source_value(self, source_template, item):
+        """Render the source value dynamically based on the item."""
+        # Convert << and >> back to {{ and }} for Jinja2 rendering
+        source_template = source_template.replace('<<', '{{').replace('>>', '}}')
+
+        # Render the Jinja2 vars in line, passing 'item' as the context for dynamic values
+        template = self.jinja_env.from_string(source_template)
+        # Render the Jinja template, passing 'item' as the context for dynamic values
+        return template.render(item=item)
 
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
