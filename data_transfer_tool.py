@@ -186,7 +186,7 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
-    def resolve_nested_context(self, item):
+    def resolve_nested_context(item):
         """Resolve nested attributes in an object using dot notation."""
         context = {}
 
