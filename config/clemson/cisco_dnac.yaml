@@ -100,7 +100,7 @@ object_mappings:
 
           serial:
             source: {{ serialNumber
-               | regex_replace('^([^\,]+),.+', '\1')
+               #| regex_replace('^([^\,]+)\,.+', '\1')
                | upper }}
 
           site:
