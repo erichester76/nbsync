@@ -68,7 +68,7 @@ object_mappings:
         action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
       role: 
-        source: const:"Hypervisor Host"
+        source: Hypervisor Host
         action: lookup_object('name', 'dcim.device_roles.filter', 'dcim.device_roles.create')
 
       site:
