@@ -165,12 +165,12 @@ class DataTransferTool:
                         # Loop through rendered mappings and apply transformations/actions
                         for dest_field, field_info in rendered_mappings.items():
                             source_value = field_info['source']
-                            print(f"Before {source_value} {field_info}")
+                            print(f"Before {dest_field} {source_value} {field_info}")
                             if 'action' in field_info:
                                 action = field_info.get('action')
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
                             mapped_data[dest_field] = source_value
-                            print(f"After {source_value} {field_info}")
+                            print(f"After {dest_field} {source_value} {field_info}")
 
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
