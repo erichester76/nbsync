@@ -143,27 +143,36 @@ class DataTransferTool:
         return template.render(context)
 
     def resolve_nested_context(self, item):
-        """
-        Resolve a dictionary-like context that supports nested access for both attributes and keys.
-        """
-        def get_nested_value(obj, attr):
-            """Helper function to get a nested attribute or key."""
+        """Resolve nested attributes in an object using dot notation."""
+        context = {}
+
+        def get_nested_value(obj, attr_path):
+            """Recursively get a nested value from an object or dict using dot notation."""
+            attrs = attr_path.split('.')
+            current_obj = obj
             try:
-                for key in attr.split('.'):
-                    if isinstance(obj, dict):
-                        obj = obj.get(key)
+                for attr in attrs:
+                    if isinstance(current_obj, dict):
+                        current_obj = current_obj.get(attr)
                     else:
-                        obj = getattr(obj, key, None)
-                return obj
-            except (AttributeError, KeyError, TypeError):
+                        current_obj = getattr(current_obj, attr)
+                    if current_obj is None:
+                        break
+                return current_obj
+            except AttributeError:
                 return None
 
-        # Flatten the item into a dictionary supporting dot notation
-        flat_item = {}
-        for key in item.__dict__.keys():  # Assuming item is an object-like structure
-            flat_item[key] = get_nested_value(item, key)
+        # Build the context with dot notation support for nested attributes
+        if isinstance(item, dict):
+            for key in item:
+                context[key] = get_nested_value(item, key)
+        else:
+            for attr in dir(item):
+                if not attr.startswith('_') and not callable(getattr(item, attr)):
+                    context[attr] = get_nested_value(item, attr)
 
-        return flat_item
+        return context
+
     
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
