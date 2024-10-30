@@ -56,14 +56,41 @@ yaml.add_constructor('!envvar', env_var_constructor)
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
-        
-        with open(yaml_file) as file:
-            self.config = yaml.load(file, Loader=yaml.FullLoader)  
-                  
-        # Initialize the Jinja environment for later rendering
+        # Initialize the Jinja environment
         self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
-        
-        self.dry_run = dry_run  # Store the dry_run flag
+
+        # Read the YAML file line by line and build yaml_content until object_mappings
+        yaml_content = []
+        object_mappings = []
+        is_object_mappings = False
+
+        with open(yaml_file, 'r') as file:
+            for line in file:
+                # Once we hit the object_mappings section, we stop adding lines to yaml_content
+                if line.strip().startswith('object_mappings:'):
+                    is_object_mappings = True
+
+                if is_object_mappings:
+                    # Collect object_mappings into a separate list
+                    object_mappings.append(line)
+                else:
+                    # Collect all other lines into yaml_content
+                    yaml_content.append(line)
+
+        # Join the non-object_mappings section into a full YAML string
+        yaml_content_str = ''.join(yaml_content)
+
+        # Substitute environment variables in the YAML content
+        yaml_content_str = os.path.expandvars(yaml_content_str)
+
+        # Load the YAML content (excluding object_mappings) into self.config
+        self.config = yaml.load(yaml_content_str, Loader=yaml.FullLoader)
+
+        # Keep the object_mappings section as a string (to be rendered later)
+        self.raw_object_mappings = ''.join(object_mappings)
+
+        # Store the dry_run flag
+        self.dry_run = dry_run
         self.sources = {}
         self.mapped_data = {}
         self.DEBUG = 1
@@ -83,6 +110,12 @@ class DataTransferTool:
 
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
+     
+        # Render the object_mappings section with Jinja2 dynamically
+        rendered_object_mappings = self.jinja_env.from_string(self.raw_object_mappings).render()
+        object_mappings_config = yaml.load(rendered_object_mappings, Loader=yaml.FullLoader)
+        self.config['object_mappings'] = object_mappings_config['object_mappings']
+        
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
 
@@ -101,13 +134,10 @@ class DataTransferTool:
                         mapped_data = {}
 
                         for dest_field, field_info in mappings.items():
-                            # Render the Jinja2 template with the item data
-                            source_value = self.render_source_value(field_info['source'], item)
-
+                            source_value = field_info['source']
                             if ('action' in field_info):
                                 action = field_info.get('action')
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
-
                             mapped_data[dest_field] = source_value
                                 
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
