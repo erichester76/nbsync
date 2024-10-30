@@ -225,7 +225,7 @@ class DataTransferTool:
 
         # If not found, create the object
         try:
-            create_data = {lookup_type: value, 'slug': re.sub(r'\W+', '-', value.lower()), **additional_data}
+            create_data = {lookup_type: value, 'slug': re.sub(r'\W+', '-', value.lower())} #, **additional_data}
             created_object = create_function(create_data)
             return created_object.id if hasattr(created_object, 'id') else None
         except Exception as e:
