@@ -165,16 +165,27 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
-    def render_item_config(self, mappings, item):
-        """Render the mappings block for each data item with Jinja2."""
-        rendered_mappings = {}
-        for field, field_info in mappings.items():
-            # Render the source field using the current data item context
-            template = env.from_string(yaml.dump(field_info['source']))
-            rendered_source = template.render(item=item)  # Pass the data item to render
-            field_info['source'] = yaml.safe_load(rendered_source)
-            rendered_mappings[field] = field_info
-        return rendered_mappings
+def render_item_config(self, mappings, item):
+    """Render the mappings block for each data item with Jinja2."""
+    rendered_mappings = {}
+    
+    for field, field_info in mappings.items():
+        # Replace << and >> with {{ and }} for Jinja2 templating
+        template_string = yaml.dump(field_info['source']).replace('<<', '{{').replace('>>', '}}')
+        
+        # Create a Jinja2 template with the updated string
+        template = self.env.from_string(template_string)
+        
+        # Render the source field using the current data item context
+        rendered_source = template.render(item=item)  # Pass the data item to render
+        
+        # Reload the rendered source back into YAML structure
+        field_info['source'] = yaml.safe_load(rendered_source)
+        
+        # Update the rendered mappings with the modified field info
+        rendered_mappings[field] = field_info
+    
+    return rendered_mappings
 
     def resolve_nested_context(self, item):
         """Resolve nested attributes in an object using dot notation."""
