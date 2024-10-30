@@ -175,7 +175,7 @@ class DataTransferTool:
             template_string = yaml.dump(field_info['source']).replace('<<', '{{').replace('>>', '}}')
             
             # Create a Jinja2 template with the updated string
-            template = self.env.from_string(template_string)
+            template = env.from_string(template_string)
             
             # Render the source field using the current data item context
             rendered_source = template.render(item=item)  # Pass the data item to render
