@@ -167,7 +167,6 @@ class DataTransferTool:
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
                             mapped_data[dest_field] = source_value
                        
-                        print(f"{mapped_data}")
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
                         # Debugging - Print final mapped data for the object
