@@ -148,7 +148,9 @@ class DataTransferTool:
                     for item in source_data:
                         # Render the mappings in one go with the entire item context
                         mapped_data = {}
-                        rendered_item_config = self.render_item_config(mappings, item)
+                        template = env.from_string(mappings)
+                        rendered_item_config = template.render(item=item)  # Pass the data item to render
+
                         print(f"{rendered_item_config}")
 
                         # Rendering all mappings together using item context
