@@ -118,7 +118,9 @@ class DataTransferTool:
 
     def initialize_sources(self):
         for name, config in self.config['api_definitions'].items():
+            
             source_type = config['type']
+            print(f"{source_type} {name}]")
             if source_type == 'api' or source_type == 'api-swagger':
                 self.sources[name] = APIDataSource(name, config)
             elif source_type == 'csv':
@@ -127,6 +129,7 @@ class DataTransferTool:
                 self.sources[name] = XLSDataSource(config)
             elif source_type == 'snmp':
                 self.sources[name] = SNMPDataSource(config)
+            
             self.sources[name].authenticate()
 
     def process_mappings(self):
