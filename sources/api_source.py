@@ -66,23 +66,40 @@ class APIDataSource(DataSource):
         print(f"Connected to Swagger API at {base_url}")
 
     def _authenticate_standard(self, base_url):
-        """Authenticate for standard API clients."""
         module_name = self.config['module']
         module = importlib.import_module(module_name)
+        auth_method = self.config['auth_method']
         auth_func = self._get_auth_function(module, self.config['auth_function'])
-        auth_args = self._prepare_auth_args(base_url)
+        auth_args = self.config['auth_args']  # Assume auth_args is a dictionary
+
         # Add base_url if required
         if 'base_url' in inspect.signature(auth_func).parameters:
             auth_args['base_url'] = base_url
-            
+
         if self.api and self.is_session_valid(base_url):
-            print(f"Using existing session for {self.name} @ {base_url}.")
+                print(f"Using existing session for {self.name} @ {base_url}.")
         else:
-            print(f"(Re)authenticating for {self.name} @ {base_url}.")
-            self.api = auth_func(**auth_args)
-            self.clients.append(self.api)
-            self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=30)
-            print(f"Connected to {self.name} at {base_url}")
+            print(f"(re)authenticating for {self.name} @ {base_url}.")
+            # Handle authentication methods
+            if auth_method == 'token':
+                self.api = auth_func(base_url, token=self.config['auth_args']['token'])
+                if base_url not in self.session_expiry: 
+                    self.clients.append(self.api)
+                    print(f"Connected to {self.name} at {base_url}")
+
+                self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
+
+            elif auth_method == 'login':
+                if auth_args:
+                    self.api = auth_func(**auth_args)
+                    if base_url not in self.session_expiry: 
+                        self.clients.append(self.api)
+                        print(f"Connected to {self.name} at {base_url}")
+
+                    self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
+
+                else:
+                    raise ValueError("Login-based authentication requires auth_args to be set.")
 
     def _prepare_auth_args(self, base_url):
         """Prepare auth args, converting lists to dicts as needed and setting SSL context."""
