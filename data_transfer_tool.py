@@ -318,7 +318,7 @@ class DataTransferTool:
                     update_function = self.get_nested_function(api_client, update_function_path)
                     update_function([sanitized_mapped_data])
             else:
-                print(f"No changes detected for object {filtered_current_data.name}, skipping update.")
+                print(f"No changes detected for object, skipping update.")
             return existing_object.id
         
         else:
