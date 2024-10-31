@@ -1,6 +1,6 @@
 api_definitions:
   # Source API using Swagger
-  source_api:
+  iaw:
     type: api_swagger
     module: bravado.client
     api_spec_url: "https://iaw.dev.clemson.edu:8443/docs/"
@@ -24,7 +24,7 @@ api_definitions:
 object_mappings:
   # Define the object type we want to map and sync
   devices:
-    source_api: source_api
+    source_api: iaw
     destination_api: netbox
     destination_endpoint: dcim.devices
     find_function: dcim.devices.filter
