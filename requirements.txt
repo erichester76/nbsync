@@ -1,6 +1,7 @@
 pyyaml-include
 pynetbox
 pyvmomi
+bravado
 dnacentersdk
 pysnmp
 pandas
