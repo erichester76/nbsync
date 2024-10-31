@@ -144,10 +144,6 @@ class DataTransferTool:
             elif source_type == 'snmp':
                 self.sources[name] = SNMPDataSource(config)
             self.sources[name].authenticate()
-       
-
-
-
         
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
@@ -199,6 +195,7 @@ class DataTransferTool:
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
                             mapped_data[dest_field] = source_value
                         
+                        print(f"Creating new item: {mapped_data}")
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
@@ -345,8 +342,6 @@ class DataTransferTool:
         """Create or update objects in the destination API."""
         # Find function
         find_function = self.get_nested_function(api_client, find_function_path)
-        
-        # Automatically extract the first field from mapped_data as the key field
         key_field = 'name'
         filter_params = {key_field: mapped_data[key_field]}
        
