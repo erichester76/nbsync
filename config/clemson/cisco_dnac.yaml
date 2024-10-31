@@ -103,20 +103,19 @@ object_mappings:
             source: {{ serialNumber
                | upper }}
 
+          #Global/Charleston Area/OUTDOOR-Edisto/Edisto Outdoor
           site:
             source: {{ siteNameHierarchy 
-               | regex_replace('^([^/]+)/([^/]+)/.*', '\2')
-               | regex_replace('(?<!^)(?=[A-Z])', ' ') 
-               | default('Default',true) }}
+              | regex_replace('^[^/]+/([^/]+)/.*', '\1') 
+              | default('Default', true) }}
             action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
-           
+
           location:
             source: {{ siteNameHierarchy 
-               | regex_replace('(?<!^)(?=[A-Z])', ' ') 
-               | regex_replace('^([^/]+)/[^/]+/([^/]+)/.*', '\2')
-               | default('Default',true) }} 
+              | regex_replace('^[^/]+/[^/]+/([^/]+)/.*', '\1') 
+              | default('Default', true) }}
             action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
-           
+                    
           status:
             source: {{ reachabilityStatus
                | regex_replace('Reachable', 'active')
