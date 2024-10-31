@@ -14,7 +14,10 @@ import deepdiff
 # Register custom Jinja2 filters
 
 def regex_replace(value, pattern, replacement):
-    return re.sub(pattern, replacement, value)
+    print(f"b4 replace: {value} {pattern} {replacement}")
+    value = re.sub(pattern, replacement, value)
+    print(f"after replace: {value} {pattern} {replacement}")
+    return value
 
 # Custom slugify filter
 def slugify(value):
