@@ -7,6 +7,7 @@ from bravado.requests_client import RequestsClient
 import datetime
 import inspect
 import types
+import pprint
 
 class APIDataSource(DataSource):
     def __init__(self, name, config):
@@ -61,6 +62,7 @@ class APIDataSource(DataSource):
 
         # Initialize Swagger client with authenticated HTTP client
         print(f"Connecting to Swagger API at {base_url}")
+        pprint.pp(http_client)
         self.api = SwaggerClient.from_url(
             f"{base_url}",
             http_client=http_client,
