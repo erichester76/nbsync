@@ -36,7 +36,7 @@ object_mappings:
     fetch_data_code: |
       def fetch_data(api_client):
             url = f"https://iaw.dev.clemson.edu:8443/api/servers"
-            print({api_client.session.headers})
+            print(f"{api_client.session.headers}"")
             response = api_client.session.request(
                 method="GET",
                 url=url,
