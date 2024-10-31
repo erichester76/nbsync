@@ -72,7 +72,7 @@ object_mappings:
         action: lookup_object('name', 'tenancy.contacts.filter', 'tenancy.contacts.create')
 
       description:
-        source: {{ dataSummary | string | default('{{ agreementName }}', true)}}
+        source: {{ agreementName }} {{ dataSummary | string }}
 
       technical_contact:
         source: "Unknown"
