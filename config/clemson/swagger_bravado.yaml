@@ -80,7 +80,9 @@ object_mappings:
         action: lookup_object('name', 'tenancy.contacts.filter', 'tenancy.contacts.create')
 
       slo: 
-        source: 1
+        source: "Business Critical"
+        action: lookup_object('name', 'plugins.netboxservicemgmt.slos.filter', 'plugins.netboxservicemgmt.slos.create')
+
 
       
 
