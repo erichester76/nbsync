@@ -8,6 +8,7 @@ import datetime
 import inspect
 import types
 import pprint
+import json
 
 class APIDataSource(DataSource):
     def __init__(self, name, config):
@@ -137,7 +138,21 @@ class APIDataSource(DataSource):
         login_data = {'username': auth_args['username'], 'password': auth_args['password']}
         print(f"Logging in to {login_url}")
         headers = {'Content-Type': 'application/json'}
+        
+            print(f"Logging in to {login_url}")
+    
+        # Log the request data
+        print(f"Request URL: {login_url}")
+        print(f"Request Headers: {headers}")
+        print(f"Request Body: {json.dumps(login_data, indent=2)}")
+
+        # Make the request and log the response
         response = requests.post(login_url, json=login_data, headers=headers, verify=False)
+
+        # Log the response data
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Headers: {response.headers}")
+        print(f"Response Body: {response.text}")
         
         if response.status_code == 200:
             token = response.json().get(auth_args.get('token_key', 'access_token'))
