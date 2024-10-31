@@ -172,8 +172,10 @@ class DataTransferTool:
                                 resolved_source = self.resolve_dot_notation(item)
                                 resolved_mappings[field] = {'source': resolved_source}
                         
+                        print(f'before: {resolved_mappings}')
                         # Convert delimiters and render with Jinja2
                         resolved_mappings = clean_non_serializable(resolved_mappings)
+                        print(f'after: {resolved_mappings}')
                         template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
                         template = env.from_string(template_string)
                         rendered_item_config = template.render(self.resolve_dot_notation(item))
@@ -181,6 +183,7 @@ class DataTransferTool:
                         # Parse the fully rendered YAML
                         try:
                             rendered_mappings = yaml.safe_load(rendered_item_config)
+                            
                         except yaml.YAMLError as e:
                             print(f"Error parsing YAML after rendering: {e}")
                             print("Rendered item config causing the issue:", rendered_item_config)
