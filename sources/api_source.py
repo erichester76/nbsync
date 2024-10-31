@@ -25,7 +25,7 @@ class APIDataSource(DataSource):
         """Handle authentication, supporting both Swagger and non-Swagger clients."""
         api_type = self.config.get('type')
         for base_url in self.config.get('base_urls', []):
-            if api_type == 'api_swagger':
+            if api_type == 'api-swagger':
                 self._authenticate_swagger(base_url)
             else:
                 self._authenticate_standard(base_url)
