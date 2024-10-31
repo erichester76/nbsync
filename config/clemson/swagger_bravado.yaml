@@ -59,9 +59,11 @@ object_mappings:
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
+        action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       business_owner_contact:
         source: {{ customerBusinessManagers[0] | regex_replace('([^#]+)\#.+$','\\1') }}
+        action: lookup_object('name', 'tenancy.contacts.filter', 'tenancy.contacts.create')
 
       description:
         source: {{ dataSummary }}
