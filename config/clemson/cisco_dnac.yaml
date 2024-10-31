@@ -22,7 +22,7 @@ api_definitions:
       username: ${DNAC_AUTH_USER}
       password: ${DNAC_AUTH_PW}
       version: 2.3.3.0
-      verify: False
+      verify_mode: False
     base_urls:
       - https://cisco-dnac.clemson.edu/
 
