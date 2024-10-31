@@ -1,6 +1,7 @@
 pyyaml-include
 pynetbox
 pyvmomi
+swagger_spec_validator==2.7
 bravado
 dnacentersdk
 pysnmp
