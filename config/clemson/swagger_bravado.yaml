@@ -55,13 +55,13 @@ object_mappings:
         source: {{ agreementName }}
      
       data_classification:
-        source: {{ dataRiskCategory | default("public") }}
+        source: {{ dataRiskCategory | default("public") | regex_replace('([^#]+)\#.+$','\\1') }}
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
 
       business_owner_contact:
-        source: {{ customerBusinessManagers[0] }}
+        source: {{ customerBusinessManagers[0] | regex_replace('([^#]+)\#.+$','\\1') }}
 
       description:
         source: {{ dataSummary }}
