@@ -95,7 +95,8 @@ class APIDataSource(DataSource):
         elif auth_args.get('sslContext') == 'None':
             auth_args['sslContext'] = None
 
-        auth_args['host'] = auth_args.get('host', base_url)
+        if 'host' in auth_args:
+            auth_args['host'] = base_url
         return auth_args
 
     def _get_auth_function(self, module, function_path):
