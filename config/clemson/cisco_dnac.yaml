@@ -1,4 +1,5 @@
 api_definitions:
+
   # NetBox API Definition
   netbox: 
     type: api
