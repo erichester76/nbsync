@@ -118,7 +118,7 @@ class DataTransferTool:
     def initialize_sources(self):
         for name, config in self.config['api_definitions'].items():
             source_type = config['type']
-            if source_type == 'api':
+            if source_type == 'api' or source_type == 'api-swagger':
                 self.sources[name] = APIDataSource(name, config)
             elif source_type == 'csv':
                 self.sources[name] = CSVDataSource(name, config)

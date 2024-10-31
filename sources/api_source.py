@@ -64,11 +64,12 @@ class APIDataSource(DataSource):
         print(f"Connected to Swagger API at {base_url}")
 
     def _authenticate_standard(self, base_url):
-        """Authenticate using standard Python module-based API clients."""
+       # Dynamically load the module specified in the YAML
         module_name = self.config['module']
         module = importlib.import_module(module_name)
         auth_method = self.config['auth_method']
 
+        # Function to handle both simple function names and paths with submodules (e.g., connect.SmartConnect)
         def get_auth_function(module, function_path):
             func_parts = function_path.split(".")
             if len(func_parts) == 1:
@@ -78,20 +79,59 @@ class APIDataSource(DataSource):
                 auth_func = getattr(submodule, func_parts[1])
             return auth_func
 
-        auth_func = get_auth_function(module, self.config['auth_function'])
-        if not callable(auth_func):
-            raise TypeError(f"{auth_func} is not callable. Please check your function path.")
+        for base_url in self.config['base_urls']:
+            print(f"Connecting to {self.name} at {base_url}...")
 
-        auth_args = self._prepare_auth_args(base_url)
+            # Dynamically retrieve the authentication function
+            auth_func = get_auth_function(module, self.config['auth_function'])
+            
+            if not callable(auth_func):
+                raise TypeError(f"{auth_func} is not callable. Please check your function path.")
 
-        if self.api and self.is_session_valid(base_url):
-            print(f"Using existing session for {self.name} @ {base_url}.")
-        else:
-            print(f"(re)authenticating for {self.name} @ {base_url}.")
-            self.api = auth_func(**auth_args)
-            self.clients.append(self.api)
-            self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
-            print(f"Connected to {self.name} at {base_url}")
+            # Convert auth_args from list to dictionary, if applicable
+            if 'auth_args' in self.config:
+                auth_args = self.config['auth_args']
+                if isinstance(auth_args, list):
+                    auth_args = {arg['name']: arg['value'] for arg in auth_args}
+                    if 'sslContext' in auth_args:
+                        if auth_args['sslContext'] == 'ignore':
+                            auth_args['sslContext'] = ssl._create_unverified_context()
+                        elif auth_args['sslContext'] == 'None':
+                            auth_args['sslContext'] = None
+                    if 'host' in auth_args:
+                        auth_args['host']=base_url
+                        
+            else:
+                auth_args = {}
+
+            # Add base_url if required
+            if 'base_url' in inspect.signature(auth_func).parameters:
+                auth_args['base_url'] = base_url
+
+            if self.api and self.is_session_valid(base_url):
+                    print(f"Using existing session for {self.name} @ {base_url}.")
+            else:
+                print(f"(re)authenticating for {self.name} @ {base_url}.")
+                # Handle authentication methods
+                if auth_method == 'token':
+                    self.api = auth_func(base_url, token=self.config['auth_args']['token'])
+                    if base_url not in self.session_expiry: 
+                        self.clients.append(self.api)
+                        print(f"Connected to {self.name} at {base_url}")
+
+                    self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
+
+                elif auth_method == 'login':
+                    if auth_args:
+                        self.api = auth_func(**auth_args)
+                        if base_url not in self.session_expiry: 
+                            self.clients.append(self.api)
+                            print(f"Connected to {self.name} at {base_url}")
+
+                        self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
+
+                    else:
+                        raise ValueError("Login-based authentication requires auth_args to be set.")
 
     def _prepare_auth_args(self, base_url):
         # Expect auth_args to be a dictionary with key-value pairs
