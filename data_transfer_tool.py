@@ -153,10 +153,11 @@ class DataTransferTool:
                         # Render each source template for all mappings at once, only once per item
                         rendered_mappings = {}
                         for dest_field, field_info in mappings.items():
-                            source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
-                            template = env.from_string(source_template)
-                            rendered_source_value = template.render(context)
-                            rendered_mappings[dest_field] = rendered_source_value
+                            if 'source' in field_info:
+                                source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
+                                template = env.from_string(source_template)
+                                rendered_source_value = template.render(context)
+                                rendered_mappings[dest_field] = rendered_source_value
 
                         # Now apply any transformations/actions to the rendered mappings
                         mapped_data = {}
