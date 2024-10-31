@@ -134,10 +134,10 @@ object_mappings:
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
-        source: {{ config.hardware.numCPU | float }}
+        source: {{ config.hardware.numCPU }}
 
       memory:
-        source: {{ config.hardware.memoryMB }}
+        source: {{ config.hardware.memoryMB | int }}
 
       platform:
         source: {{ guest.guestFullName }}
