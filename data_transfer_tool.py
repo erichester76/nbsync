@@ -10,6 +10,7 @@ from sources.xls_source import XLSDataSource
 from sources.snmp_source import SNMPDataSource
 import jinja2
 import deepdiff
+import json
 
 # Register custom Jinja2 filters
 
@@ -54,21 +55,22 @@ def replace_map(value, filename):
         return value  # Return the value unchanged in case of an error
     
     
+def clean_non_serializable(data):
+    """Recursively clean data of non-serializable elements, preserving basic types."""
+    if isinstance(data, dict):
+        return {k: clean_non_serializable(v) for k, v in data.items() if is_serializable(v)}
+    elif isinstance(data, list):
+        return [clean_non_serializable(v) for v in data if is_serializable(v)]
+    else:
+        return data if is_serializable(data) else None
+
 def is_serializable(value):
-    """Check if a value can be serialized by yaml."""
+    """Check if a value is JSON-serializable."""
     try:
-        yaml.dump(value)
+        json.dumps(value)
         return True
-    except (TypeError, yaml.YAMLError):
-        return False
-        
-def clean_non_serializable(obj):
-    """Recursively remove non-serializable objects from a dictionary or list."""
-    if isinstance(obj, dict):
-        return {k: clean_non_serializable(v) for k, v in obj.items() if is_serializable(v)}
-    elif isinstance(obj, list):
-        return [clean_non_serializable(item) for item in obj if is_serializable(item)]
-    return obj    
+    except (TypeError, OverflowError):
+        return False  
 
 # Create a new Jinja2 environment and add the filters
 env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
