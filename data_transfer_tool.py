@@ -15,7 +15,11 @@ import deepdiff
 # Register custom Jinja2 filters
 
 def regex_replace(value, pattern, replacement):
-   return re.sub(pattern, replacement, value)
+   print(f'regex: [ {value}] [{pattern}] [{replacement}]')
+   new = re.sub(pattern, replacement, value)
+   print(f'value after: [{new}] ')
+
+   return new
 
 # Custom slugify filter
 def slugify(value):
@@ -316,7 +320,7 @@ class DataTransferTool:
                 if self.dry_run:
                     print(f"[DRY RUN] Would update object {existing_object.id} with data")
                 else: 
-                    print(f"Updating object {existing_object.id}: {mapped_data}")
+                    print(f"Updating object {existing_object.id}:")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     update_function([sanitized_mapped_data])
             else:
