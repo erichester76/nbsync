@@ -61,7 +61,7 @@ class APIDataSource(DataSource):
 
         # Initialize Swagger client with authenticated HTTP client
         self.api = SwaggerClient.from_url(
-            f"{base_url}/swagger.json",
+            f"{base_url}",
             http_client=http_client,
             config={'also_return_response': True}
         )
