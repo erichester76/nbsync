@@ -1,15 +1,5 @@
 api_definitions:
-  # Source API using Swagger
-  iaw:
-    type: api_swagger
-    module: bravado.client
-    api_spec_url: "https://iaw.dev.clemson.edu:8443/docs/"
-    auth_method: login  
-    auth_args:
-      username: ${IAW_USERNAME}
-      password: ${IAW_PASSWORD}
-
-  # Destination API using pynetbox for NetBox
+   # Destination API using pynetbox for NetBox
   netbox:
     type: api
     module: pynetbox
@@ -20,9 +10,21 @@ api_definitions:
     base_urls:
       - https://netbox.example.com
 
+  # Source API using Swagger
+  iaw:
+    type: api_swagger
+    module: bravado.client
+    api_spec_url: "https://iaw.dev.clemson.edu:8443/docs/"
+    auth_method: login  
+    auth_args:
+      username: ${IAW_USERNAME}
+      password: ${IAW_PASSWORD}
+
+
+
 # Object Mappings Configuration
 object_mappings:
-  # Define the object type we want to map and sync
+
   devices:
     source_api: iaw
     destination_api: netbox
