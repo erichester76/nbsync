@@ -23,8 +23,8 @@ class APIDataSource(DataSource):
 
     def authenticate(self):
         """Handle authentication, supporting both Swagger and non-Swagger clients."""
-        api_type = self.config.get('type')
-        for base_url in self.config.get('base_urls', []):
+        api_type = self.config['type']
+        for base_url in self.config['base_urls']:
             if api_type == 'api-swagger':
                 print('swagger api')
                 self._authenticate_swagger(base_url)

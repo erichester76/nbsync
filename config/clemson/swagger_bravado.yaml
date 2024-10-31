@@ -13,11 +13,12 @@ api_definitions:
   iaw:  
     type: api-swagger
     module: bravado.client
-    api_spec_url: https://iaw.dev.clemson.edu:8443/docs
     auth_method: login  
     auth_args:
       username: ${IAW_USERNAME}
       password: ${IAW_PASSWORD}
+    base_urls:
+      - https://iaw.dev.clemson.edu:8443/docs
 
 
 
