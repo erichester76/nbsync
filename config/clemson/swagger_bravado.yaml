@@ -55,7 +55,15 @@ object_mappings:
         source: {{ agreementName }}
      
       data_classification:
-        source: {{ dataRiskCategory | default("public") | regex_replace('([^#]+)\#.+$','\\1') | replace(';','') }}
+        source: {{ dataRiskCategory 
+        | default("public") 
+        | regex_replace('([^#]+)\#.+$','\\1') 
+        | replace(';','') 
+        | replace('Internal Use','internal_use')
+        | replace('Public','public')
+        | replace('Confidential','confidential')
+        | replace('Restricted','restricted')
+        }}
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
