@@ -58,7 +58,7 @@ object_mappings:
           | replace_regex("('?i)Internal Use","internal_use")
           | replace_regex("('?i)Public","public")
           | replace_regex("('?i)Confidential","confidential")
-          | replace_regex("('?i)Restricted.*$',"restricted") }}
+          | replace_regex("('?i)Restricted.*$","restricted") }}
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
