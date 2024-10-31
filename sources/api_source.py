@@ -60,12 +60,14 @@ class APIDataSource(DataSource):
             raise ValueError(f"Unsupported auth_method for Swagger: {auth_method}")
 
         # Initialize Swagger client with authenticated HTTP client
+        print(f"Connecting to Swagger API at {base_url}")
         self.api = SwaggerClient.from_url(
             f"{base_url}",
             http_client=http_client,
             config={'also_return_response': True}
         )
         self.clients.append(self.api)
+        
         print(f"Connected to Swagger API at {base_url}")
 
     def _authenticate_standard(self, base_url):
