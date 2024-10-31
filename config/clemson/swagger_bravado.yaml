@@ -11,7 +11,7 @@ api_definitions:
       - https://netbox.example.com
 
   iaw:  
-    type: api_swagger
+    type: api-swagger
     module: bravado.client
     api_spec_url: https://iaw.dev.clemson.edu:8443/docs
     auth_method: login  
