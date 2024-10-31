@@ -295,6 +295,7 @@ class DataTransferTool:
         print(f'{key_field} : {mapped_data[key_field]}')
         try:
             found_object = find_function(**filter_params)
+            print(f'{len(found_object)}')
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
