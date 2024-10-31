@@ -171,7 +171,7 @@ class DataTransferTool:
         rendered_mappings = {}
         for field, field_info in mappings.items():
             # Render the source field using the current data item context
-            template = self.env.from_string(yaml.dump(field_info['source']))
+            template = env.from_string(yaml.dump(field_info['source']))
             rendered_source = template.render(item=item)  # Pass the data item to render
             field_info['source'] = yaml.safe_load(rendered_source)
             rendered_mappings[field] = field_info
