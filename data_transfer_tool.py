@@ -303,13 +303,14 @@ class DataTransferTool:
 
         if found_object:
             existing_object = list(found_object)[0]
-            
+            print(f'found_obj sanitized: {self.sanitize_data(mapped_data)}')
+
             mapped_data['id'] = existing_object.id
             current_data = self.sanitize_data(existing_object.serialize())
             sanitized_mapped_data = self.sanitize_data(mapped_data)
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
-            
+            print(f'post filter sanitized: {sanitize_mapped_data}')
             # Check for changes in object to determine if we should update
             differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
             if differences:
@@ -329,7 +330,7 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}: {mapped_data}")
             else:
                 create_function = self.get_nested_function(api_client, create_function_path)
-                print(f'new create sanitized: s{self.sanitize_data(mapped_data)}')
+                print(f'new create sanitized: {self.sanitize_data(mapped_data)}')
                 new_object = create_function(self.sanitize_data(mapped_data))
                 print(f'Created New Object #{new_object.id}')
                 return new_object.id
