@@ -61,7 +61,7 @@ slas:
       custom_fields.technical_contact: 
         source: {{ technicalcontacts[0].fullname }}
 
-  virtualmachines:
+virtualmachines:
     source_api: iaw
     destination_api: netbox
     destination_endpoint: virtualization.virtual_machines
