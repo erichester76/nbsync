@@ -132,6 +132,7 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
+            print(f"{source}")
             for source_client in source.clients:
                 source_api = obj_config.get('source_api')
                 print(f"Fetching data from {source_api}...")
@@ -148,24 +149,12 @@ class DataTransferTool:
                     for item in source_data:
                         # Render the mappings in one go with the entire item context
                         mapped_data = {}
-                        resolved_mappings = {}
-
-                        for field, field_info in mappings.items():
-                            if 'source' in field_info:
-                                # Use resolve_nested_context to handle dot notation before rendering
-                                resolved_source = self.resolve_nested_context(item, field_info['source'])
-                                resolved_mappings[field] = {**field_info, 'source': resolved_source}
-
-                        template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
-                        template = env.from_string(template_string)
-                        rendered_item_config = template.render(item=item)
-                        rendered_mappings = yaml.safe_load(rendered_item_config)
-                        print(f"{rendered_item_config}")
-
+                        rendered_item_config = self.render_item_config(mappings, item)
                         # Rendering all mappings together using item context
+                        rendered_mapping = self.render_source_mapping(mappings, item)
 
                         # Loop through rendered mappings and apply transformations/actions
-                        for dest_field, field_info in rendered_mappings.items():
+                        for dest_field, field_info in rendered_mapping.items():
                             source_value = field_info
 
                             if 'action' in field_info:
@@ -176,6 +165,17 @@ class DataTransferTool:
                             
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
+
+    def render_item_config(self, mappings, item):
+        """Render the mappings block for each data item with Jinja2."""
+        rendered_mappings = {}
+        for field, field_info in mappings.items():
+            # Render the source field using the current data item context
+            template = self.env.from_string(yaml.dump(field_info['source']))
+            rendered_source = template.render(item=item)  # Pass the data item to render
+            field_info['source'] = yaml.safe_load(rendered_source)
+            rendered_mappings[field] = field_info
+        return rendered_mappings
 
     def resolve_nested_context(self, item):
         """Resolve nested attributes in an object using dot notation."""
