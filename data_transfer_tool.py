@@ -11,6 +11,7 @@ from sources.snmp_source import SNMPDataSource
 import jinja2
 import deepdiff
 
+
 # Register custom Jinja2 filters
 
 def regex_replace(value, pattern, replacement):

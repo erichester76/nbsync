@@ -5,6 +5,8 @@ import requests
 from bravado.client import SwaggerClient
 from bravado.requests_client import RequestsClient
 import datetime
+import inspect
+import types
 
 class APIDataSource(DataSource):
     def __init__(self, name, config):
