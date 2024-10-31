@@ -56,12 +56,13 @@ object_mappings:
      
       data_classification:
         source: {{ dataRiskCategory 
-        | regex_replace('([^#]+)\#.+$','\\1') 
-        | replace(';','') 
-        | replace('Internal Use','internal_use')
-        | replace('Public','public')
-        | replace('Confidential','confidential')
-        | replace('Restricted','restricted') }}
+          | regex_replace('([^#]+)\#.+$','\\1') 
+          | replace(';','') 
+          | replace('Internal Use','internal_use')
+          | replace('Public','public')
+          | replace('Confidential','confidential')
+          | replace('Restricted','restricted')
+          | default("public") }}
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
