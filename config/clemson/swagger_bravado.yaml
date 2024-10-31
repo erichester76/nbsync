@@ -9,7 +9,7 @@ api_definitions:
       token: ${NETBOX_API_KEY}
     base_urls:
       - https://netbox.app.clemson.edu
-      
+
   iaw:  
     type: api-swagger
     module: bravado.client
@@ -60,7 +60,7 @@ object_mappings:
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
 
-      business_owner_tenant:
+      business_owner_contact:
         source: {{ customerBusinessManagers[0] }}
 
       description:
