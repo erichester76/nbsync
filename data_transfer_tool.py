@@ -326,8 +326,9 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}: {mapped_data}")
             else:
                 create_function = self.get_nested_function(api_client, create_function_path)
-                print(f'{mapped_data}')
+                print(f'{self.sanitize_data(mapped_data)}')
                 new_object = create_function(self.sanitize_data(mapped_data))
+                print(f'Created New Object #{new_object.id}')
                 return new_object.id
 
 def main():
