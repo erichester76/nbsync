@@ -14,9 +14,9 @@ import deepdiff
 # Register custom Jinja2 filters
 
 def regex_replace(value, pattern, replacement):
-    print(f"b4 replace: {value} {pattern} {replacement}")
+    print(f"b4 replace: {value}")
     value = re.sub(pattern, replacement, value)
-    print(f"after replace: {value} {pattern} {replacement}")
+    print(f"after replace: {value}")
     return value
 
 # Custom slugify filter
