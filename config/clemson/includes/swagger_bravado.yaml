@@ -3,7 +3,7 @@ api_definitions:
   source_api:
     type: api_swagger
     module: bravado.client
-    api_spec_url: "https://iaw.dev.clemson.edu:8443/docs/""
+    api_spec_url: "https://iaw.dev.clemson.edu:8443/docs/"
     auth_method: login  
     auth_args:
       username: ${IAW_USERNAME}
