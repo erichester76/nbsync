@@ -263,6 +263,7 @@ class DataTransferTool:
             if self.dry_run:
                 print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
             else:
+                print(f"Creating {lookup_type} object with data: {create_data}")
                 created_object = create_function(create_data)
                 return created_object.id if hasattr(created_object, 'id') else None
         except Exception as e:
