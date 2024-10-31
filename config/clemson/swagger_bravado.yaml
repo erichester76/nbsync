@@ -58,7 +58,7 @@ object_mappings:
           | replace('Internal Use','internal_use')
           | replace('Public','public')
           | replace('Confidential','confidential')
-          | replace('Restricted','restricted') }}
+          | replace('restricted (most sensitive)','restricted') }}
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
