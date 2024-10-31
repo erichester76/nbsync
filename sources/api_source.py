@@ -33,6 +33,8 @@ class APIDataSource(DataSource):
                 self._authenticate_standard(base_url)
 
     def _authenticate_swagger(self, base_url):
+        print(f'Connecting to REST API via {base_url}')
+
         """Authenticate using Bravado (Swagger) with various auth methods."""
         http_client = RequestsClient()
         auth_method = self.config['auth_method']
@@ -61,14 +63,13 @@ class APIDataSource(DataSource):
             raise ValueError(f"Unsupported auth_method for Swagger: {auth_method}")
 
         # Initialize Swagger client with authenticated HTTP client
-        print(f'Connecting to Swagger API via {base_url}/docs/swagger.json')
-        self.api = SwaggerClient.from_url(
-            f"{base_url}/docs/swagger.json",
-            http_client=http_client,
-            config={'also_return_response': True}
-        )
-        self.clients.append(self.api)
-        print(f"Connected to Swagger API")
+        #self.api = SwaggerClient.from_url(
+        #    f"{base_url}/api/swagger.json",
+        #    http_client=http_client}
+        #)
+        
+        self.clients.append(http_client)
+        print(f"Connected to REST API")
 
     def _authenticate_standard(self, base_url):
         module = importlib.import_module(self.config['module'])
@@ -234,4 +235,4 @@ class APIDataSource(DataSource):
             obj = getattr(obj, attr, None)
             if obj is None:
                 break  # Stop if any attribute in the chain is None
-        return obj
+        return obj#
