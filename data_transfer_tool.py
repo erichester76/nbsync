@@ -165,9 +165,7 @@ class DataTransferTool:
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
-                            
                             mapped_data[dest_field] = rendered_source_value
-                            print(f'{dest_field} = {rendered_source_value}')
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
