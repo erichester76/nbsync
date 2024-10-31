@@ -81,11 +81,7 @@ def jinja_placeholder_constructor(loader, node):
     value = loader.construct_scalar(node)
     return value
 
-env_var_pattern = re.compile(r'\$\{([^}^{]+)\}')
-jinja_placeholder_pattern = re.compile(r'{{.+}}')
-
-yaml.add_implicit_resolver('!jinja_placeholder', jinja_placeholder_pattern)
-yaml.add_constructor('!jinja_placeholder', jinja_placeholder_constructor)
+env_var_pattern = re.compile(r'\$\{([^}^{]+)\}') 
 yaml.add_implicit_resolver('!envvar', env_var_pattern)
 yaml.add_constructor('!envvar', env_var_constructor)
 
@@ -99,6 +95,7 @@ class DataTransferTool:
         with open(yaml_file, 'r') as file:
             yaml_content = file.read()
 
+        #replace jinjas {{}} with <<>> so it wont parse them yet.
         yaml_content = yaml_content.replace('{{', '<<').replace('}}', '>>')
 
         # Substitute environment variables in the YAML content
