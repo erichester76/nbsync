@@ -53,6 +53,23 @@ def replace_map(value, filename):
         print(f"Error in replace_map: {e}")
         return value  # Return the value unchanged in case of an error
     
+    
+def is_serializable(value):
+    """Check if a value can be serialized by yaml."""
+    try:
+        yaml.dump(value)
+        return True
+    except (TypeError, yaml.YAMLError):
+        return False
+        
+def clean_non_serializable(obj):
+    """Recursively remove non-serializable objects from a dictionary or list."""
+    if isinstance(obj, dict):
+        return {k: clean_non_serializable(v) for k, v in obj.items() if is_serializable(v)}
+    elif isinstance(obj, list):
+        return [clean_non_serializable(item) for item in obj if is_serializable(item)]
+    return obj    
+
 # Create a new Jinja2 environment and add the filters
 env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
 env.filters['regex_replace'] = regex_replace
@@ -127,7 +144,11 @@ class DataTransferTool:
             elif source_type == 'snmp':
                 self.sources[name] = SNMPDataSource(config)
             self.sources[name].authenticate()
+       
 
+
+
+        
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
@@ -156,6 +177,7 @@ class DataTransferTool:
                                 resolved_mappings[field] = {'source': resolved_source}
                         
                         # Convert delimiters and render with Jinja2
+                        resolved_mappings = clean_non_serializable(resolved_mappings)
                         template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
                         template = env.from_string(template_string)
                         rendered_item_config = template.render(self.resolve_dot_notation(item))
