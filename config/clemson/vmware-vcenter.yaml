@@ -79,8 +79,8 @@ object_mappings:
         source: {{ hardware.systemInfo.model }}
         action: 
           - lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create') # need to add aditional info option here
-          - append('part_number', '{{ hardware.systemInfo.model | regex_replace('^.+\-[([^)+])]-', '\\1') }}')
-          - append('manufacturer', '{ "name": {{ hardware.systemInfo.vendor }} }')        
+         # - append('part_number', '{{ hardware.systemInfo.model | regex_replace('^.+\-[([^)+])]-', '\\1') }}')
+         # - append('manufacturer', '{ "name": {{ hardware.systemInfo.vendor }} }')        
 
       status:
         source: {{ runtime.connectionState 
