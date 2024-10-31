@@ -136,7 +136,8 @@ class APIDataSource(DataSource):
         login_url = f"{base_url}{auth_args.get('login_endpoint')}"
         login_data = {'username': auth_args['username'], 'password': auth_args['password']}
         print(f"Logging in to {login_url}")
-        response = requests.post(login_url, data=login_data, verify=False)
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(login_url, json=login_data, headers=headers, verify=False)
         
         if response.status_code == 200:
             token = response.json().get(auth_args.get('token_key', 'access_token'))
