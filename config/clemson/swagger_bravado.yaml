@@ -55,6 +55,7 @@ object_mappings:
           | default("public", true)
           | regex_replace('([^#]+)\#.+$','\\1') 
           | replace(';','') 
+          | regex_replace('.*nN\/A.*$','internal_use')
           | regex_replace('.*nternal.*$','internal_use')
           | regex_replace('.*ublic.*$','public')
           | regex_replace('.*onfidential.*$','confidential')
