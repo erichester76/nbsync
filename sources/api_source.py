@@ -52,6 +52,7 @@ class APIDataSource(DataSource):
             http_client.session.headers.update({'Authorization': f'Bearer {token}'})
 
         elif auth_method == 'login':
+            print(f'using custom login method')
             self._handle_custom_login(http_client, base_url)
 
         else:
