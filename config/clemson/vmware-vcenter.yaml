@@ -65,6 +65,7 @@ object_mappings:
 
       cluster:
         source: {{ parent.name }}
+
         action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
       role: 
