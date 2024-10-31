@@ -293,6 +293,7 @@ class DataTransferTool:
         key_field = list(mapped_data.keys())[0]
         filter_params = {key_field: mapped_data[key_field]}
         print(f'{key_field} : {mapped_data[key_field]}')
+        
         try:
             found_object = find_function(**filter_params)
             print(f'{len(found_object)}')
@@ -305,21 +306,22 @@ class DataTransferTool:
             
             mapped_data['id'] = existing_object.id
             current_data = self.sanitize_data(existing_object.serialize())
-            filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(mapped_data)
+            filtered_current_data = {key: current_data.get(key) for key in mapped_data}
+            sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
             
             # Check for changes in object to determine if we should update
             differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
             if differences:
-                print(f"Differences found for {existing_object.name}: {differences}")
+                print(f"Differences found for {filtered_current_data.name}: {differences}")
                 if self.dry_run:
-                    print(f"[DRY RUN] Would update object {existing_object.id} with data: {mapped_data}")
+                    print(f"[DRY RUN] Would update object {filtered_current_data.id} with data: {sanitized_mapped_data}")
                 else: 
-                    print(f"Updating object {existing_object.name}: {sanitized_mapped_data}")
+                    print(f"Updating object {filtered_current_data.name}: {sanitized_mapped_data}")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     update_function([sanitized_mapped_data])
             else:
-                print(f"No changes detected for object {existing_object.name}, skipping update.")
+                print(f"No changes detected for object {filtered_current_data.name}, skipping update.")
             return existing_object.id
         
         else:
@@ -327,7 +329,7 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}: {mapped_data}")
             else:
                 create_function = self.get_nested_function(api_client, create_function_path)
-                print(f'{self.sanitize_data(mapped_data)}')
+                print(f'new create sanitized: s{self.sanitize_data(mapped_data)}')
                 new_object = create_function(self.sanitize_data(mapped_data))
                 print(f'Created New Object #{new_object.id}')
                 return new_object.id
