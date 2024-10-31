@@ -169,6 +169,7 @@ class DataTransferTool:
                             mapped_data[dest_field] = rendered_source_value
                             print(f'{dest_field} = {rendered_source_value}')
                         # Create or update the object in the destination
+                        print(f'{mapped_data}')
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
     def resolve_nested_context(self, item):
