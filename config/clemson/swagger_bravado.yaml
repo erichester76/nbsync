@@ -8,7 +8,7 @@ api_definitions:
     auth_args:
       token: ${NETBOX_API_KEY}
     base_urls:
-      - https://netbox.example.com
+      - https://netbox.app.clemson.edu
 
   iaw:  
     type: api-swagger
