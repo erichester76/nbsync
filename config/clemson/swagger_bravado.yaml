@@ -75,6 +75,13 @@ object_mappings:
       description:
         source: {{ dataSummary | string}}
 
+      technical_contact:
+        source: "Unknown"
+        action: lookup_object('name', 'tenancy.contacts.filter', 'tenancy.contacts.create')
+
+      slo: 
+        source: 1
+
       
 
       
