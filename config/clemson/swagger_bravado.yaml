@@ -16,6 +16,7 @@ api_definitions:
     auth_method: login  
     auth_args:
       login_endpoint: /api/login
+      token_key: token
       username: ${IAW_USERNAME}
       password: ${IAW_PASSWORD}
     base_urls:

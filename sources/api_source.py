@@ -155,7 +155,7 @@ class APIDataSource(DataSource):
         print(f"Response Body: {response.text}")
         
         if response.status_code == 200:
-            token = response.json().get(auth_args.get('token_key', 'access_token', 'token'))
+            token = response.json().get(auth_args.get('token_key', 'access_token'))
             if token:
                 http_client.session.headers.update({'Authorization': f'Bearer {token}'})
                 self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=30)
