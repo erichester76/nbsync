@@ -152,7 +152,7 @@ class DataTransferTool:
                             if 'source' in field_info:
                                 # Resolve any dot notation in 'source' using the data item context
                                 source_value = field_info['source']
-                                resolved_source = self.resolve_dot_notation(item, source_value)
+                                resolved_source = self.resolve_dot_notation(item)
                                 resolved_mappings[field] = {'source': resolved_source}
                         
                         # Convert delimiters and render with Jinja2
