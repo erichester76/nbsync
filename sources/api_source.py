@@ -61,7 +61,6 @@ class APIDataSource(DataSource):
             raise ValueError(f"Unsupported auth_method for Swagger: {auth_method}")
 
         # Initialize Swagger client with authenticated HTTP client
-        pprint.pp(http_client)
         self.api = SwaggerClient.from_url(
             f"{base_url}",
             http_client=http_client,
