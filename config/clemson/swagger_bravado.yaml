@@ -15,6 +15,7 @@ api_definitions:
     module: bravado.client
     auth_method: login  
     auth_args:
+      login_endpoint: login
       username: ${IAW_USERNAME}
       password: ${IAW_PASSWORD}
     base_urls:

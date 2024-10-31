@@ -27,7 +27,6 @@ class APIDataSource(DataSource):
         api_type = self.config['type']
         for base_url in self.config['base_urls']:
             if api_type == 'api-swagger':
-                print('swagger api')
                 self._authenticate_swagger(base_url)
             else:
                 self._authenticate_standard(base_url)
@@ -61,7 +60,6 @@ class APIDataSource(DataSource):
             raise ValueError(f"Unsupported auth_method for Swagger: {auth_method}")
 
         # Initialize Swagger client with authenticated HTTP client
-        print(f"Connecting to Swagger API at {base_url}")
         pprint.pp(http_client)
         self.api = SwaggerClient.from_url(
             f"{base_url}",
@@ -69,7 +67,6 @@ class APIDataSource(DataSource):
             config={'also_return_response': True}
         )
         self.clients.append(self.api)
-        
         print(f"Connected to Swagger API at {base_url}")
 
     def _authenticate_standard(self, base_url):
@@ -136,7 +133,7 @@ class APIDataSource(DataSource):
     def _handle_custom_login(self, http_client, base_url):
         """Handle custom login for Swagger APIs."""
         auth_args = self.config['auth_args']
-        login_url = f"{base_url}{auth_args.get('token_endpoint')}"
+        login_url = f"{base_url}{auth_args.get('login_endpoint')}"
         login_data = {'username': auth_args['username'], 'password': auth_args['password']}
         response = requests.post(login_url, data=login_data, verify=False)
 
