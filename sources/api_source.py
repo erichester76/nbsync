@@ -33,8 +33,6 @@ class APIDataSource(DataSource):
                 self._authenticate_standard(base_url)
 
     def _authenticate_swagger(self, base_url):
-        print(f'Connecting to REST API via {base_url}')
-
         """Authenticate using Bravado (Swagger) with various auth methods."""
         http_client = RequestsClient()
         auth_method = self.config['auth_method']

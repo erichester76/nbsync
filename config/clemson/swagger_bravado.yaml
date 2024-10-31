@@ -23,12 +23,10 @@ api_definitions:
     base_urls:
       - https://iaw.dev.clemson.edu:8443/api
 
-
-
 # Object Mappings Configuration
 object_mappings:
 
-slas:
+  slas:
     source_api: iaw
     destination_api: netbox
     destination_endpoint: 
@@ -63,7 +61,7 @@ slas:
       custom_fields.technical_contact: 
         source: {{ technicalcontacts[0].fullname }}
 
-virtualmachines:
+  virtualmachines:
     source_api: iaw
     destination_api: netbox
     destination_endpoint: virtualization.virtual_machines
