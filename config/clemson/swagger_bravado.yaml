@@ -55,10 +55,10 @@ object_mappings:
           | default("public", true)
           | regex_replace('([^#]+)\#.+$','\\1') 
           | replace(';','') 
-          | regex_replace('(\'?i)Internal.*$','internal_use')
-          | regex_replace('(\'?i)Public','public')
-          | regex_replace('(\'?i)Confidential','confidential')
-          | regex_replace('(\'?i)Restricted.*$','restricted') }}
+          | regex_replace('.*nternal.*$','internal_use')
+          | regex_replace('.*ublic.*$','public')
+          | regex_replace('.*onfidential.*$','confidential')
+          | regex_replace('.*estricted.*$','restricted') }}
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
