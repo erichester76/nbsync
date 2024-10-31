@@ -61,7 +61,6 @@ object_mappings:
 
       cluster:
         source: {{ parent.name }}
-
         action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
       role: 
@@ -78,7 +77,10 @@ object_mappings:
 
       device_type:
         source: {{ hardware.systemInfo.model }}
-        action: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create') # need to add aditional info option here
+        action: 
+          - lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create') # need to add aditional info option here
+          - append('part_number', '{{ hardware.systemInfo.model | regex_replace('^.+\-[([^)+])]-', '\\1') }}')
+          - append('manufacturer', '{ "name": {{ hardware.systemInfo.vendor }} }')        
 
       status:
         source: {{ runtime.connectionState 
