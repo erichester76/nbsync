@@ -13,7 +13,8 @@ api_definitions:
   iaw:  
     type: api-swagger
     module: bravado.client
-    auth_method: login  
+    auth_method: login
+    json_url: /docs/swagger.json  
     auth_args:
       login_endpoint: /api/login
       token_key: token
@@ -27,19 +28,17 @@ api_definitions:
 # Object Mappings Configuration
 object_mappings:
 
-  devices:
+  virtualmachines:
     source_api: iaw
     destination_api: netbox
-    destination_endpoint: dcim.devices
-    find_function: dcim.devices.filter
-    create_function: dcim.devices.create
-    update_function: dcim.devices.update
-    fetch_data_function: |
+    destination_endpoint: virtualization.virtual_machines
+    find_function: virtualization.virtual_machines.filter
+    create_function: virtualization.virtual_machines.create
+    update_function: virtualization.virtual_machines.update
+    fetch_data_code: |
       # Custom data fetching function for Bravado source API
       def get_data(client):
-          # Example: retrieving devices from the source API
-          # Replace `devices` with actual path as per Swagger spec
-          response = client.devices.getAllDevices().response().result
+          response = client.servers.getAllServers().response().result
           if not response:
               raise ValueError("No devices found from source API.")
           return response
@@ -48,19 +47,18 @@ object_mappings:
     mapping:
       # Map source API field names to NetBox field names
       name:
-        source: {{ item.device_name }}
-      device_type:
-        source: {{ item.device_type }}
-        action: lookup_object('model', 'dcim.device_types.filter', 'dcim.device_types.create')
-      serial:
-        source: {{ item.serial_number | upper }}
-      status:
-        source: {{ item.operational_status }}
-        transform_function:
-          - lookup_object('name', 'dcim.device_status.filter', 'dcim.device_status.create')
-      site:
-        source: {{ item.location }}
-        action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create')
-      platform:
-        source: {{ item.platform | upper }}
-        action: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+        source: {{ name | regex_replace('(.+).clemson.edu.+', '\\1') }}
+
+      custom_fields.sla: 
+        source: {{ sla.agreementNumber }}: {{ sla.agreementName }}
+
+      custom_fields.business_contact: 
+        source: {{ sla.customerBusinessManagers[0] }}
+ 
+      custom_fields.contact: 
+        source: {{ sla.customerPointsofContact[0] }}
+    
+      custom_fields.technical_contact: 
+        source: {{ technicalcontacts[0].fullname }}
+
+      

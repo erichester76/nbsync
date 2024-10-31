@@ -61,13 +61,14 @@ class APIDataSource(DataSource):
             raise ValueError(f"Unsupported auth_method for Swagger: {auth_method}")
 
         # Initialize Swagger client with authenticated HTTP client
+        print(f'Connecting to Swagger API via {base_url}/docs/swagger.json')
         self.api = SwaggerClient.from_url(
             f"{base_url}/docs/swagger.json",
             http_client=http_client,
             config={'also_return_response': True}
         )
         self.clients.append(self.api)
-        print(f"Connected to Swagger API at {base_url}")
+        print(f"Connected to Swagger API")
 
     def _authenticate_standard(self, base_url):
         module = importlib.import_module(self.config['module'])
@@ -137,21 +138,9 @@ class APIDataSource(DataSource):
         login_data = {'username': auth_args['username'], 'password': auth_args['password']}
         print(f"Logging in to {login_url}")
         headers = {'Content-Type': 'application/json'}
-        
+
         print(f"Logging in to {login_url}")
-    
-        # Log the request data
-        print(f"Request URL: {login_url}")
-        print(f"Request Headers: {headers}")
-        print(f"Request Body: {json.dumps(login_data, indent=2)}")
-
-        # Make the request and log the response
         response = requests.post(login_url, json=login_data, headers=headers, verify=False)
-
-        # Log the response data
-        print(f"Response Status Code: {response.status_code}")
-        print(f"Response Headers: {response.headers}")
-        print(f"Response Body: {response.text}")
         
         if response.status_code == 200:
             token = response.json().get(auth_args.get('token_key', 'access_token'))
