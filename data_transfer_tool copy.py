@@ -10,6 +10,7 @@ from sources.xls_source import XLSDataSource
 from sources.snmp_source import SNMPDataSource
 import jinja2
 import deepdiff
+import json
 
 # Register custom Jinja2 filters
 
@@ -53,6 +54,24 @@ def replace_map(value, filename):
         print(f"Error in replace_map: {e}")
         return value  # Return the value unchanged in case of an error
     
+    
+def clean_non_serializable(data):
+    """Recursively clean data of non-serializable elements, preserving basic types."""
+    if isinstance(data, dict):
+        return {k: clean_non_serializable(v) for k, v in data.items() if is_serializable(v)}
+    elif isinstance(data, list):
+        return [clean_non_serializable(v) for v in data if is_serializable(v)]
+    else:
+        return data if is_serializable(data) else None
+
+def is_serializable(value):
+    """Check if a value is JSON-serializable."""
+    try:
+        json.dumps(value)
+        return True
+    except (TypeError, OverflowError):
+        return False  
+
 # Create a new Jinja2 environment and add the filters
 env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
 env.filters['regex_replace'] = regex_replace
@@ -127,7 +146,7 @@ class DataTransferTool:
             elif source_type == 'snmp':
                 self.sources[name] = SNMPDataSource(config)
             self.sources[name].authenticate()
-
+        
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
         for obj_type, obj_config in self.config['object_mappings'].items():
@@ -144,54 +163,59 @@ class DataTransferTool:
                     find_function = obj_config.get('find_function')
                     mappings = obj_config['mapping']
 
-                    # Render the entire mapping for each item in the source_data
+                    # Process each item from the source data
                     for item in source_data:
-                        # Render the mappings in one go with the entire item context
+                        # Prepare a template string with the mappings
+                        resolved_mappings = {}
+                        for field, field_info in mappings.items():
+                            if 'source' in field_info:
+                                # Resolve any dot notation in 'source' using the data item context
+                                source_value = field_info['source']
+                                resolved_source = self.resolve_dot_notation(item)
+                                resolved_mappings[field] = {'source': resolved_source}
+                        
+                        template_string = yaml.dump(resolved_mappings).replace('<<', '{{').replace('>>', '}}')
+                        template = env.from_string(template_string)
+                        rendered_item_config = template.render(self.resolve_dot_notation(item))
+
+                        # Parse the fully rendered YAML
+                        try:
+                            rendered_mappings = yaml.safe_load(rendered_item_config)
+                            
+                        except yaml.YAMLError as e:
+                            print(f"Error parsing YAML after rendering: {e}")
+                            print("Rendered item config causing the issue:", rendered_item_config)
+                            continue  # Skip this item if parsing fails
+
+                        # Process each rendered mapping item
                         mapped_data = {}
-                        rendered_item_config = self.render_item_config(mappings, item)
-                        print(f"{rendered_item_config}")
-
-                        # Rendering all mappings together using item context
-
-                        # Loop through rendered mappings and apply transformations/actions
-                        for dest_field, field_info in rendered_item_config.items():
-                            source_value = field_info
-
+                        for dest_field, field_info in rendered_mappings.items():
+                            source_value = field_info['source'] if 'source' in field_info else None
                             if 'action' in field_info:
                                 action = field_info.get('action')
                                 source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
-
                             mapped_data[dest_field] = source_value
-                            
+                        
+                        print(f"Creating new item: {mapped_data}")
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
-    def render_item_config(self, mappings, item):
-        """Render the mappings block for each data item with Jinja2."""
-        rendered_mappings = {}
+    
+    def resolve_dot_notation(self,item):
+        """Resolve all dot notation variables in the item and return the corrected structure."""
         
-        for field, field_info in mappings.items():
-            # Replace << and >> with {{ and }} for Jinja2 templating
-            template_string = yaml.dump(field_info['source']).replace('<<', '{{').replace('>>', '}}')
-            print(f'{template_string}')
-            # Create a Jinja2 template with the updated string
-            template = env.from_string(template_string)
-            
-            # Render the source field using the current data item context
-            rendered_source = template.render(item=item)  # Pass the data item to render
-            
-            # Reload the rendered source back into YAML structure
-            field_info['source'] = yaml.safe_load(rendered_source)
-            
-            # Update the rendered mappings with the modified field info
-            rendered_mappings[field] = field_info
+        def object_to_dict(obj):
+            """Convert an object (like vim.HostSystem) to a dictionary."""
+            data = {}
+            for attr in dir(obj):
+                # Skip private attributes and methods
+                if not attr.startswith("_") and not callable(getattr(obj, attr)):
+                    try:
+                        data[attr] = getattr(obj, attr)
+                    except Exception as e:
+                        data[attr] = str(e)  # If attribute access fails, store the error message
+            return data
         
-        return rendered_mappings
-
-    def resolve_nested_context(self, item):
-        """Resolve nested attributes in an object using dot notation."""
-        context = {}
-
         def get_nested_value(obj, attr_path):
             """Recursively get a nested value from an object or dict using dot notation."""
             attrs = attr_path.split('.')
@@ -201,23 +225,38 @@ class DataTransferTool:
                     if isinstance(current_obj, dict):
                         current_obj = current_obj.get(attr)
                     else:
-                        current_obj = getattr(current_obj, attr)
+                        # Convert non-dict objects like vim.HostSystem to dict before accessing
+                        if not isinstance(current_obj, dict):
+                            current_obj = object_to_dict(current_obj)
+                        current_obj = current_obj.get(attr)
                     if current_obj is None:
                         break
                 return current_obj
             except AttributeError:
                 return None
+        
+        def resolve_values(item):
+            """Recursively resolve dot notation in dictionaries and lists."""
+            if isinstance(item, dict):
+                resolved_dict = {}
+                for key, value in item.items():
+                    if isinstance(value, str) and re.match(r'.*\b\w+(\.\w+)+\b.*', value):
+                        resolved_dict[key] = get_nested_value(item, value)
+                    elif isinstance(value, (dict, list)):
+                        resolved_dict[key] = resolve_values(value)
+                    else:
+                        resolved_dict[key] = value
+                return resolved_dict
+            elif isinstance(item, list):
+                return [resolve_values(elem) for elem in item]
+            elif not isinstance(item, dict):
+                # Convert object to dict if needed
+                return object_to_dict(item)
+            else:
+                return item
+        
+        return resolve_values(item)
 
-        # Build the context with dot notation support for nested attributes
-        if isinstance(item, dict):
-            for key in item:
-                context[key] = get_nested_value(item, key)
-        else:
-            for attr in dir(item):
-                if not attr.startswith('_') and not callable(getattr(item, attr)):
-                    context[attr] = get_nested_value(item, attr)
-
-        return context
 
     
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
@@ -304,19 +343,19 @@ class DataTransferTool:
         """Create or update objects in the destination API."""
         # Find function
         find_function = self.get_nested_function(api_client, find_function_path)
-        # Automatically extract the first field from mapped_data as the key field
-        key_field = list(mapped_data.keys())[0]
+        key_field = 'name'
         filter_params = {key_field: mapped_data[key_field]}
-
+       
         try:
             found_object = find_function(**filter_params)
+            
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
 
         if found_object:
             existing_object = list(found_object)[0]
-            
+
             mapped_data['id'] = existing_object.id
             current_data = self.sanitize_data(existing_object.serialize())
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
@@ -345,6 +384,7 @@ class DataTransferTool:
                 return new_object.id
 
 def main():
+    
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
     parser.add_argument('-f', '--file', required=True, help='YAML file to load configurations')
     parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode without making any changes')
