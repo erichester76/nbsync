@@ -310,15 +310,15 @@ class DataTransferTool:
             # Check for changes in object to determine if we should update
             differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
             if differences:
-                print(f"Differences found {differences}")
+                print(f"Differences found for {filtered_current_data}: {differences}")
                 if self.dry_run:
                     print(f"[DRY RUN] Would update object {filtered_current_data.id} with data: {sanitized_mapped_data}")
                 else: 
-                    print(f"Updating object {filtered_current_data.name}: {sanitized_mapped_data}")
+                    print(f"Updating object {filtered_current_data}: {sanitized_mapped_data}")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     update_function([sanitized_mapped_data])
             else:
-                print(f"No changes detected for object, skipping update.")
+                print(f"No changes detected for object {filtered_current_data}, skipping update.")
             return existing_object.id
         
         else:
