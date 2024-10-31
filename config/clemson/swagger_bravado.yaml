@@ -35,7 +35,7 @@ object_mappings:
     update_function: 
     fetch_data_code: |
       def fetch_data(api_client):
-            url = f"{self.base_url}/servers"
+            url = f"{base_url}/servers"
             response = api_client.session.request(
                 method="GET",
                 url=url,
