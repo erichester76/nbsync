@@ -15,11 +15,11 @@ api_definitions:
     module: bravado.client
     auth_method: login  
     auth_args:
-      login_endpoint: login
+      login_endpoint: /api/login
       username: ${IAW_USERNAME}
       password: ${IAW_PASSWORD}
     base_urls:
-      - https://iaw.dev.clemson.edu:8443/docs
+      - https://iaw.dev.clemson.edu:8443
 
 
 
