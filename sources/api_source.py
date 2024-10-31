@@ -71,7 +71,9 @@ class APIDataSource(DataSource):
         auth_method = self.config['auth_method']
         auth_func = self._get_auth_function(module, self.config['auth_function'])
         auth_args = self._prepare_auth_args(base_url)
-
+        if 'base_url' in inspect.signature(auth_func).parameters:
+            auth_args['base_url'] = base_url
+            
         if self.api and self.is_session_valid(base_url):
                 print(f"Using existing session for {self.name} @ {base_url}.")
         else:
@@ -105,10 +107,6 @@ class APIDataSource(DataSource):
         if isinstance(auth_args, list):
             auth_args = {arg['name']: arg['value'] for arg in auth_args}
   
-        # Add base_url if required
-        if 'base_url' in inspect.signature(auth_func).parameters:
-            auth_args['base_url'] = base_url
-            
         # Handle SSL context if specified
         if auth_args.get('sslContext') == 'ignore':
             auth_args['sslContext'] = ssl._create_unverified_context()
