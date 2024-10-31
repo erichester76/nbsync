@@ -3,7 +3,6 @@ api_definitions:
   netbox: 
     type: api
     module: pynetbox
-
     auth_method: token
     auth_function: api  
     auth_args:
@@ -16,7 +15,6 @@ api_definitions:
   vmware: 
     type: api
     module: pyVim
-
     auth_method: login
     auth_function: connect.SmartConnect
     auth_args:
@@ -28,7 +26,6 @@ api_definitions:
         value: ${VMWARE_AUTH_PW}
       - name: sslContext
         value: ignore
-
     base_urls:
       - cu-vcenter.clemson.edu
       - poole-vcenter.clemson.edu
@@ -38,16 +35,15 @@ api_definitions:
 object_mappings:
 
   hosts:
+
     source_api: vmware
     destination_api: netbox
     destination_endpoint: dcim.devices
     find_function: dcim.devices.filter
     create_function: dcim.devices.create
     update_function: dcim.devices.update
-
     imports:
       - pyVmomi.vim
-    
     fetch_data_code: |
       def fetch_data(api_client):
           content = api_client.RetrieveContent()
