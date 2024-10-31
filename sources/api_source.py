@@ -71,7 +71,10 @@ class APIDataSource(DataSource):
         module = importlib.import_module(module_name)
         auth_func = self._get_auth_function(module, self.config['auth_function'])
         auth_args = self._prepare_auth_args(base_url)
-
+        # Add base_url if required
+        if 'base_url' in inspect.signature(auth_func).parameters:
+            auth_args['base_url'] = base_url
+            
         if self.api and self.is_session_valid(base_url):
             print(f"Using existing session for {self.name} @ {base_url}.")
         else:
