@@ -291,26 +291,22 @@ class DataTransferTool:
         find_function = self.get_nested_function(api_client, find_function_path)
         # Automatically extract the first field from mapped_data as the key field
         key_field = list(mapped_data.keys())[0]
-        filter_params = {key_field: mapped_data[key_field]}
-        print(f'{key_field} : {mapped_data[key_field]}')
-        
+        filter_params = {key_field: mapped_data[key_field]}        
         try:
             found_object = find_function(**filter_params)
-            print(f'Objects: {len(found_object)} - {list(found_object)[0].name}')
+            
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
 
         if found_object:
             existing_object = list(found_object)[0]
-            print(f'found_obj sanitized: {self.sanitize_data(mapped_data)}')
 
             mapped_data['id'] = existing_object.id
             current_data = self.sanitize_data(existing_object.serialize())
             sanitized_mapped_data = self.sanitize_data(mapped_data)
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
-            print(f'post filter sanitized: {sanitized_mapped_data}')
             # Check for changes in object to determine if we should update
             differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
             if differences:

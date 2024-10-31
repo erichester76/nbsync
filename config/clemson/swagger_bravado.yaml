@@ -35,12 +35,8 @@ object_mappings:
     update_function: plugins.netboxservicemgmt.slas.update
     fetch_data_code: |
       def fetch_data(api_client):
-            url = f"https://iaw.dev.clemson.edu:8443/api/slas"
-            response = api_client.session.request(
-                method="GET",
-                url=url,
-            )
-            response.raise_for_status()  # Raise an error for bad status codes
+            response = api_client.session.request(method="GET",url="https://iaw.dev.clemson.edu:8443/api/slas")
+            response.raise_for_status()
             return response.json()
 
     # {'_id': '666b271cec496524844ff19d', 'agreementNumber': '2026', 'dataRiskCategory': None, 
@@ -55,21 +51,23 @@ object_mappings:
         source: {{ agreementName }}
      
       data_classification:
-        source: {{ dataRiskCategory | default("public")
+        source: {{ dataRiskCategory 
+          | default("public")
           | regex_replace('([^#]+)\#.+$','\\1') 
           | replace(';','') 
           | replace('Internal Use','internal_use')
           | replace('Public','public')
           | replace('Confidential','confidential')
-          | replace('Restricted','restricted')
-          | default("public") }}
+          | replace('Restricted','restricted') }}
 
       business_owner_tenant:
         source: {{ customerDepartments[0] }}
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       business_owner_contact:
-        source: {{ customerBusinessManagers[0] | regex_replace('([^#]+)\#.+$','\\1') | replace(';','') }}
+        source: {{ customerBusinessManagers[0] 
+          | regex_replace('([^#]+)\#.+$','\\1') 
+          | replace(';','') }}
         action: lookup_object('name', 'tenancy.contacts.filter', 'tenancy.contacts.create')
 
       description:
