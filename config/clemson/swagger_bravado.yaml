@@ -52,7 +52,7 @@ object_mappings:
      
       data_classification:
         source: {{ dataRiskCategory 
-          | default("public")
+          | default("public", true)
           | regex_replace('([^#]+)\#.+$','\\1') 
           | replace(';','') 
           | replace('Internal Use','internal_use')
@@ -71,7 +71,7 @@ object_mappings:
         action: lookup_object('name', 'tenancy.contacts.filter', 'tenancy.contacts.create')
 
       description:
-        source: {{ dataSummary | string | default('{{ agreementName }}')}}
+        source: {{ dataSummary | string | default('{{ agreementName }}', true)}}
 
       technical_contact:
         source: "Unknown"
