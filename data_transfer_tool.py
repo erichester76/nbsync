@@ -81,7 +81,7 @@ def jinja_placeholder_constructor(loader, node):
     value = loader.construct_scalar(node)
     return value
 
-env_var_pattern = re.compile(r'\$\{([^}^{]+)\}') 
+env_var_pattern = re.compile(r'\$\{([^}^{]+)\}')
 yaml.add_implicit_resolver('!envvar', env_var_pattern)
 yaml.add_constructor('!envvar', env_var_constructor)
 
@@ -118,7 +118,7 @@ class DataTransferTool:
             
             source_type = config['type']
             print(f"[{source_type}] [{name}]")
-            if 'api' in source_type:
+            if source_type == 'api' or source_type == 'api-swagger':
                 self.sources[name] = APIDataSource(name, config)
             elif source_type == 'csv':
                 self.sources[name] = CSVDataSource(name, config)
