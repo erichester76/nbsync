@@ -14,10 +14,7 @@ import deepdiff
 # Register custom Jinja2 filters
 
 def regex_replace(value, pattern, replacement):
-    print(f"b4 replace: {value}")
-    value = re.sub(pattern, replacement, value)
-    print(f"after replace: {value}")
-    return value
+   return re.sub(pattern, replacement, value)
 
 # Custom slugify filter
 def slugify(value):
@@ -169,7 +166,7 @@ class DataTransferTool:
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
                             
                             mapped_data[dest_field] = rendered_source_value
-                        
+                            print(f'{dest_field} = {rendered_source_value}')
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
