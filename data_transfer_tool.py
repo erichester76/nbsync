@@ -118,9 +118,10 @@ class DataTransferTool:
             
             source_type = config['type']
             if source_type == 'api' or source_type == 'api-swagger':
-                print(f"api datasource: [{source_type}] [{name}]")
 
                 self.sources[name] = APIDataSource(name, config)
+                print(f"api datasource: [{self.sources[name]}] [{name}]")
+
             elif source_type == 'csv':
                 self.sources[name] = CSVDataSource(name, config)
             elif source_type == 'xls':
