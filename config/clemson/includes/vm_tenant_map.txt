@@ -124,8 +124,8 @@
 ('?i)^2b8.*,Agricultural Sciences
 ('?i)^2b9.*,Applied Economics & Statistics
 ('?i)^2ba.*,Biological Sciences
-('?i)^2bb.*,Entomology, Soils & Plant Science
-('?i)^2bc.*,Food, Nutrition & Package Science
+('?i)^2bb.*,Entomology Soils & Plant Science
+('?i)^2bc.*,Food Nutrition & Package Science
 ('?i)^2bd.*,Forestry & Environment Conserv
 ('?i)^2be.*,Genetics and Biochemistry
 ('?i)^2bf.*,Horticulture
@@ -205,7 +205,7 @@
 ('?i)^2mq.*,SC Trn Ctr-Rd Rcvry/Early Literature
 ('?i)^2mr.*,Teacher Education
 ('?i)^2ms.*,Center of Excellence-DML
-('?i)^2mt.*,Leadrshp,Counsl Ed,Hum&Org Dev
+('?i)^2mt.*,Leadrshp Counsl Ed Hum&Org Dev
 ('?i)^2mu.*,Curriculum and Instruction
 ('?i)^2mw.*,Counseling & Educat Leadership
 ('?i)^2mx.*,Ad-Research/Grad Studies
@@ -243,7 +243,7 @@
 ('?i)^2o7.*,Family Outreach
 ('?i)^2o8.*,Youth Development Programs
 ('?i)^2o9.*,HEHD Office of Distance Educ
-('?i)^2oa.*,Youth, Fmly & Comm Studies
+('?i)^2oa.*,Youth Fmly & Comm Studies
 ('?i)^2oe.*,CBSHS AD-RESCH/Grad Studies
 ('?i)^2pj.*,Budget Holding Closing - SOE
 ('?i)^2pl.*,College of Science-Deans Offic

@@ -56,7 +56,7 @@ object_mappings:
         source: {{ name | replace('.clemson.edu', '') }}
   
       tenant:
-        source: {{ name | replace_map('config/clemson/host_tenant_map.txt') }}
+        source: {{ name | replace_map('config/clemson/includes/host_tenant_map.txt') }}
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       cluster:
@@ -128,7 +128,7 @@ object_mappings:
         action: lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
 
       tenant:
-        source: {{ config.name | replace_map('config/clemson/vm_tenant_map.txt') }}
+        source: {{ config.name | replace_map('config/clemson/includes/vm_tenant_map.txt') }}
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       vcpus:
