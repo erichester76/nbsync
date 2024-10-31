@@ -18,17 +18,11 @@ api_definitions:
     auth_method: login
     auth_function: DNACenterAPI
     auth_args:
-      - name: base_url
-        value: base_urls
-      - name: username
-        value: ${DNAC_AUTH_USER}
-      - name: password
-        value: ${DNAC_AUTH_PW}
-      - name: version
-        value: 2.3.3.0
-      - name: verify
-        value: False
-
+      base_url: base_urls
+      username: ${DNAC_AUTH_USER}
+      password: ${DNAC_AUTH_PW}
+      version: 2.3.3.0
+      verify: False
     base_urls:
       - https://cisco-dnac.clemson.edu/
 
