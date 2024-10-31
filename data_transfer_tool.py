@@ -133,7 +133,7 @@ class DataTransferTool:
 
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
-     
+        
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
 
@@ -142,6 +142,7 @@ class DataTransferTool:
                 print(f"Fetching data from {source_api}...")
                 source_data = source.fetch_data(obj_config, source_client)
                 destination_api = self.sources[obj_config['destination_api']]
+                
                 for destination_client in destination_api.clients:
                     create_function = obj_config.get('create_function')
                     update_function = obj_config.get('update_function')
@@ -149,31 +150,28 @@ class DataTransferTool:
                     mappings = obj_config['mapping']
 
                     for item in source_data:
-                        mapped_data = {}
-
+                        # Prepare the context once per item
+                        context = self.resolve_nested_context(item)
+                        
+                        # Render each source template for all mappings at once, only once per item
+                        rendered_mappings = {}
                         for dest_field, field_info in mappings.items():
-                            # Render the Jinja2 template with the item data
-                            source_value = self.render_source_value(field_info['source'], item)
+                            source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
+                            template = env.from_string(source_template)
+                            rendered_source_value = template.render(context)
+                            rendered_mappings[dest_field] = rendered_source_value
 
-                            if ('action' in field_info):
-                                action = field_info.get('action')
-                                source_value = self.apply_transform_function(source_value, action, obj_config, dest_field, item)
-
-                            mapped_data[dest_field] = source_value
-                                
+                        # Now apply any transformations/actions to the rendered mappings
+                        mapped_data = {}
+                        for dest_field, rendered_source_value in rendered_mappings.items():
+                            if 'action' in mappings[dest_field]:
+                                action = mappings[dest_field].get('action')
+                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
+                            
+                            mapped_data[dest_field] = rendered_source_value
+                        
+                        # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
-
-    def render_source_value(self, source_template, item):
-        """Render the source value dynamically based on the item."""
-        # Convert << and >> back to {{ and }} for Jinja2 rendering
-        source_template = source_template.replace('<<', '{{').replace('>>', '}}')
-
-        # Use a helper function to resolve nested attributes in the item
-        context = self.resolve_nested_context(item)
-
-        # Render the Jinja2 template, passing the resolved context
-        template = env.from_string(source_template)
-        return template.render(context)
 
     def resolve_nested_context(self, item):
         """Resolve nested attributes in an object using dot notation."""
@@ -205,6 +203,7 @@ class DataTransferTool:
                     context[attr] = get_nested_value(item, attr)
 
         return context
+
 
     
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
