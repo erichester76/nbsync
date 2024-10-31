@@ -48,7 +48,7 @@ object_mappings:
     mapping:
 
       name:
-        source: {{ agreementName | regex_replace('([^#]+)\#.+$','\\1') | regex_replace('[\ ]*$','') | replace(' - ',' ') }}
+        source: {{ agreementName | regex_replace('[\ ]*$','') | replace(' - ',' ') }}
      
       data_classification:
         source: {{ dataRiskCategory 
