@@ -7,7 +7,6 @@ api_definitions:
     auth_function: api  
     auth_args:
       token: ${NETBOX_API_KEY}
-    
     base_urls:
       - https://netbox.app.clemson.edu
 
@@ -18,14 +17,10 @@ api_definitions:
     auth_method: login
     auth_function: connect.SmartConnect
     auth_args:
-      - name: host
-        value: base_urls
-      - name: user
-        value: ${VMWARE_AUTH_USER}
-      - name: pwd
-        value: ${VMWARE_AUTH_PW}
-      - name: sslContext
-        value: ignore
+      host: base_urls
+      user: ${VMWARE_AUTH_USER}
+      pwd: ${VMWARE_AUTH_PW}
+      sslContext: ignore
     base_urls:
       - cu-vcenter.clemson.edu
       - poole-vcenter.clemson.edu

@@ -94,18 +94,17 @@ class APIDataSource(DataSource):
             print(f"Connected to {self.name} at {base_url}")
 
     def _prepare_auth_args(self, base_url):
-        """Prepare arguments for authentication based on YAML configuration."""
-        if 'auth_args' in self.config:
-            auth_args = {arg['name']: arg['value'] for arg in self.config['auth_args']}
-            if 'sslContext' in auth_args:
-                if auth_args['sslContext'] == 'ignore':
-                    auth_args['sslContext'] = ssl._create_unverified_context()
-                elif auth_args['sslContext'] == 'None':
-                    auth_args['sslContext'] = None
-            auth_args['host'] = base_url
-        else:
-            auth_args = {}
+        # Expect auth_args to be a dictionary with key-value pairs
+        auth_args = self.config.get('auth_args', {})
+
+        if not isinstance(auth_args, dict):
+            raise TypeError("auth_args must be a dictionary")
+
+        # Inject base_url if required
+        auth_args['host'] = auth_args.get('host', base_url)
+
         return auth_args
+
 
     def _handle_custom_login(self, http_client, base_url):
         """Handle custom login flow for Swagger."""
