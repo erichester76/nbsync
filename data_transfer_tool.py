@@ -289,10 +289,11 @@ class DataTransferTool:
         find_function = self.get_nested_function(api_client, find_function_path)
         # Automatically extract the first field from mapped_data as the key field
         key_field = list(mapped_data.keys())[0]
+        print (f'seatching for {key_field}, {mapped_data[key_field]}')
         filter_params = {key_field: mapped_data[key_field]}        
         try:
             found_object = find_function(**filter_params)
-            
+            print (f'{len(found_object)} objects')
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
