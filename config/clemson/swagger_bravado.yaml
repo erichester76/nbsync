@@ -28,6 +28,39 @@ api_definitions:
 # Object Mappings Configuration
 object_mappings:
 
+slas:
+    source_api: iaw
+    destination_api: netbox
+    destination_endpoint: plug
+    find_function: virtualization.virtual_machines.filter
+    create_function: virtualization.virtual_machines.create
+    update_function: virtualization.virtual_machines.update
+    fetch_data_code: |
+      # Custom data fetching function for Bravado source API
+      def get_data(client):
+          response = client.slas.getAllSlas().response().result
+          if not response:
+              raise ValueError("No slas found from source API.")
+          return response
+
+    # Mapping Configuration
+    mapping:
+      # Map source API field names to NetBox field names
+      name:
+        source: {{ name | regex_replace('(.+).clemson.edu.+', '\\1') }}
+
+      custom_fields.sla: 
+        source: {{ sla.agreementNumber }} - {{ sla.agreementName }}
+
+      custom_fields.business_contact: 
+        source: {{ sla.customerBusinessManagers[0] }}
+ 
+      custom_fields.contact: 
+        source: {{ sla.customerPointsofContact[0] }}
+    
+      custom_fields.technical_contact: 
+        source: {{ technicalcontacts[0].fullname }}
+
   virtualmachines:
     source_api: iaw
     destination_api: netbox
@@ -50,7 +83,7 @@ object_mappings:
         source: {{ name | regex_replace('(.+).clemson.edu.+', '\\1') }}
 
       custom_fields.sla: 
-        source: {{ sla.agreementNumber }}: {{ sla.agreementName }}
+        source: {{ sla.agreementNumber }} - {{ sla.agreementName }}
 
       custom_fields.business_contact: 
         source: {{ sla.customerBusinessManagers[0] }}
