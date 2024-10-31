@@ -296,7 +296,7 @@ class DataTransferTool:
         
         try:
             found_object = find_function(**filter_params)
-            print(f'{len(found_object)}')
+            print(f'Objects: {len(found_object)} - {list(found_object)[0].name}')
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
