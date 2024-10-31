@@ -310,7 +310,7 @@ class DataTransferTool:
             sanitized_mapped_data = self.sanitize_data(mapped_data)
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
-            print(f'post filter sanitized: {sanitize_mapped_data}')
+            print(f'post filter sanitized: {sanitized_mapped_data}')
             # Check for changes in object to determine if we should update
             differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
             if differences:
