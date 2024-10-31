@@ -42,7 +42,8 @@ object_mappings:
                 url=url,
             )
             response.raise_for_status()  # Raise an error for bad status codes
-            return response.json
+            print({resppnse.json()})
+            return response.json()
 
     # Mapping Configuration
     mapping:
