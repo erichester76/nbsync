@@ -29,10 +29,10 @@ object_mappings:
   slas:
     source_api: iaw
     destination_api: netbox
-    destination_endpoint: plugins.netbox_servicemgmt.slas
-    find_function: plugins.netbox_servicemgmt.slas.filter
-    create_function: plugins.netbox_servicemgmt.slas.create
-    update_function: plugins.netbox_servicemgmt.slas.update
+    destination_endpoint: plugins.netboxservicemgmt.slas
+    find_function: plugins.netboxservicemgmt.slas.filter
+    create_function: plugins.netboxservicemgmt.slas.create
+    update_function: plugins.netboxservicemgmt.slas.update
     fetch_data_code: |
       def fetch_data(api_client):
             url = f"https://iaw.dev.clemson.edu:8443/api/slas"
