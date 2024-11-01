@@ -181,6 +181,7 @@ class DataTransferTool:
                                 print(f"Excluding object {mapped_data['name']} based on exclusion criteria.")
                                 continue 
                             
+                            print(f'RSV: {rendered_source_value}')
                             # Apply transformation and lookup actions
                             if 'action' in rendered_source_value:
                                 action = rendered_source_value['action']
