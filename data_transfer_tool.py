@@ -193,8 +193,61 @@ class DataTransferTool:
 
                         print(f'Mapped Data: {mapped_data}')
                         # Create or update the object in the destination
-                        self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
+                        self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
+    
+    def apply_transform_function(self, value, actions, obj_config, field_name, item):
+        """Apply transformations using Jinja2 filters directly."""
+        if value is None:
+            return value
+        
+        #make a single action a list of 1 so loop works
+        if isinstance(actions, str):
+            actions = [actions]
+            
+        for action in actions:
+            print(f'ACTION {action} for {value}')
+            
+            if 'regex_replace' in action:
+                pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
+                value = env.filters['regex_replace'](value, pattern, replacement)
+            elif 'lookup_object' in action:
+                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
+                if matches:
+                    lookup_type, find_function_path, create_function_path = matches[0]
+                    value = self.lookup_object(
+                        value, lookup_type, find_function_path, create_function_path, 
+                        obj_config, map, field_name, item
+                    ).id
+            elif 'include_object' in action:
+                matches = re.findall(r"include_object\((.*?)\s*,\s*'(.*?)'\s*,\s*'(.*?)',\s*'(.*?)'\)", action)
+                if matches:
+                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
+                    sub_value = item.get(reference_field)
+                    if sub_value:
+                        nested_field = self.lookup_object(
+                            sub_value, lookup_type, find_function_path, create_function_path,
+                            obj_config, map, reference_field, item
+                        ) 
+                        value = {**value, nested_field: nested_field.id}
+        
+                          
+        print(f'POST ACTION {action}: value now {value}')
+ 
+        return value
 
+    def get_nested_function(self, api_client, function_path):
+        """Recursively get a function from the API client."""
+        parts = function_path.split('.')
+        func = api_client  # Start with the root client (e.g., pynetbox.NetBox())
+        for part in parts:
+            try:
+                func = getattr(func, part)
+            except AttributeError:
+                raise AttributeError(f"Attribute '{part}' not found in API client at path '{function_path}'")
+        if not callable(func):
+            raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
+        return func
+    
     def resolve_nested_context(self, item):
         """Resolve nested attributes in an object using dot notation."""
         context = {}
@@ -227,60 +280,28 @@ class DataTransferTool:
         return context
     
     
-    def apply_transform_function(self, value, actions, obj_config, field_name, item):
-        """Apply transformations using Jinja2 filters directly."""
-        if value is None:
-            return value
-        
-        if isinstance(actions, str):
-            actions = [actions]
-        print(f"processing actions")
-        for action in actions:
-            print(f'processing {action} on {value}')
-            
-            if 'regex_replace' in action:
-                pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
-                value = env.filters['regex_replace'](value, pattern, replacement)
-            elif 'lookup_object' in action:
-                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
-                if matches:
-                    lookup_type, find_function_path, create_function_path = matches[0]
-                    value = self.lookup_object(value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item)
-            # Handle 'include_object' by reusing lookup_object logic
-            elif 'include_object' in action:
-                matches = re.findall(r"include_object\((.*?)\s*,\s*'(.*?)'\s*,\s*'(.*?)',\s*'(.*?)'\)", action)
-                if matches:
-                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
-                    sub_value = item.get(reference_field)
-                    if sub_value:
-                        # Reuse lookup_object with the specific reference field value
-                        value = self.lookup_object(
-                            sub_value, lookup_type, find_function_path, create_function_path,
-                            obj_config, map, reference_field, item
-                        )           
-        print(f'processed {action} now {value}')
- 
-        return value
+    def sanitize_data(self, data):
+        """
+        Sanitize the mapped_data to ensure all values are serializable.
+        If any value is an object, extract its relevant attribute (e.g., 'id' or 'name').
+        """
+        sanitized_data = {}
+        for key, value in data.items():
+            if hasattr(value, 'id'):  # If it's an object with an 'id' attribute, use the 'id'
+                sanitized_data[key] = value.id
+            elif hasattr(value, 'name'):  # If it's an object with a 'name' attribute, use the 'name'
+                sanitized_data[key] = value.name
+            else:
+                sanitized_data[key] = value  # Otherwise, use the value as is
 
-    def get_nested_function(self, api_client, function_path):
-        """Recursively get a function from the API client."""
-        parts = function_path.split('.')
-        func = api_client  # Start with the root client (e.g., pynetbox.NetBox())
-        for part in parts:
-            try:
-                func = getattr(func, part)
-            except AttributeError:
-                raise AttributeError(f"Attribute '{part}' not found in API client at path '{function_path}'")
-        if not callable(func):
-            raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
-        return func
+        return sanitized_data
 
     def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item):
         """Perform API lookup or create an object on the server side."""
         
         cache_key = f"{lookup_type}:{value}"
         if cache_key in self.lookup_cache:
-            #print(f"Found {cache_key} in cache.")
+            print(f"Found {cache_key} in cache.")
             return self.lookup_cache[cache_key]
         
         api_client = self.sources[obj_config['destination_api']].api
@@ -288,10 +309,6 @@ class DataTransferTool:
         create_function = self.get_nested_function(api_client, create_function_path)
         
         filter_params = {lookup_type: value}
-        
-        # # Handle additional fields from the mapping
-        # additional_data = self.get_included_fields_data(obj_config, field_name, item)
-        # filter_params.update(additional_data)
 
         # Try finding the object
         try:
@@ -321,21 +338,6 @@ class DataTransferTool:
             print(f"Error calling create_function: {str(e)}")
             return None
 
-    def sanitize_data(self, data):
-        """
-        Sanitize the mapped_data to ensure all values are serializable.
-        If any value is an object, extract its relevant attribute (e.g., 'id' or 'name').
-        """
-        sanitized_data = {}
-        for key, value in data.items():
-            if hasattr(value, 'id'):  # If it's an object with an 'id' attribute, use the 'id'
-                sanitized_data[key] = value.id
-            elif hasattr(value, 'name'):  # If it's an object with a 'name' attribute, use the 'name'
-                sanitized_data[key] = value.name
-            else:
-                sanitized_data[key] = value  # Otherwise, use the value as is
-
-        return sanitized_data
     
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """Create or update objects in the destination API."""
