@@ -280,7 +280,7 @@ class DataTransferTool:
             found_object = find_function(**filter_params)
             if found_object:
                 first_object = list(found_object)[0]
-                self.lookup_cache[cache_key] = first_object
+                #self.lookup_cache[cache_key] = first_object
                 return first_object
             
         except Exception as e:
@@ -295,7 +295,7 @@ class DataTransferTool:
             else:
                 print(f"Creating {lookup_type} object with data: {create_data}")
                 created_object = create_function(create_data)
-                self.lookup_cache[cache_key] = created_object
+                #self.lookup_cache[cache_key] = created_object
                 return created_object if hasattr(created_object, 'id') else None
             
         except Exception as e:
