@@ -220,16 +220,16 @@ class DataTransferTool:
             elif 'include_object' in action:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
-                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
-                    print(f'Matched {reference_field} for include_object')
-                    
+                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]                    
                     # Look up the referenced value dynamically within `item`
                     sub_value = mapped_data[reference_field]
                     print(f'Matched {reference_field} {sub_value} for include_object')
 
-                    if sub_value:
-                        nested_obj = self.lookup_object( sub_value, lookup_type, find_function_path, create_function_path, obj_config )
-                        value = {**value, reference_field: nested_obj.id}
+                    if sub_value is not int:
+                        nested_obj = self.lookup_object( reference_field, lookup_type, find_function_path, create_function_path, obj_config )
+                        sub_value = nested_obj.id
+                    
+                    value = {**value, reference_field: sub_value}
                         
         print(f'POST ACTION {action}: value now {value}')
  
