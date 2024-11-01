@@ -231,7 +231,7 @@ class DataTransferTool:
                             obj_config, map, field_name, item
                         ) 
                         value = {**value, nested_field: nested_field.id}
-        
+                        print(f'{value}')
                           
         print(f'POST ACTION {action}: value now {value}')
  
