@@ -107,5 +107,5 @@ object_mappings:
 
       sla:
         source: {{ sla }}
-        action: lookup_object('uuid', 'plugins.netbox_servicemgmt.slas.filter', 'plugins.netbox_servicemgmt.slas.create')
+        action: lookup_object('uuid', 'plugins.netboxservicemgmt.slas.filter', 'plugins.netboxservicemgmt.slas.create')
       
