@@ -364,7 +364,9 @@ def main():
     tool.process_mappings()
 
 if __name__ == "__main__":
-    with cProfile.Profile() as profiler:
-        main()
+    profiler = cProfile.Profile()
+    profiler.enable()  
+    main()
+    profiler.disable()
     stats = pstats.Stats(profiler)
     stats.sort_stats(pstats.SortKey.TIME).print_stats(20)  # Show top 20 time-consuming functions
