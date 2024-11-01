@@ -54,6 +54,7 @@ def replace_map(value, filename):
     except Exception as e:
         print(f"Error in replace_map: {e}")
         return value  # Return the value unchanged in case of an error
+
     
 # Create a new Jinja2 environment and add the filters
 env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'))
@@ -162,11 +163,24 @@ class DataTransferTool:
 
                         # Now apply any transformations/actions to the rendered mappings
                         mapped_data = {}
+                        exclude_object = False
                         for dest_field, rendered_source_value in rendered_mappings.items():
+                            # Check if the exclusion filter is set
+                            if 'exclude' in mappings[dest_field]:
+                                if bool(re.match(mappings[dest_field].get('exclude'), rendered_source_value['dest_field'])):
+                                    exclude_object = True
+                                    break
+                            
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
+                           
                             mapped_data[dest_field] = rendered_source_value
+                        
+                        if exclude_object:
+                            print(f"Excluding object {item} based on exclusion criteria.")
+                            continue    
+                        
                         # Create or update the object in the destination
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
