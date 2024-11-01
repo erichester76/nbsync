@@ -199,6 +199,8 @@ class DataTransferTool:
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
+        newvalue={}
+        
         
         #make a single action a list of 1 so loop works
         if isinstance(actions, str):
