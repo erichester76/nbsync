@@ -261,7 +261,7 @@ class DataTransferTool:
         
         cache_key = f"{lookup_type}:{value}"
         if cache_key in self.lookup_cache:
-            print(f"Found {cache_key} in cache.")
+            #print(f"Found {cache_key} in cache.")
             return self.lookup_cache[cache_key]
         
         api_client = self.sources[obj_config['destination_api']].api
@@ -288,13 +288,16 @@ class DataTransferTool:
 
         # If not found, create the object
         try:
+            
             create_data = {lookup_type: value, 'slug': re.sub(r'\W+', '-', value.lower())} #, **additional_data}
             if self.dry_run:
                 print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
             else:
                 print(f"Creating {lookup_type} object with data: {create_data}")
                 created_object = create_function(create_data)
-                return created_object.id if hasattr(created_object, 'id') else None
+                self.lookup_cache[cache_key] = created_object
+                return created_object if hasattr(created_object, 'id') else None
+            
         except Exception as e:
             print(f"Error calling create_function: {str(e)}")
             return None
