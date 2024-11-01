@@ -202,8 +202,9 @@ class DataTransferTool:
                         
                         if exclude_object:
                             print(f"Excluding object {mapped_data['name']} based on exclusion criteria.")
-                            continue    
-                        
+                            continue 
+                           
+                        print(f'Mapped Data: {mapped_data}')
                         # Create or update the object in the destination
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
