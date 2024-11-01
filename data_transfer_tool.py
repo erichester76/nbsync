@@ -347,7 +347,6 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}")
             else:
                 print(f"Creating new object {mapped_data['name']}: {mapped_data}")
-
                 create_function = self.get_nested_function(api_client, create_function_path)
                 new_object = create_function(self.sanitize_data(mapped_data))
                 print(f"Created New Object {mapped_data['name']} #{new_object.id}")
@@ -368,6 +367,11 @@ if __name__ == "__main__":
     profiler.enable()  
     main()
     profiler.disable()
+   
     stats = pstats.Stats(profiler)
     stats.sort_stats("cumulative").print_stats(20)  # Adjust '20' to see more or fewer lines of output
-   
+    # Print only the top 10 functions sorted by time
+    stats.sort_stats("time").print_stats(10)
+    # Print callers and callees for detailed call chain information
+    stats.print_callers(10)  
+    stats.print_callees(10)  
