@@ -223,8 +223,9 @@ class DataTransferTool:
                 if matches:
                     reference_field, lookup_type, find_function_path, create_function_path = matches[0]
                     print(f'regex matched {reference_field} {lookup_type} {find_function_path} {create_function_path}')
-
                     sub_value = item.get(reference_field)
+                    print(f'looking up {sub_value} {lookup_type} {find_function_path} {create_function_path}')
+
                     if sub_value:
                         nested_field = self.lookup_object(
                             sub_value, lookup_type, find_function_path, create_function_path,
