@@ -37,7 +37,6 @@ object_mappings:
       def fetch_data(api_client):
             response = api_client.session.request(method="GET",url="https://iaw.dev.clemson.edu:8443/api/slas")
             response.raise_for_status()
-            print(f'{response.json()[0]}')
             return response.json()
 
     # {'_id': '666b271cec496524844ff19d', 'agreementNumber': '2026', 'dataRiskCategory': None, 

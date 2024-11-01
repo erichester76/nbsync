@@ -369,4 +369,5 @@ if __name__ == "__main__":
     main()
     profiler.disable()
     stats = pstats.Stats(profiler)
-    stats.sort_stats(pstats.SortKey.TIME).print_stats(20)  # Show top 20 time-consuming functions
+    stats.sort_stats("cumulative").print_stats(20)  # Adjust '20' to see more or fewer lines of output
+   
