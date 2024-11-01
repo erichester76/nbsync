@@ -194,7 +194,7 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
     
-    def apply_transform_function(self, value, actions, obj_config, field_name, item, reference_item=None):
+    def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
@@ -213,21 +213,6 @@ class DataTransferTool:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     reference_field, lookup_type, find_function_path, create_function_path = matches[0]
-                    print(f'regex matched {reference_field} for include_object')
-                    
-                    # Retrieve the value from `reference_item` for include_object
-                    sub_value = reference_item.get(reference_field) if reference_item else item.get(reference_field)
-                    if sub_value:
-                        nested_obj = self.lookup_object(
-                            sub_value, lookup_type, find_function_path, create_function_path,
-                            obj_config, map, reference_field, item
-                        )
-                        value = {**value, reference_field: nested_obj.id}
-    
-            elif 'include_object' in action:
-                matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
-                if matches:
-                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
                     print(f'Matched {reference_field} for include_object')
                     
                     # Look up the referenced value dynamically within `item`
@@ -240,7 +225,6 @@ class DataTransferTool:
                         value = {**value, reference_field: nested_obj.id}
                             
         print(f'POST ACTION {action}: value now {value}')
- 
         return value
 
     def get_nested_function(self, api_client, function_path):
