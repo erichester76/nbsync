@@ -318,7 +318,6 @@ class DataTransferTool:
                 else: 
                     print(f"Updating object {existing_object.id}:")
                     update_function = self.get_nested_function(api_client, update_function_path)
-                    print(f'{[sanitized_mapped_data]}')
                     update_function([sanitized_mapped_data])
             else:
                 print(f"No changes detected for object {existing_object.name}, skipping update.")
@@ -329,11 +328,6 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}")
             else:
                 create_function = self.get_nested_function(api_client, create_function_path)
-                mapped_data['uuid'] = str(mapped_data.get('uuid', ''))
-
-                print(f"Creating New Object {mapped_data['name']} {mapped_data}")
-                print(f"Sanitized data being sent to create_function: {self.sanitize_data(mapped_data)}")
-
                 new_object = create_function(self.sanitize_data(mapped_data))
                 print(f"Created New Object {mapped_data['name']} #{new_object.id}")
                 return new_object.id
