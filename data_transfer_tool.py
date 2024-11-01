@@ -228,6 +228,8 @@ class DataTransferTool:
                     
                     # Look up the referenced value dynamically within `item`
                     sub_value = item.get(reference_field)
+                    print(f'Matched {reference_field} {sub_value} for include_object')
+
                     if sub_value:
                         nested_obj = self.lookup_object(
                             sub_value, lookup_type, find_function_path, create_function_path,
