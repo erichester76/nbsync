@@ -198,7 +198,7 @@ class DataTransferTool:
                                         rendered_source_value, action, obj_config, mappings, dest_field, item
                                     )                     
                             
-                             mapped_data[dest_field] = rendered_source_value
+                            mapped_data[dest_field] = rendered_source_value
                         
                         if exclude_object:
                             print(f"Excluding object {mapped_data['name']} based on exclusion criteria.")
