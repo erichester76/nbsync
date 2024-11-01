@@ -89,66 +89,66 @@ object_mappings:
         source: {{ config.product.name }} {{ config.product.version }}
         action: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
-  virtual_machines:
-    source_api: vmware
-    destination_api: netbox
-    destination_endpoint: virtualization.virtual_machines
-    find_function: virtualization.virtual_machines.filter
-    create_function: virtualization.virtual_machines.create
-    update_function: virtualization.virtual_machines.update
-    imports:
-      - pyVmomi.vim
-    fetch_data_code: |
-      def fetch_data(api_client):
-          content = api_client.RetrieveContent()
-          vms = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view                  
-          return vms
+  # virtual_machines:
+  #   source_api: vmware
+  #   destination_api: netbox
+  #   destination_endpoint: virtualization.virtual_machines
+  #   find_function: virtualization.virtual_machines.filter
+  #   create_function: virtualization.virtual_machines.create
+  #   update_function: virtualization.virtual_machines.update
+  #   imports:
+  #     - pyVmomi.vim
+  #   fetch_data_code: |
+  #     def fetch_data(api_client):
+  #         content = api_client.RetrieveContent()
+  #         vms = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True).view                  
+  #         return vms
 
-    mapping:
+  #   mapping:
 
-      name:
-        source: {{ config.name | regex_replace('(.+).clemson.edu.+', '\\1') }}
-        exclude: 
-          - "^Z-VRA.*$" 
-          - "^.*template.*$" 
-          - "^ISO-.*$" 
+  #     name:
+  #       source: {{ config.name | regex_replace('(.+).clemson.edu.+', '\\1') }}
+  #       exclude: 
+  #         - "^Z-VRA.*$" 
+  #         - "^.*template.*$" 
+  #         - "^ISO-.*$" 
 
-      status:
-        source: {{ runtime.powerState 
-            | replace('poweredOn', 'active') 
-            | replace('poweredOff', 'offline') }}
+  #     status:
+  #       source: {{ runtime.powerState 
+  #           | replace('poweredOn', 'active') 
+  #           | replace('poweredOff', 'offline') }}
 
-      custom_fields: {}
+  #     custom_fields: {}
 
-      cluster:
-        source: {{ runtime.host.parent.name }}
-        action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
+  #     cluster:
+  #       source: {{ runtime.host.parent.name }}
+  #       action: lookup_object('name', 'virtualization.clusters.filter', 'virtualization.clusters.create')
 
-      device:
-        source: {{ runtime.host.name | replace('.clemson.edu', '') }}
-        action: lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
+  #     device:
+  #       source: {{ runtime.host.name | replace('.clemson.edu', '') }}
+  #       action: lookup_object('name', 'dcim.devices.filter', 'dcim.devices.create')
 
-      tenant:
-        source: {{ config.name | replace_map('config/clemson/includes/vm_tenant_map.txt') }}
-        action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
+  #     tenant:
+  #       source: {{ config.name | replace_map('config/clemson/includes/vm_tenant_map.txt') }}
+  #       action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
-      vcpus:
-        source: {{ config.hardware.numCPU | float }}
+  #     vcpus:
+  #       source: {{ config.hardware.numCPU | float }}
 
-      memory:
-        source: {{ config.hardware.memoryMB }}
+  #     memory:
+  #       source: {{ config.hardware.memoryMB }}
 
-      platform:
-        source: {{ guest.guestFullName }}
-        action: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
+  #     platform:
+  #       source: {{ guest.guestFullName }}
+  #       action: lookup_object('name', 'dcim.platforms.filter', 'dcim.platforms.create')
 
-      serial:
-        source: {{ config.uuid }}
+  #     serial:
+  #       source: {{ config.uuid }}
 
-      site:
-        source: {{ runtime.host.parent.name 
-            | regex_replace('(?i)^CU-.+','Clemson Information Technology Center') 
-            | regex_replace('(?i)^CUDR-.+|^DR-.+','University of California San Diego') 
-            | regex_replace('(?i)^Poole-.+','Poole') 
-            | regex_replace('(?i)^Proto-.+','Clemson Information Technology Center') }}
-        action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create') 
+  #     site:
+  #       source: {{ runtime.host.parent.name 
+  #           | regex_replace('(?i)^CU-.+','Clemson Information Technology Center') 
+  #           | regex_replace('(?i)^CUDR-.+|^DR-.+','University of California San Diego') 
+  #           | regex_replace('(?i)^Poole-.+','Poole') 
+  #           | regex_replace('(?i)^Proto-.+','Clemson Information Technology Center') }}
+  #       action: lookup_object('name', 'dcim.sites.filter', 'dcim.sites.create') 
