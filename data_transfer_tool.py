@@ -384,8 +384,8 @@ if __name__ == "__main__":
    
     stats = pstats.Stats(profiler)
     stats.sort_stats("cumulative").print_stats(20)  # Adjust '20' to see more or fewer lines of output
-    # Print only the top 10 functions sorted by time
-    stats.sort_stats("time").print_stats(10)
-    # Print callers and callees for detailed call chain information
-    stats.print_callers(10)  
-    stats.print_callees(10)  
+    # # Print only the top 10 functions sorted by time
+    # stats.sort_stats("time").print_stats(10)
+    # # Print callers and callees for detailed call chain information
+    # stats.print_callers(10)  
+    # stats.print_callees(10)  
