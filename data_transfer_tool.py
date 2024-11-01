@@ -222,6 +222,8 @@ class DataTransferTool:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     reference_field, lookup_type, find_function_path, create_function_path = matches[0]
+                    print(f'regex matched {reference_field} {lookup_type} {find_function_path} {create_function_path}')
+
                     sub_value = item.get(reference_field)
                     if sub_value:
                         nested_field = self.lookup_object(
