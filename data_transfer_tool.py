@@ -185,7 +185,7 @@ class DataTransferTool:
                             # Apply transformation and lookup actions
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
-                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
+                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, mapped_data)
                 
                             
                             mapped_data[dest_field] = rendered_source_value
@@ -195,7 +195,7 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
     
-    def apply_transform_function(self, value, actions, obj_config, field_name, item, reference_item=None):
+    def apply_transform_function(self, value, actions, obj_config, mapped_data):
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
@@ -215,10 +215,7 @@ class DataTransferTool:
                 matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     lookup_type, find_function_path, create_function_path = matches[0]
-                    value = self.lookup_object(
-                        value, lookup_type, find_function_path, create_function_path, 
-                        obj_config, map, field_name, item
-                    ).id
+                    value = self.lookup_object( value, lookup_type, find_function_path, create_function_path, obj_config ).id
  
             elif 'include_object' in action:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
@@ -227,15 +224,13 @@ class DataTransferTool:
                     print(f'Matched {reference_field} for include_object')
                     
                     # Look up the referenced value dynamically within `item`
-                    sub_value = item.get(reference_field)
+                    sub_value = mapped_data[reference_field]
                     print(f'Matched {reference_field} {sub_value} for include_object')
 
                     if sub_value:
-                        nested_obj = self.lookup_object(
-                            sub_value, lookup_type, find_function_path, create_function_path,
-                            obj_config, map, reference_field, item
-                        )
+                        nested_obj = self.lookup_object( sub_value, lookup_type, find_function_path, create_function_path, obj_config )
                         value = {**value, reference_field: nested_obj.id}
+                        
         print(f'POST ACTION {action}: value now {value}')
  
         return value
@@ -301,7 +296,7 @@ class DataTransferTool:
 
         return sanitized_data
 
-    def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item):
+    def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config):
         """Perform API lookup or create an object on the server side."""
         
         cache_key = f"{lookup_type}:{value}"
