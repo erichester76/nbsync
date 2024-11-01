@@ -228,11 +228,11 @@ class DataTransferTool:
                         nested_obj = self.lookup_object( reference_field, lookup_type, find_function_path, create_function_path, obj_config )
                         sub_value = nested_obj.id
                     
-                    value = {**value, reference_field: sub_value}
+                    newvalue = {**value, reference_field: sub_value}
                         
-        print(f'POST ACTION {action}: value now {value}')
+        print(f'POST ACTION {action}: value now {newvalue}')
  
-        return value
+        return newvalue
 
     def get_nested_function(self, api_client, function_path):
         """Recursively get a function from the API client."""
