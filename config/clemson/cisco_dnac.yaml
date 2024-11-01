@@ -105,9 +105,10 @@ object_mappings:
           location:
             source: {{ siteNameHierarchy 
               | regex_replace('^[^/]+/[^/]+/([^/]+)/*.*$', '\\1') }}
-            action: lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
-            action: include_object(site,'name','dcim.sites.filter', 'dcim.sites.create')       
-             
+            action: 
+             - lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
+             - include_object(site,'name','dcim.sites.filter', 'dcim.sites.create')       
+
           status:
             source: {{ reachabilityStatus
                | regex_replace('Reachable', 'active')
