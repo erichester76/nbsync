@@ -108,7 +108,10 @@ object_mappings:
 
       name:
         source: {{ config.name | regex_replace('(.+).clemson.edu.+', '\\1') }}
-        exclude: "^Z-VRA.*$"  
+        exclude: 
+          - "^Z-VRA.*$" 
+          - "^.*template.*$" 
+          - "^ISO-.*$" 
 
       status:
         source: {{ runtime.powerState 
