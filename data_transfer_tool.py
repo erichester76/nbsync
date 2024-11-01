@@ -276,10 +276,13 @@ class DataTransferTool:
 
         # Try finding the object
         try:
+            
             found_object = find_function(**filter_params)
             if found_object:
-                self.lookup_cache[cache_key] = list(found_object)[0]
-                return list(found_object)[0]  
+                first_object = list(found_object)[0]
+                self.lookup_cache[cache_key] = first_object
+                return first_object
+            
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
 
