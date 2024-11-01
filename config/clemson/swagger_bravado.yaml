@@ -62,7 +62,7 @@ object_mappings:
           | regex_replace('.*estricted.*$','restricted') }}
 
       business_owner_tenant:
-        source: {{ customerDepartments[0] | regex_replace('\d+[\ ]*(.*$)','\\1') }}
+        source: {{ customerDepartments[0] | regex_replace('\d+[\-\ ]*(.*$)','\\1') }}
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       business_owner_contact:
