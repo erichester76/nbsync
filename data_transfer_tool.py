@@ -17,9 +17,7 @@ import deepdiff
 def regex_replace(value, pattern, replacement):
    if value: 
       return re.sub(pattern, replacement, value)
-   else:
-      return None
-
+  
 # Custom slugify filter
 def slugify(value):
     return re.sub(r'\W+', '-', value.lower())
