@@ -178,9 +178,26 @@ class DataTransferTool:
                                 exclude_object = True
 
                             
-                            if 'action' in mappings[dest_field]:
-                                action = mappings[dest_field].get('action')
-                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
+                        # Apply transformation and lookup actions
+                        if 'action' in field_info:
+                            action = field_info['action']
+                            if 'include_object' in action:
+                                # Handle include_object as a nested lookup within the main source_value
+                                matches = re.findall(r"include_object\((.*?)\s*,\s*'(.*?)'\s*,\s*'(.*?)',\s*'(.*?)'\)", action)
+                                if matches:
+                                    nested_field, lookup_type, find_function_path, create_function_path = matches[0]
+                                # Perform the nested lookup and add the result to source_value
+                                nested_id = self.apply_transform_function(
+                                    rendered_source_value, action, obj_config, mappings, dest_field, item
+                                )                     
+                                
+                                # Assign nested structure for include_object within the main source_value
+                                rendered_source_value = {**rendered_source_value, nested_field: nested_id}
+                            else:
+                                # Handle regular lookup_object or other transformations
+                                rendered_source_value = self.apply_transform_function(
+                                    rendered_source_value, action, obj_config, mappings, dest_field, item
+                                )                     
                            
                             mapped_data[dest_field] = rendered_source_value
                         
@@ -240,7 +257,18 @@ class DataTransferTool:
                 if matches:
                     lookup_type, find_function_path, create_function_path = matches[0]
                     value = self.lookup_object(value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item)
-            
+            # Handle 'include_object' by reusing lookup_object logic
+            elif 'include_object' in action:
+                matches = re.findall(r"include_object\((.*?)\s*,\s*'(.*?)'\s*,\s*'(.*?)',\s*'(.*?)'\)", action)
+                if matches:
+                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
+                    sub_value = item.get(reference_field)
+                    if sub_value:
+                        # Reuse lookup_object with the specific reference field value
+                        value = self.lookup_object(
+                            sub_value, lookup_type, find_function_path, create_function_path,
+                            obj_config, map, reference_field, item
+                        )            
         return value
 
     def get_nested_function(self, api_client, function_path):
