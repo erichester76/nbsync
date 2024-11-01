@@ -247,8 +247,10 @@ class DataTransferTool:
         
         if isinstance(actions, str):
             actions = [actions]
-
+        print(f"processing actions")
         for action in actions:
+            print(f'processing {action} on {value}')
+            
             if 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](value, pattern, replacement)
@@ -268,7 +270,9 @@ class DataTransferTool:
                         value = self.lookup_object(
                             sub_value, lookup_type, find_function_path, create_function_path,
                             obj_config, map, reference_field, item
-                        )            
+                        )           
+        print(f'processed {action} now {value}')
+ 
         return value
 
     def get_nested_function(self, api_client, function_path):
