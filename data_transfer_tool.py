@@ -166,14 +166,14 @@ class DataTransferTool:
                         exclude_object = False
                         for dest_field, rendered_source_value in rendered_mappings.items():
                             
-                            exclude_patterns = field_info.get('exclude', [])
+                            exclude_patterns = mappings[dest_field].get('exclude',[])
                             if isinstance(exclude_patterns, list):
                                 for pattern in exclude_patterns:
                                     if bool(re.match(pattern, rendered_source_value['dest_field'])):
                                         exclude_object = True
                                         break
                             elif bool(re.match(exclude_patterns, rendered_source_value['dest_field'])):
-                                        exclude_object = True
+                                exclude_object = True
 
                             
                             if 'action' in mappings[dest_field]:
