@@ -219,7 +219,7 @@ class DataTransferTool:
                         obj_config, map, field_name, item
                     ).id
             elif 'include_object' in action:
-                matches = re.findall(r"include_object\((.*?)\s*,\s*'(.*?)'\s*,\s*'(.*?)',\s*'(.*?)'\)", action)
+                matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     reference_field, lookup_type, find_function_path, create_function_path = matches[0]
                     sub_value = item.get(reference_field)
