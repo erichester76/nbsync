@@ -262,6 +262,7 @@ class DataTransferTool:
         # Check if we already have this value cached
         cache_key = f"{lookup_type}:{value}"
         if cache_key in self.lookup_cache:
+            print(f"cache used for {lookup_type}:{value}")
             return self.lookup_cache[cache_key]
         
         api_client = self.sources[obj_config['destination_api']].api
