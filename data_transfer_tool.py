@@ -181,10 +181,10 @@ class DataTransferTool:
                                 print(f"Excluding object {mapped_data['name']} based on exclusion criteria.")
                                 continue 
                             
-                            print(f'RSV: {rendered_source_value}')
+                            print(f'mappings: {mappings[dest_field]}')
                             # Apply transformation and lookup actions
-                            if 'action' in rendered_source_value:
-                                action = rendered_source_value['action']
+                            if 'action' in mappings[dest_field]:
+                                action = mappings[dest_field].get('action')
                                 if 'include_object' in action:
                                     # Handle include_object as a nested lookup within the main source_value
                                     matches = re.findall(r"include_object\((.*?)\s*,\s*'(.*?)'\s*,\s*'(.*?)',\s*'(.*?)'\)", action)
