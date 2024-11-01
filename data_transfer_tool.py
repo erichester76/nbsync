@@ -293,11 +293,9 @@ class DataTransferTool:
         if not mapped_data[key_field]: 
             return None
         
-        print (f'seatching for {key_field}, {mapped_data[key_field]}')
         filter_params = {key_field: mapped_data[key_field]}        
         try:
             found_object = find_function(**filter_params)
-            print (f'{len(found_object)} objects')
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
             raise
