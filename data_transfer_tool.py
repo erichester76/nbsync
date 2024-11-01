@@ -160,6 +160,8 @@ class DataTransferTool:
                                 template = env.from_string(source_template)
                                 rendered_source_value = template.render(context)
                                 rendered_mappings[dest_field] = rendered_source_value
+                                print(f"{rendered_mappings[dest_field]}")
+
 
                         # Now apply any transformations/actions to the rendered mappings
                         mapped_data = {}
