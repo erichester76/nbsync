@@ -106,7 +106,7 @@ object_mappings:
             source: {{ siteNameHierarchy 
               | regex_replace('^[^/]+/[^/]+/([^/]+)/*.*$', '\\1') }}
             action: 
-             - include_object(site,'name','dcim.sites.filter', 'dcim.sites.create')       
+             - include_object('site', 'name', 'dcim.sites.filter', 'dcim.sites.create')       
              - lookup_object('name', 'dcim.locations.filter', 'dcim.locations.create')
 
           status:
