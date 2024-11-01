@@ -155,13 +155,12 @@ class DataTransferTool:
                         rendered_mappings = {}
                         for dest_field, field_info in mappings.items():
                             if 'source' in field_info:
-                                print(f"{dest_field} {field_info['source']}")
+                                print(f"{dest_field} did = {field_info['source']}")
                                 source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                                 template = env.from_string(source_template)
                                 rendered_source_value = template.render(context)
                                 rendered_mappings[dest_field] = rendered_source_value
-                                print(f"{rendered_mappings[dest_field]}")
-
+                                print(f"{dest_field} now = {rendered_mappings[dest_field]}")
 
                         # Now apply any transformations/actions to the rendered mappings
                         mapped_data = {}
@@ -171,6 +170,7 @@ class DataTransferTool:
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
                             mapped_data[dest_field] = rendered_source_value
                         # Create or update the object in the destination
+                        print(f"MD: {mapped_data}")
                         object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
     def resolve_nested_context(self, item):
