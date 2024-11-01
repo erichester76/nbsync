@@ -155,6 +155,7 @@ class DataTransferTool:
                         rendered_mappings = {}
                         for dest_field, field_info in mappings.items():
                             if 'source' in field_info:
+                                print(f"{dest_field} {field_info['source']}")
                                 source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                                 template = env.from_string(source_template)
                                 rendered_source_value = template.render(context)
