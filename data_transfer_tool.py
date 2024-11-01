@@ -280,7 +280,7 @@ class DataTransferTool:
             found_object = find_function(**filter_params)
             if found_object:
                 self.lookup_cache[cache_key] = list(found_object)[0]
-                return list(found_object)[0]  # Return first found object
+                return list(found_object)[0] 
         
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
