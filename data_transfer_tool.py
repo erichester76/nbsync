@@ -183,7 +183,7 @@ class DataTransferTool:
                             mapped_data[dest_field] = rendered_source_value
                         
                         if exclude_object:
-                            print(f"Excluding object {mapped_data.name} based on exclusion criteria.")
+                            print(f"Excluding object {mapped_data['name']} based on exclusion criteria.")
                             continue    
                         
                         # Create or update the object in the destination
