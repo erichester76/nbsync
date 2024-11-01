@@ -165,11 +165,16 @@ class DataTransferTool:
                         mapped_data = {}
                         exclude_object = False
                         for dest_field, rendered_source_value in rendered_mappings.items():
-                            # Check if the exclusion filter is set
-                            if 'exclude' in mappings[dest_field]:
-                                if bool(re.match(mappings[dest_field].get('exclude'), rendered_source_value['dest_field'])):
-                                    exclude_object = True
-                                    break
+                            
+                            exclude_patterns = field_info.get('exclude', [])
+                            if isinstance(exclude_patterns, list):
+                                for pattern in exclude_patterns:
+                                    if bool(re.match(pattern, rendered_source_value['dest_field'])):
+                                        exclude_object = True
+                                        break
+                            elif bool(re.match(exclude_patterns, rendered_source_value['dest_field'])):
+                                        exclude_object = True
+
                             
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
@@ -182,7 +187,7 @@ class DataTransferTool:
                             continue    
                         
                         # Create or update the object in the destination
-                        object_id = self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
+                        self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
 
     def resolve_nested_context(self, item):
         """Resolve nested attributes in an object using dot notation."""
@@ -214,8 +219,7 @@ class DataTransferTool:
                     context[attr] = get_nested_value(item, attr)
 
         return context
-
-
+    
     
     def apply_transform_function(self, value, actions, obj_config, field_name, item):
         """Apply transformations using Jinja2 filters directly."""
