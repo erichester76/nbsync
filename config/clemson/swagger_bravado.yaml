@@ -83,7 +83,7 @@ object_mappings:
         action: lookup_object('name', 'plugins.netboxservicemgmt.slos.filter', 'plugins.netboxservicemgmt.slos.create')
 
       uuid: 
-        source: {{ agreementNumber }}
+        source: {{ id }}
 
   virtual_machines:
 
