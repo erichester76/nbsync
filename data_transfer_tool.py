@@ -185,23 +185,8 @@ class DataTransferTool:
                             # Apply transformation and lookup actions
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
-                                if 'include_object' in action:
-                                    # Handle include_object as a nested lookup within the main source_value
-                                    matches = re.findall(r"include_object\((.*?)\s*,\s*'(.*?)'\s*,\s*'(.*?)',\s*'(.*?)'\)", action)
-                                    if matches:
-                                        nested_field, lookup_type, find_function_path, create_function_path = matches[0]
-                                    # Perform the nested lookup and add the result to source_value
-                                    nested_id = self.apply_transform_function(
-                                        rendered_source_value, action, obj_config, mappings, dest_field, item
-                                    )                     
-                                    
-                                    # Assign nested structure for include_object within the main source_value
-                                    rendered_source_value = {**rendered_source_value, nested_field: nested_id}
-                                else:
-                                    # Handle regular lookup_object or other transformations
-                                    rendered_source_value = self.apply_transform_function(
-                                        rendered_source_value, action, obj_config, mappings, dest_field, item
-                                    )                     
+                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
+                
                             
                             mapped_data[dest_field] = rendered_source_value
                         
