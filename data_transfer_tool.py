@@ -115,6 +115,7 @@ class DataTransferTool:
         self.sources = {}
         self.mapped_data = {}
         self.DEBUG = 1
+        self.lookup_cache = {}
 
     def initialize_sources(self):
         for name, config in self.config['api_definitions'].items():
@@ -257,6 +258,12 @@ class DataTransferTool:
 
     def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item):
         """Perform API lookup or create an object on the server side."""
+        
+        cache_key = f"{lookup_type}:{value}"
+        if cache_key in self.lookup_cache:
+            print(f"Found {cache_key} in cache.")
+            return self.lookup_cache[cache_key]
+        
         api_client = self.sources[obj_config['destination_api']].api
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
