@@ -86,26 +86,26 @@ object_mappings:
       uuid: 
         source: {{ _id | string }}
 
-  virtual_machines:
+  # virtual_machines:
 
-    source_api: iaw
-    destination_api: netbox
-    destination_endpoint: virtualization.virtual_machines
-    find_function: virtualization.virtual_machines.filter
-    create_function: virtualization.virtual_machines.create
-    update_function: virtualization.virtual_machines.update
-    fetch_data_code: |
-      def fetch_data(api_client):
-          response = api_client.session.request(method="GET",url="https://iaw.dev.clemson.edu:8443/api/servers")
-          response.raise_for_status()
-          return response.json()
+  #   source_api: iaw
+  #   destination_api: netbox
+  #   destination_endpoint: virtualization.virtual_machines
+  #   find_function: virtualization.virtual_machines.filter
+  #   create_function: virtualization.virtual_machines.create
+  #   update_function: virtualization.virtual_machines.update
+  #   fetch_data_code: |
+  #     def fetch_data(api_client):
+  #         response = api_client.session.request(method="GET",url="https://iaw.dev.clemson.edu:8443/api/servers")
+  #         response.raise_for_status()
+  #         return response.json()
 
-    mapping:
+  #   mapping:
 
-      name:
-        source: {{ name | regex_replace('(.+).clemson.edu.+', '\\1') }} 
+  #     name:
+  #       source: {{ name | regex_replace('(.+).clemson.edu.+', '\\1') }} 
 
-      sla:
-        source: {{ sla }}
-        action: lookup_object('uuid', 'plugins.netboxservicemgmt.slas.filter', 'plugins.netboxservicemgmt.slas.create')
+  #     sla:
+  #       source: {{ sla }}
+  #       action: lookup_object('uuid', 'plugins.netboxservicemgmt.slas.filter', 'plugins.netboxservicemgmt.slas.create')
       
