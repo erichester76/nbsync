@@ -224,7 +224,7 @@ class DataTransferTool:
                     # Look up the referenced value dynamically within `item`
                     sub_value = mapped_data[reference_field]
                     print(f'Matched {reference_field} {sub_value} for include_object')
-                    if not sub_value.isdigit():
+                    if not isinstance(sub_value,int):
                         nested_obj = self.lookup_object( reference_field, lookup_type, find_function_path, create_function_path, obj_config )
                         sub_value = nested_obj.id
                     
