@@ -223,7 +223,7 @@ class DataTransferTool:
                 if matches:
                     reference_field, lookup_type, find_function_path, create_function_path = matches[0]
                     print(f'regex matched {item.get(reference_field)} {field_name} {reference_field} {lookup_type} {find_function_path} {create_function_path}')
-
+                    print(f'{item} {obj_config}')
                     sub_value = item.get(reference_field)
                     if sub_value:
                         nested_field = self.lookup_object(
