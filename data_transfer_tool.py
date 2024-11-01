@@ -167,7 +167,6 @@ class DataTransferTool:
                         mapped_data = {}
                         exclude_object = False
                         for dest_field, rendered_source_value in rendered_mappings.items():
-                            
                             exclude_patterns = mappings[dest_field].get('exclude',[])
                             if isinstance(exclude_patterns, list):
                                 for pattern in exclude_patterns:
@@ -185,7 +184,7 @@ class DataTransferTool:
                             # Apply transformation and lookup actions
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
-                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
+                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item, reference_item)
                 
                             
                             mapped_data[dest_field] = rendered_source_value
@@ -195,7 +194,7 @@ class DataTransferTool:
                         # Create or update the object in the destination
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
     
-    def apply_transform_function(self, value, actions, obj_config, field_name, item):
+    def apply_transform_function(self, value, actions, obj_config, field_name, item, reference_item=None):
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
@@ -210,27 +209,36 @@ class DataTransferTool:
             if 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](value, pattern, replacement)
-            elif 'lookup_object' in action:
-                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
-                if matches:
-                    lookup_type, find_function_path, create_function_path = matches[0]
-                    value = self.lookup_object(
-                        value, lookup_type, find_function_path, create_function_path, 
-                        obj_config, map, field_name, item
-                    ).id
             elif 'include_object' in action:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     reference_field, lookup_type, find_function_path, create_function_path = matches[0]
-                    print(f'regex matched {item.get(reference_field)} {field_name} {reference_field} {lookup_type} {find_function_path} {create_function_path}')
+                    print(f'regex matched {reference_field} for include_object')
+                    
+                    # Retrieve the value from `reference_item` for include_object
+                    sub_value = reference_item.get(reference_field) if reference_item else item.get(reference_field)
+                    if sub_value:
+                        nested_obj = self.lookup_object(
+                            sub_value, lookup_type, find_function_path, create_function_path,
+                            obj_config, map, reference_field, item
+                        )
+                        value = {**value, reference_field: nested_obj.id}
+    
+            elif 'include_object' in action:
+                matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
+                if matches:
+                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
+                    print(f'Matched {reference_field} for include_object')
+                    
+                    # Look up the referenced value dynamically within `item`
                     sub_value = item.get(reference_field)
                     if sub_value:
-                        nested_field = self.lookup_object(
-                            reference_field, lookup_type, find_function_path, create_function_path,
-                            obj_config, map, field_name, item
-                        ) 
-                        value = {**value, nested_field: nested_field.id}
-                        
+                        nested_obj = self.lookup_object(
+                            sub_value, lookup_type, find_function_path, create_function_path,
+                            obj_config, map, reference_field, item
+                        )
+                        value = {**value, reference_field: nested_obj.id}
+                            
         print(f'POST ACTION {action}: value now {value}')
  
         return value
