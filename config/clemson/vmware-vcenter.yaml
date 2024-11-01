@@ -49,7 +49,6 @@ object_mappings:
     
       name:
         source: {{ name | replace('.clemson.edu', '') }}
-        exclude: ".*len.*"
 
       tenant:
         source: {{ name | replace_map('config/clemson/includes/host_tenant_map.txt') }}

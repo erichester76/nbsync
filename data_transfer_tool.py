@@ -10,7 +10,8 @@ from sources.xls_source import XLSDataSource
 from sources.snmp_source import SNMPDataSource
 import jinja2
 import deepdiff
-
+import cProfile
+import pstats
 
 # Register custom Jinja2 filters
 
@@ -363,4 +364,7 @@ def main():
     tool.process_mappings()
 
 if __name__ == "__main__":
-    main()
+    with cProfile.Profile() as profiler:
+        main()
+    stats = pstats.Stats(profiler)
+    stats.sort_stats(pstats.SortKey.TIME).print_stats(20)  # Show top 20 time-consuming functions
