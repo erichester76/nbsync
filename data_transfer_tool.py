@@ -15,7 +15,7 @@ import deepdiff
 # Register custom Jinja2 filters
 
 def regex_replace(value, pattern, replacement):
-   print(f'regex: [ {value}] [{pattern}] [{replacement}]')
+   print(f'regex: [{value}] [{pattern}] [{replacement}]')
    new = re.sub(pattern, replacement, value)
    print(f'value after: [{new}] ')
 

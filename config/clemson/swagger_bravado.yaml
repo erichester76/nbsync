@@ -66,13 +66,13 @@ object_mappings:
         action: lookup_object('name', 'tenancy.tenants.filter', 'tenancy.tenants.create')
 
       business_owner_contact:
-        source: {{ customerBusinessManagers[0] 
+        source: {{ customerBusinessManagers[0] \
           | regex_replace('([^#]+)\#.+$','\\1') 
           | replace(';','') }}
         action: lookup_object('name', 'tenancy.contacts.filter', 'tenancy.contacts.create')
 
       description:
-        source: {{ agreementName }} {{ dataSummary | string }}
+        source: {{ dataSummary | string  | default('None',true)}}
 
       technical_contact:
         source: "Unknown"
