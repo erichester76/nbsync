@@ -94,7 +94,6 @@ class DataTransferTool:
         # Read the YAML file line by line and build yaml_content until object_mappings
         yaml_content = []
         object_mappings = []
-        self.lookup_cache = {}
 
         with open(yaml_file, 'r') as file:
             yaml_content = file.read()
@@ -258,13 +257,6 @@ class DataTransferTool:
 
     def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, map, field_name, item):
         """Perform API lookup or create an object on the server side."""
-        
-        # Check if we already have this value cached
-        cache_key = f"{lookup_type}:{value}"
-        if cache_key in self.lookup_cache:
-            print(f"cache used for {lookup_type}:{value}")
-            return self.lookup_cache[cache_key]
-        
         api_client = self.sources[obj_config['destination_api']].api
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
@@ -279,9 +271,7 @@ class DataTransferTool:
         try:
             found_object = find_function(**filter_params)
             if found_object:
-                self.lookup_cache[cache_key] = list(found_object)[0]
-                return list(found_object)[0] 
-        
+                return list(found_object)[0]  # Return first found object
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
 
