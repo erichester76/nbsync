@@ -652,3 +652,4 @@
 ('?i)^89o.*,Unalloc Schol Costs Bonuses
 ('?i)^89p.*,Flight Services
 ('?i)^89r.*,Institutional Support
+^[^\d],Unknown
