@@ -276,14 +276,12 @@ class DataTransferTool:
         """
         sanitized_data = {}
         for key, value in data.items():
-            print(f'B4 {key} {value}')
             if hasattr(value, 'id'):  # If it's an object with an 'id' attribute, use the 'id'
                 sanitized_data[key] = value.id
             elif hasattr(value, 'name'):  # If it's an object with a 'name' attribute, use the 'name'
                 sanitized_data[key] = value.name
             else:
                 sanitized_data[key] = value  # Otherwise, use the value as is
-            print(f'AFTER {key} {value}')
 
         return sanitized_data
     
@@ -320,6 +318,7 @@ class DataTransferTool:
                 else: 
                     print(f"Updating object {existing_object.id}:")
                     update_function = self.get_nested_function(api_client, update_function_path)
+                    print(f'{[sanitized_mapped_data]}')
                     update_function([sanitized_mapped_data])
             else:
                 print(f"No changes detected for object {existing_object.name}, skipping update.")
