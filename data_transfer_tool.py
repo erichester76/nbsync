@@ -184,7 +184,7 @@ class DataTransferTool:
                             # Apply transformation and lookup actions
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
-                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item, reference_item)
+                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, item)
                 
                             
                             mapped_data[dest_field] = rendered_source_value
