@@ -8,7 +8,7 @@ api_definitions:
     auth_params:
       token: your_netbox_api_key
     base_urls:
-      - https://netapp.app.clemson.edu
+      - https://netbox.dummy.com
 
   # VMware API Definition (pyvmomi)
   vmware: &vmware_api
