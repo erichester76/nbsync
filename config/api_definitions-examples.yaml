@@ -1,0 +1,172 @@
+api_definitions:
+  # NetBox API Definition
+  netbox: &netbox_api
+    type: api
+    module: pynetbox
+    auth_method: token
+    auth_function: api  
+    auth_params:
+      token: your_netbox_api_key
+    base_urls:
+      - https://netapp.app.clemson.edu
+
+  # VMware API Definition (pyvmomi)
+  vmware: &vmware_api
+    type: api
+    module: pyVim
+    auth_method: login
+    auth_function: connect.SmartConnect
+    auth_params:
+      username: your_vcenter_user
+      password: your_vcenter_pw
+      sslContext: ignore
+    auth_args:
+      - host
+      - username
+      - password
+      - sslContext
+    base_urls:
+      - vcenter.dummy.com
+
+
+  # Cisco DNA Center API Definition (dnacentersdk)
+  dnac: &dnac_api
+    type: api
+    module: dnacentersdk
+    auth_method: login
+    auth_function: api
+    auth_params:
+      username: dnac_user
+      password: dnac_pw
+    base_urls:
+      - https://dnac.dummy.com/
+
+  # SNMP API Definition (pysnmp)
+  snmp: &snmp_api
+    type: snmp
+    module: pysnmp
+    auth_method: snmp_v3  # Or use 'snmp_v2' for v2c
+    auth_params:
+      version: v3
+      username: snmpuser
+      auth_key: your_auth_key
+      priv_key: your_priv_key
+      auth_protocol: usmHMACSHAAuthProtocol
+      priv_protocol: usmAesCfb128Protocol
+      targets:
+        - 192.168.1.100
+        - 192.168.1.101
+
+  # Cisco Nexus Dashboard Fabric Controller (ndfc-sdk)
+  ndfc: &ndfc_api
+    type: api
+    module: ndfc_python
+    auth_method: login
+    auth_function: login
+    auth_params:
+      username: your_ndfc_username
+      password: your_ndfc_password
+    base_urls:
+      - https://ndfc.example.com/api
+
+  # Big Switch Networks API Definition (pybsn)
+  big_switch: &pybsn_api
+    type: api
+    module: pybsn
+    auth_method: login
+    auth_function: authenticate
+    auth_params:
+      username: your_bsn_username
+      password: your_bsn_password
+    base_urls:
+      - https://bcf.dummy.com
+
+  # WMI API Definition
+  windows_wmi: &wmi_api
+    type: api
+    module: wmi
+    auth_method: none
+    base_urls:
+      - localhost
+
+  # WinRM API Definition
+  windows_winrm: &winrm_api
+    type: api
+    module: pywinrm
+    auth_method: login
+    auth_function: run_ps
+    auth_params:
+      username: your_windows_username
+      password: your_windows_password
+    base_urls:
+      - http://windows-server.local
+
+  # Azure Compute API (for managing Virtual Machines)
+  azure_compute: &azure_compute_api
+    type: api
+    module: azure.mgmt.compute
+    auth_method: login
+    auth_function: ClientSecretCredential
+    auth_params:
+      tenant_id: your_azure_tenant_id
+      client_id: your_azure_client_id
+      client_secret: your_azure_client_secret
+    auth_args:
+      - tenant_id
+      - client_id
+      - client_secret
+    base_urls:
+      - https://management.azure.com
+
+  # Azure Network API (for managing Network Interfaces, Public IPs, etc.)
+  azure_network: &azure_network_api
+    type: api
+    module: azure.mgmt.network
+    auth_method: login
+    auth_function: ClientSecretCredential
+    auth_params:
+      tenant_id: your_azure_tenant_id
+      client_id: your_azure_client_id
+      client_secret: your_azure_client_secret
+    auth_args:
+      - tenant_id
+      - client_id
+      - client_secret
+    base_urls:
+      - https://management.azure.com
+
+  # Azure Resource Management API (generic ARM resources)
+  azure_resource: &azure_resource_api
+    type: api
+    module: azure.mgmt.resource
+    auth_method: login
+    auth_function: ClientSecretCredential
+    auth_params:
+      tenant_id: your_azure_tenant_id
+      client_id: your_azure_client_id
+      client_secret: your_azure_client_secret
+    auth_args:
+      - tenant_id
+      - client_id
+      - client_secret
+    base_urls:
+      - https://management.azure.com
+
+
+  # AWS API Definition (boto3)
+  aws: &aws_api
+    type: api
+    module: boto3
+    auth_method: login
+    auth_function: client
+    auth_params:
+      access_key: your_aws_access_key
+      secret_key: your_aws_secret_key
+      region_name: us-west-1
+    auth_args:
+      - ec2
+      - aws_access_key_id
+      - aws_secret_access_key
+      - region_name
+    base_urls:
+      - https://ec2.amazonaws.com

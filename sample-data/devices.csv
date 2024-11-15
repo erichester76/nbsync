@@ -1,0 +1,4 @@
+device_name,manufacturer,device_type,serial,site_name,status,role
+Switch01,Cisco,Switch,ABC123,SiteA,active,Switch/Router
+Switch02,Cisco,Switch,XYZ789,SiteB,planned,Switch/Router
+Router01,Cisco,Router,DEF456,SiteA,active,Switch/Router

@@ -1,0 +1,20 @@
+requests==2.20.0
+urllib3==1.24.3
+pyyaml-include
+pynetbox
+pyvmomi
+swagger_spec_validator==2.7
+bravado
+dnacentersdk
+pysnmp
+pandas
+#ndfc_python @ git+https://github.com/allenrobel/ndfc-python.git
+pybsn
+pywinrm
+azure-mgmt-compute
+azure-mgmt-network
+azure-mgmt-resource
+azure-mgmt-storage
+boto3
+jinja2
+deepdiff==5.0
