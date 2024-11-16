@@ -36,3 +36,9 @@ class Resolver:
         if isinstance(self.item, dict):
             return self.sanitize_keys(self.item)
         return self
+    
+    def __getitem__(self, attr_path):
+        return self.resolve(attr_path)
+
+    def __getattr__(self, attr):
+        return self.resolve(attr)
