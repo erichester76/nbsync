@@ -167,7 +167,7 @@ class DataTransferTool:
                     mappings = obj_config['mapping']
 
                 for item in source_data:
-                    timer.show_timers()
+                    #timer.show_timers()
                     timer.start_timer(f"Item Processing Total {obj_type}")
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
@@ -223,6 +223,9 @@ class DataTransferTool:
                         timer.stop_timer("Create or Update")
                         
                     timer.stop_timer(f"Item Processing Total {obj_type}")
+                    
+            timer.show_timers()
+
 
 
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
