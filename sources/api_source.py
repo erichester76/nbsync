@@ -84,7 +84,7 @@ class APIDataSource(DataSource):
             print(f"(re)authenticating for {self.name} @ {base_url}.")
             # Handle authentication methods
             if auth_method == 'token':
-                self.api = auth_func(base_url, token=self.config['auth_args']['token'], verify=False)
+                self.api = auth_func(base_url, token=self.config['auth_args']['token'], ssl_verify=False)
                 if base_url not in self.session_expiry: 
                     self.clients.append(self.api)
                     print(f"Connected to {self.name} at {base_url}")
