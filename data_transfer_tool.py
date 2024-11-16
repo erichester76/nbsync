@@ -286,8 +286,6 @@ class DataTransferTool:
                         continue
                     context[attr] = get_nested_value(item, attr)
                 except Exception as e:
-                    # Log the error and continue
-                    print(f"Error processing attribute {attr}: {e}")
                     continue
 
         return context
