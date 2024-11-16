@@ -5,9 +5,12 @@ class Resolver:
         self.pre_resolved = self._pre_resolve()
 
     def _pre_resolve(self):
+        """
+        Pre-resolve only the required keys, handling nested paths dynamically.
+        """
         resolved = {}
         for key in self.required_keys:
-            attrs = key.split('.')
+            attrs = key.split('.')  # Split the key into its dot notation parts
             current_obj = self.item
             full_path = []
 
@@ -17,6 +20,7 @@ class Resolver:
                     full_path_str = '.'.join(full_path)
 
                     if full_path_str not in resolved:
+                        # Resolve intermediate attributes
                         if isinstance(current_obj, dict):
                             current_obj = current_obj.get(attr)
                         elif hasattr(current_obj, attr):
@@ -24,18 +28,18 @@ class Resolver:
                         else:
                             current_obj = None
 
-                        if current_obj is None:
-                            print(f"Unable to resolve '{full_path_str}'")
-                            break
-
                         resolved[full_path_str] = current_obj
+                        if current_obj is None:
+                            break  # Stop resolving deeper if parent is None
                     else:
+                        # Use already resolved value for the current path
                         current_obj = resolved[full_path_str]
             except Exception as e:
                 print(f"Error resolving '{key}': {e}")
-                resolved[key] = None
+                resolved[key] = None  # Safeguard for unresolved paths
 
         return resolved
+
 
 
     def resolve(self, attr_path):
