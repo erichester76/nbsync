@@ -20,6 +20,8 @@ class Resolver:
                 flat_dict.update(self._flatten_structure(v, new_key, sep=sep))
         elif hasattr(item, '__dict__'):  # Handle object-like structures
             for k, v in vars(item).items():
+                if k.startswith('_'):  # Skip private/protected attributes
+                    continue
                 new_key = f"{parent_key}{sep}{k}" if parent_key else k
                 print(f"Processing object attribute: {new_key} -> {v}")
                 flat_dict.update(self._flatten_structure(v, new_key, sep=sep))
@@ -27,6 +29,7 @@ class Resolver:
             flat_dict[parent_key] = item
             print(f"Added flat value: {parent_key} -> {item}")
         return flat_dict
+
 
     def resolve(self, path):
         """
