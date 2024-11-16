@@ -10,25 +10,42 @@ class Resolver:
 
     def _flatten_structure(self, item, parent_key='', sep='.'):
         """
-        Flatten a nested dictionary or object-like structure into a single-level dictionary.
+        Flatten a nested dictionary or object-like structure into a single-level dictionary,
+        incorporating dynamic resolution logic.
         """
         flat_dict = {}
+
+        def get_value(obj, attr):
+            """Dynamically get a value from an object or dict."""
+            if isinstance(obj, dict):
+                return obj.get(attr, None)
+            elif hasattr(obj, attr):
+                return getattr(obj, attr, None)
+            return None
+
         if isinstance(item, dict):
+            # Process dictionary keys
             for k, v in item.items():
                 new_key = f"{parent_key}{sep}{k}" if parent_key else k
                 print(f"Processing dict key: {new_key} -> {v}")
                 flat_dict.update(self._flatten_structure(v, new_key, sep=sep))
-        elif hasattr(item, '__dict__'):  # Handle object-like structures
-            for k, v in vars(item).items():
-                if k.startswith('_'):  # Skip private/protected attributes
+        elif hasattr(item, '__dict__') or isinstance(item, object):
+            # Process object attributes dynamically
+            for attr in dir(item):
+                if attr.startswith('_') or callable(getattr(item, attr, None)):
+                    # Skip private/protected and callable attributes
                     continue
-                new_key = f"{parent_key}{sep}{k}" if parent_key else k
-                print(f"Processing object attribute: {new_key} -> {v}")
-                flat_dict.update(self._flatten_structure(v, new_key, sep=sep))
+                value = get_value(item, attr)
+                new_key = f"{parent_key}{sep}{attr}" if parent_key else attr
+                print(f"Processing object attribute: {new_key} -> {value}")
+                flat_dict.update(self._flatten_structure(value, new_key, sep=sep))
         else:
+            # Base case: add the final value
             flat_dict[parent_key] = item
             print(f"Added flat value: {parent_key} -> {item}")
+
         return flat_dict
+
 
 
     def resolve(self, path):
