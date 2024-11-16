@@ -207,14 +207,14 @@ class DataTransferTool:
                             
                             mapped_data[dest_field] = rendered_source_value
   
-                        if exclude_object:
-                            print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
-                        else:                            
-                            #print(f'Mapped Data: {mapped_data}')
-                            # Create or update the object in the destination
-                            timer.start_timer("Create or Update")
-                            self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
-                            timer.stop_timer("Create or Update")
+                    if exclude_object:
+                        print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
+                    else:                            
+                        #print(f'Mapped Data: {mapped_data}')
+                        # Create or update the object in the destination
+                        timer.start_timer("Create or Update")
+                        self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
+                        timer.stop_timer("Create or Update")
 
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
         """Apply transformations using Jinja2 filters directly."""
