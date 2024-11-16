@@ -9,19 +9,23 @@ class Resolver:
     def _flatten_structure(self, item, parent_key='', sep='.'):
         """
         Flatten a nested dictionary or object-like structure into a single-level dictionary.
+        Include intermediate paths dynamically.
         """
         flat_dict = {}
         if isinstance(item, dict):
             for k, v in item.items():
                 new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                flat_dict[new_key] = v
                 flat_dict.update(self._flatten_structure(v, new_key, sep=sep))
         elif hasattr(item, '__dict__'):  # Handle object-like structures
             for k, v in vars(item).items():
                 new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                flat_dict[new_key] = v
                 flat_dict.update(self._flatten_structure(v, new_key, sep=sep))
         else:
             flat_dict[parent_key] = item
         return flat_dict
+
 
     def resolve(self, path):
         """
