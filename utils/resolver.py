@@ -9,8 +9,6 @@ class Resolver:
         """
         Dynamically resolve a dot-notation path from an object or dictionary.
         """
-        print(f"Resolving: {attr_path}")
-
         attrs = attr_path.split('.')
         current_obj = self.item
         try:
@@ -43,3 +41,24 @@ class Resolver:
         if attr in self.reserved_words:
             raise AttributeError(f"Attribute '{attr}' conflicts with Jinja2 reserved words.")
         return self.resolve(attr)
+
+    # Implement dictionary-like behavior
+    def keys(self):
+        """
+        Provide keys for Jinja2 to iterate over.
+        """
+        if isinstance(self.item, dict):
+            return self.item.keys()
+        return [attr for attr in dir(self.item) if not attr.startswith('_') and not callable(getattr(self.item, attr, None))]
+
+    def items(self):
+        """
+        Provide items for Jinja2 to iterate over.
+        """
+        return [(key, self[key]) for key in self.keys()]
+
+    def values(self):
+        """
+        Provide values for Jinja2 to iterate over.
+        """
+        return [self[key] for key in self.keys()]
