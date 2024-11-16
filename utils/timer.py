@@ -28,7 +28,7 @@ class Timer:
         """
         Display the average times for all timers, sorted from slowest to fastest.
         """
-        print("Timer Results (sorted by average time):")
+        print("\n--\nTimer Results (sorted by average time):")
         sorted_timers = sorted(
             self.timings.items(),
             key=lambda item: item[1]["total"] / item[1]["count"] if item[1]["count"] > 0 else 0,
