@@ -216,7 +216,7 @@ class DataTransferTool:
                     lookup_type, find_function_path, create_function_path = matches[0]
                     value = self.lookup_object(
                         value, lookup_type, find_function_path, create_function_path, 
-                        obj_config, mapped_data, field_name
+                        obj_config
                     ).id
 
             elif 'include_object' in action:
@@ -229,7 +229,7 @@ class DataTransferTool:
                     if sub_value:
                         nested_obj = self.lookup_object(
                             sub_value, lookup_type, find_function_path, create_function_path, 
-                            obj_config, mapped_data, reference_field
+                            obj_config
                         )
                         # Instead of placing it in mapped_data, nest it within `value`
                         if isinstance(value, dict):
