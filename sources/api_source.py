@@ -85,6 +85,7 @@ class APIDataSource(DataSource):
             # Handle authentication methods
             if auth_method == 'token':
                 self.api = auth_func(base_url, token=self.config['auth_args']['token'])
+                self.api.http_session.verify = False
                 if base_url not in self.session_expiry: 
                     self.clients.append(self.api)
                     print(f"Connected to {self.name} at {base_url}")
