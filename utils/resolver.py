@@ -9,7 +9,7 @@ class Resolver:
     def resolve_nested_context(self, item, keys_to_resolve=None):
         """Resolve specified keys/attributes for an object or dict."""
         context = {}
-
+        print(f'resolving {keys_to_resolve}')
         if keys_to_resolve is None:
             keys_to_resolve = []
 
