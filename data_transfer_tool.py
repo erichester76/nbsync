@@ -180,7 +180,7 @@ class DataTransferTool:
                                 exclude_object = True
                             
                             if exclude_object:
-                                print(f"Excluding object {mapped_data['name']} based on exclusion criteria.")
+                                print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
                                 continue 
                             
                             #print(f'mappings: {mappings[dest_field]}')
