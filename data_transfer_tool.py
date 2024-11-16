@@ -155,7 +155,7 @@ class DataTransferTool:
 
                     for item in source_data:
                         # Prepare the context once per item
-                        pprint.pp(item)
+                        pprint(item)
                         context = self.resolve_nested_context(item)
                         
                         # Render each source template for all mappings at once, only once per item
