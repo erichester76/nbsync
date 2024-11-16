@@ -10,18 +10,14 @@ from sources.xls_source import XLSDataSource
 from sources.snmp_source import SNMPDataSource
 import jinja2
 import deepdiff
-import cProfile
-import pstats
 from utils.timer import Timer
 from utils.resolver import Resolver
 
-# Register custom Jinja2 filters
-
+# Custom Jinja2 filters
 def regex_replace(value, pattern, replacement):
    if value: 
       return re.sub(pattern, replacement, value)
   
-# Custom slugify filter
 def slugify(value):
     return re.sub(r'\W+', '-', value.lower())
 
@@ -82,16 +78,9 @@ def env_var_constructor(loader, node):
     
     return value
 
-# Custom constructor to handle Jinja-like fields
-def jinja_placeholder_constructor(loader, node):
-    """This constructor will simply return the string for Jinja fields like '{{ }}'."""
-    value = loader.construct_scalar(node)
-    return value
-
 env_var_pattern = re.compile(r'\$\{([^}^{]+)\}')
 yaml.add_implicit_resolver('!envvar', env_var_pattern)
 yaml.add_constructor('!envvar', env_var_constructor)
-
 
 class DataTransferTool:
     def __init__(self, yaml_file, dry_run):
@@ -154,23 +143,17 @@ class DataTransferTool:
 
                 source_api = obj_config.get('source_api')
 
-                
-                timer.start_timer(f"Fetch Data {source_api}")
-                print(f"Fetching data from {source_api}...")
+                timer.start_timer(f"Fetch Data {obj_type} {source_api}")
+                print(f"Fetching {obj_type} from {source_api}...")
                 source_data = source.fetch_data(obj_config, source_client)
-                timer.stop_timer(f"Fetch Data {source_api}")
+                timer.stop_timer(f"Fetch Data {obj_type} {source_api}")
 
                 destination_api = self.sources[obj_config['destination_api']]
-                
-                for destination_client in destination_api.clients:
-                    create_function = obj_config.get('create_function')
-                    update_function = obj_config.get('update_function')
-                    find_function = obj_config.get('find_function')
-                    mappings = obj_config['mapping']
+                timer.start_timer(f"API Endpoint Processing Total {source_api}")
+     
+                mappings = obj_config['mapping']
 
                 for item in source_data:
-                    #timer.show_timers()
-                    timer.start_timer(f"API Processing Total {source_api}")
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
@@ -218,19 +201,20 @@ class DataTransferTool:
                     if exclude_object:
                         print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
                     else:                            
-                        #print(f'Mapped Data: {mapped_data}')
                         # Create or update the object in the destination
-                        timer.start_timer(f"Create or Update {obj_type}")
-                        self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
-                        timer.stop_timer(f"Create or Update {obj_type}")
+                        for destination_client in destination_api.clients:
+                            create_function = obj_config.get('create_function')
+                            update_function = obj_config.get('update_function')
+                            find_function = obj_config.get('find_function')
+                            timer.start_timer(f"Create or Update {obj_type}")
+                            self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
+                            timer.stop_timer(f"Create or Update {obj_type}")
                         
                 timer.stop_timer(f"API Endpoint Processing Total {source_api}")
                 timer.show_timers()
 
-        timer.stop_timer(f"Total {obj_type} Runtime")
-        timer.show_timers()
-
-
+            timer.stop_timer(f"Total {obj_type} Runtime")
+            timer.show_timers()
 
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
         """Apply transformations using Jinja2 filters directly."""
