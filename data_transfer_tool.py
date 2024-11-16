@@ -136,6 +136,13 @@ class DataTransferTool:
             
             self.sources[name].authenticate()
 
+    def extract_required_keys(template_string):
+        """
+        Extract keys referenced in a Jinja template.
+        """
+        key_pattern = r"{{\s*([\w\.]+)"
+        return re.findall(key_pattern, template_string)
+
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
                 
@@ -159,24 +166,14 @@ class DataTransferTool:
                     mappings = obj_config['mapping']
 
                 for item in source_data:
-                    resolver = Resolver(item)
-
-                    # Debug: Ensure resolver is initialized correctly
-                    print(f"Type of resolver before template render: {type(resolver)}")
-
-                    # Render each source template for all mappings at once, only once per item
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
                             source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
-
+                            resolver = Resolver(item, required_keys=extract_required_keys(source_template))
                             # Debug: Ensure the source template is valid
-                            print(f"Source template for {dest_field}: {source_template}")
-
                             template = env.from_string(source_template)
                             timer.start_timer("Render Source Template")
-
-                            # Debug: Ensure to_dict() works as expected
                             try:
                                 rendered_source_value = template.render(resolver)
                             except Exception as e:

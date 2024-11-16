@@ -1,10 +1,22 @@
 class Resolver:
-    def __init__(self, item):
+    def __init__(self, item, required_keys=None):
         self.item = item
-        self._cached_keys = None
-        self._cached_items = None
+        self.required_keys = required_keys or []
+        self.pre_resolved = self._pre_resolve()
+
+    def _pre_resolve(self):
+        """
+        Pre-resolve only the required keys.
+        """
+        resolved = {}
+        for key in self.required_keys:
+            resolved[key] = self.resolve(key)
+        return resolved
 
     def resolve(self, attr_path):
+        """
+        Dynamically resolve a dot-notation path from an object or dictionary.
+        """
         attrs = attr_path.split('.')
         current_obj = self.item
         try:
@@ -23,35 +35,16 @@ class Resolver:
             return None
 
     def __getitem__(self, attr):
-        return self.resolve(attr)
+        return self.pre_resolved.get(attr)
 
     def __getattr__(self, attr):
-        return self.resolve(attr)
+        return self.pre_resolved.get(attr)
 
     def keys(self):
-        """
-        Cache keys to avoid recomputation.
-        """
-        if self._cached_keys is None:
-            if isinstance(self.item, dict):
-                self._cached_keys = list(self.item.keys())
-            else:
-                self._cached_keys = [
-                    attr for attr in dir(self.item)
-                    if not attr.startswith('_') and not callable(getattr(self.item, attr, None))
-                ]
-        return self._cached_keys
+        return self.pre_resolved.keys()
 
     def items(self):
-        """
-        Cache items to avoid recomputation.
-        """
-        if self._cached_items is None:
-            self._cached_items = [(key, self[key]) for key in self.keys()]
-        return self._cached_items
+        return self.pre_resolved.items()
 
     def values(self):
-        """
-        Compute values based on cached keys.
-        """
-        return [self[key] for key in self.keys()]
+        return self.pre_resolved.values()
