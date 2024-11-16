@@ -33,6 +33,7 @@ class Resolver:
         else:
             for attr in dir(item):
                 try:
+                    print(f'{attr}')
                     if attr.startswith('_'):
                         continue
                     context[attr] = get_nested_value(item, attr)
