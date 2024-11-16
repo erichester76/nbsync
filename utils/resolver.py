@@ -28,7 +28,11 @@ class Resolver:
         reserved_words = set(DEFAULT_FILTERS.keys())        
         sanitized_data = {}
         for key, value in data.items():
-            sanitized_key = f"{key}_" if key in reserved_words else key
+            if key in reserved_words:
+                sanitized_key = f"{key}_"  
+                print(f"sanitized {key}")
+            else:
+               sanitized_key = key
             sanitized_data[sanitized_key] = value
         return sanitized_data
 
