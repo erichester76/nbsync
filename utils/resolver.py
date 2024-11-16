@@ -6,22 +6,37 @@ class Resolver:
     def __init__(self):
         self._cache = {}
 
-    def resolve_nested_context(self, item, key=None):
-        """Resolve specified keys/attributes for an object or dict."""
+    def resolve_nested_context(self, item):
+        """Resolve nested attributes in an object using dot notation."""
         context = {}
-        print(f'resolving {key}')
-        if key is None:
-            key = []
 
+        def get_nested_value(obj, attr_path):
+            """Recursively get a nested value from an object or dict using dot notation."""
+            attrs = attr_path.split('.')
+            current_obj = obj
+            try:
+                for attr in attrs:
+                    if isinstance(current_obj, dict):
+                        current_obj = current_obj.get(attr)
+                    else:
+                        current_obj = getattr(current_obj, attr)
+                    if current_obj is None:
+                        break
+                return current_obj
+            except AttributeError:
+                return None
+
+        # Build the context with dot notation support for nested attributes
         if isinstance(item, dict):
-            print('is dict')
-            if key in item:
-                context[key] = item[key]
+            for key in item:
+                context[key] = get_nested_value(item, key)
         else:
-            print('is attr')
-            if hasattr(item, key):
-                context[key] = getattr(item, key)
+            for attr in dir(item):
+                try:
+                    if attr.startswith('_'):
+                        continue
+                    context[attr] = get_nested_value(item, attr)
+                except Exception as e:
+                    continue
 
         return context
-
-

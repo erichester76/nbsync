@@ -162,17 +162,15 @@ class DataTransferTool:
 
                     for item in source_data:
                         # Prepare the context once per item
-
+                        timer.start_timer("Resolve Nested Context")
+                        context = resolver.resolve_nested_context(item)
+                        timer.stop_timer("Resolve Nested Context")
                         # Render each source template for all mappings at once, only once per item
                         rendered_mappings = {}
                         for dest_field, field_info in mappings.items():
                             if 'source' in field_info:
                                 source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                                 template = env.from_string(source_template)
-                                timer.start_timer("Resolve Nested Context")
-                                context = resolver.resolve_nested_context(item,field_info['source'].replace('<<', '').replace('>>', '').replace(' ',''))
-                                timer.stop_timer("Resolve Nested Context")
-                                print(f'{context}')
                                 rendered_source_value = template.render(context)
                                 rendered_mappings[dest_field] = rendered_source_value
 
