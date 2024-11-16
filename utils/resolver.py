@@ -31,9 +31,13 @@ class Resolver:
         """
         Resolve a dot-notation path using the pre-flattened structure or dynamically.
         """
+        print(f"Resolving path: {path}")
+
         # Attempt to resolve using the flattened structure
         if path in self.flattened_item:
-            return self.flattened_item[path]
+            value = self.flattened_item[path]
+            print(f"Resolved from flattened: {path} -> {value}")
+            return value
 
         # Resolve dynamically for missing intermediate paths
         attrs = path.split('.')
@@ -45,7 +49,9 @@ class Resolver:
                 current_obj = getattr(current_obj, attr, None)
             else:
                 current_obj = None
+                print(f"Failed to resolve '{attr}' in '{path}'")
                 break
+        print(f"Dynamically resolved: {path} -> {current_obj}")
         return current_obj
 
     def __getitem__(self, path):
