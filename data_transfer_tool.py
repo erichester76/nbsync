@@ -204,7 +204,7 @@ class DataTransferTool:
             actions = [actions]
             
         for action in actions:
-            #print(f'ACTION {action} for {value}')
+            print(f'ACTION {action} for {value}')
             
             if 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
@@ -237,7 +237,7 @@ class DataTransferTool:
                         else:
                             value = {reference_field: nested_obj.id, field_name: value}
             
-            #print(f'POST ACTION {action}: value now {value}')
+            print(f'POST ACTION {action}: value now {value}')
         
         return value
 
