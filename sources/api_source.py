@@ -9,6 +9,7 @@ import inspect
 import types
 import pprint
 import json
+import urllib3
 
 class APIDataSource(DataSource):
     def __init__(self, name, config):
@@ -17,6 +18,7 @@ class APIDataSource(DataSource):
         self.api = None
         self.clients = []
         self.session_expiry = {}
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def is_session_valid(self, base_url):
         if base_url in self.session_expiry:
