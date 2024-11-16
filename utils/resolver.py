@@ -1,15 +1,10 @@
-from jinja2.defaults import DEFAULT_FILTERS
-
 class Resolver:
     def __init__(self, item):
         self.item = item
-        self.reserved_words = set(DEFAULT_FILTERS.keys())  # Includes 'replace', 'join', etc.
+        self._cached_keys = None
+        self._cached_items = None
 
     def resolve(self, attr_path):
-        """
-        Dynamically resolve a dot-notation path from an object or dictionary.
-        """
-        print(f"resolving {attr_path}")
         attrs = attr_path.split('.')
         current_obj = self.item
         try:
@@ -28,38 +23,35 @@ class Resolver:
             return None
 
     def __getitem__(self, attr):
-        """
-        Handle key-like access, e.g., resolver['key'].
-        """
-        if attr in self.reserved_words:
-            raise KeyError(f"Attribute '{attr}' conflicts with Jinja2 reserved words.")
         return self.resolve(attr)
 
     def __getattr__(self, attr):
-        """
-        Handle attribute-like access, e.g., resolver.key.
-        """
-        if attr in self.reserved_words:
-            raise AttributeError(f"Attribute '{attr}' conflicts with Jinja2 reserved words.")
         return self.resolve(attr)
 
-    # Implement dictionary-like behavior
     def keys(self):
         """
-        Provide keys for Jinja2 to iterate over.
+        Cache keys to avoid recomputation.
         """
-        if isinstance(self.item, dict):
-            return self.item.keys()
-        return [attr for attr in dir(self.item) if not attr.startswith('_') and not callable(getattr(self.item, attr, None))]
+        if self._cached_keys is None:
+            if isinstance(self.item, dict):
+                self._cached_keys = list(self.item.keys())
+            else:
+                self._cached_keys = [
+                    attr for attr in dir(self.item)
+                    if not attr.startswith('_') and not callable(getattr(self.item, attr, None))
+                ]
+        return self._cached_keys
 
     def items(self):
         """
-        Provide items for Jinja2 to iterate over.
+        Cache items to avoid recomputation.
         """
-        return [(key, self[key]) for key in self.keys()]
+        if self._cached_items is None:
+            self._cached_items = [(key, self[key]) for key in self.keys()]
+        return self._cached_items
 
     def values(self):
         """
-        Provide values for Jinja2 to iterate over.
+        Compute values based on cached keys.
         """
         return [self[key] for key in self.keys()]
