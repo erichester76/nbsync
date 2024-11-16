@@ -170,7 +170,7 @@ class DataTransferTool:
                                 source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                                 template = env.from_string(source_template)
                                 timer.start_timer("Resolve Nested Context")
-                                context = resolver.resolve_nested_context(item,'field_info['source']')
+                                context = resolver.resolve_nested_context(item,field_info['source'])
                                 timer.stop_timer("Resolve Nested Context")
                                 rendered_source_value = template.render(context)
                                 rendered_mappings[dest_field] = rendered_source_value
