@@ -1,74 +1,81 @@
+import re
+from jinja2.defaults import DEFAULT_FILTERS
+
 class Resolver:
-    def __init__(self, item):
-        """
-        Initialize the Resolver with the given item.
-        """
+    def __init__(self, item, required_keys=None):
         self.item = item
-        self.resolved_data = {}  # Stores pre-resolved values
-        print("Initializing Resolver with item:", vars(item) if hasattr(item, '__dict__') else item)
+        self.required_keys = required_keys or []
+        self.pre_resolved = self._pre_resolve()
 
-    def pre_resolve(self, required_keys):
+    def _pre_resolve(self):
         """
-        Pre-resolve only the required keys from the item.
+        Pre-resolve only the required keys, handling nested paths dynamically.
         """
-        for key in required_keys:
-            value = self.resolve(key)
-            if value is not None:
-                self.resolved_data[key] = value
-        print("Pre-resolved data:", self.resolved_data)
+        resolved = {}
+        for key in self.required_keys:
+            attrs = key.split('.')  # Split the key into its dot notation parts
+            current_obj = self.item
+            full_path = []
 
-    def resolve(self, path):
-        """
-        Resolve a dot-notation path dynamically.
-        """
-        print(f"Attempting to resolve path: {path}")
-        if path in self.resolved_data:
-            print(f"Resolved from cache: {path} -> {self.resolved_data[path]}")
-            return self.resolved_data[path]
-
-        attrs = path.split('.')
-        current_obj = self.item
-        for attr in attrs:
             try:
-                if current_obj is None:
-                    print(f"Stopping resolution: '{attr}' is undefined in '{path}'")
-                    return None
+                for attr in attrs:
+                    full_path.append(attr)
+                    full_path_str = '.'.join(full_path)
+
+                    if full_path_str not in resolved:
+                        # Resolve intermediate attributes
+                        if isinstance(current_obj, dict):
+                            current_obj = current_obj.get(attr)
+                        elif hasattr(current_obj, attr):
+                            current_obj = getattr(current_obj, attr, None)
+                        else:
+                            current_obj = None
+
+                        resolved[full_path_str] = current_obj
+                        if current_obj is None:
+                            break  # Stop resolving deeper if parent is None
+                    else:
+                        # Use already resolved value for the current path
+                        current_obj = resolved[full_path_str]
+            except Exception as e:
+                print(f"Error resolving '{key}': {e}")
+                resolved[key] = None  # Safeguard for unresolved paths
+
+        return resolved
+
+
+    def resolve(self, attr_path):
+        """
+        Dynamically resolve a dot-notation path from an object or dictionary.
+        """
+        attrs = attr_path.split('.')
+        current_obj = self.item
+        try:
+            for attr in attrs:
                 if isinstance(current_obj, dict):
                     current_obj = current_obj.get(attr)
-                else:
+                elif hasattr(current_obj, attr):
                     current_obj = getattr(current_obj, attr, None)
-            except Exception as e:
-                print(f"Error resolving '{path}' at '{attr}': {e}")
-                return None
-        print(f"Resolved path: {path} -> {current_obj}")
-        return current_obj
+                else:
+                    current_obj = None
+                if current_obj is None:
+                    break
+            return current_obj
+        except Exception as e:
+            print(f"Error resolving '{attr_path}': {e}")
+            return None
 
-    def __getitem__(self, path):
-        """
-        Allow dictionary-like access to resolve paths.
-        """
-        return self.resolve(path)
+    def __getitem__(self, attr):
+        return self.pre_resolved.get(attr)
 
-    def __getattr__(self, path):
-        """
-        Allow attribute-like access to resolve paths.
-        """
-        return self.resolve(path)
+    def __getattr__(self, attr):
+        return self.pre_resolved.get(attr)
 
     def keys(self):
-        """
-        Provide all pre-resolved keys.
-        """
-        return self.resolved_data.keys()
+        return self.pre_resolved.keys()
 
     def items(self):
-        """
-        Provide all pre-resolved key-value pairs.
-        """
-        return self.resolved_data.items()
+        return self.pre_resolved.items()
 
     def values(self):
-        """
-        Provide all pre-resolved values.
-        """
-        return self.resolved_data.values()
+        return self.pre_resolved.values()
