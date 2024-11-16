@@ -151,6 +151,8 @@ class DataTransferTool:
             source = self.sources[obj_config['source_api']]
 
             for source_client in source.clients:
+                timer.start_timer(f"Total {source_api} Runtime")
+
                 source_api = obj_config.get('source_api')
                 print(f"Fetching data from {source_api}...")
                 
@@ -223,7 +225,7 @@ class DataTransferTool:
                         timer.stop_timer("Create or Update")
                         
                     timer.stop_timer(f"Item Processing Total {obj_type}")
-                    
+            timer.stop_timer(f"Total {source_api} Runtime")
             timer.show_timers()
 
 
