@@ -34,7 +34,6 @@ class Resolver:
             for attr in dir(item):
                 try:
                     if attr.startswith('_') or callable(getattr(item, attr)):
-                        print(f'{attr} Skipped')
                         continue
                     print(f'{attr} Processed')
                     context[attr] = get_nested_value(item, attr)
