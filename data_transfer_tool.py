@@ -136,7 +136,7 @@ class DataTransferTool:
             
             self.sources[name].authenticate()
 
-    def extract_required_keys(template_string):
+    def extract_required_keys(self,template_string):
         """
         Extract keys referenced in a Jinja template.
         """
@@ -170,7 +170,9 @@ class DataTransferTool:
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
                             source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
-                            resolver = Resolver(item, required_keys=extract_required_keys(source_template))
+                            required_keys=self.extract_required_keys(source_template)
+                            print(f"preloading {required_keys}")
+                            resolver = Resolver(item, required_keys=required_keys)
                             # Debug: Ensure the source template is valid
                             template = env.from_string(source_template)
                             timer.start_timer("Render Source Template")
