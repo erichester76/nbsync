@@ -21,28 +21,29 @@ class Resolver:
         return grouped
     
     
-    def _extract_nested_value(self, obj, path):
+    def _extract_nested_values(self, obj, paths):
         """
-        Extract the nested value for a given path starting from `obj`.
+        Extract multiple nested values for given paths from a base object.
         """
-        if not path:  # If the path is empty, return the object itself
-            return obj
-        attrs = path.split('.')
-        current_obj = obj
-        try:
-            for attr in attrs:
-                if isinstance(current_obj, dict):
-                    current_obj = current_obj.get(attr)
-                elif hasattr(current_obj, attr):
-                    current_obj = getattr(current_obj, attr, None)
-                else:
-                    current_obj = None
-                if current_obj is None:
-                    break
-            return current_obj
-        except Exception as e:
-            print(f"Error resolving nested path '{path}': {e}")
-            return None
+        results = {}
+        for path in paths:
+            current_obj = obj
+            attrs = path.split('.')
+            try:
+                for attr in attrs:
+                    if isinstance(current_obj, dict):
+                        current_obj = current_obj.get(attr)
+                    elif hasattr(current_obj, attr):
+                        current_obj = getattr(current_obj, attr, None)
+                    else:
+                        current_obj = None
+                        break
+                results[path] = current_obj
+            except Exception as e:
+                print(f"Error resolving nested path '{path}': {e}")
+                results[path] = None
+        return results
+
 
     
     def _pre_resolve(self):
@@ -77,14 +78,12 @@ class Resolver:
                         # Use already resolved value for the current path
                         current_obj = resolved[full_path_str]
 
-                # Extract values for all keys in this group
+                # If the prefix is resolved, extract all sub-values
                 if current_obj is not None:
-                    for key in keys:
-                        suffix = key[len(prefix) + 1:]  # Remove prefix + dot
-                        if suffix:
-                            resolved[key] = self._extract_nested_value(current_obj, suffix)
-                        else:
-                            resolved[key] = current_obj
+                    sub_keys = [key[len(prefix) + 1:] for key in keys if key != prefix]
+                    sub_values = self._extract_nested_values(current_obj, sub_keys)
+                    for suffix, value in sub_values.items():
+                        resolved[f"{prefix}.{suffix}"] = value
 
             except Exception as e:
                 print(f"Error resolving prefix '{prefix}': {e}")
@@ -92,6 +91,7 @@ class Resolver:
                     resolved[key] = None  # Safeguard unresolved paths
 
         return resolved
+
 
     def resolve(self, attr_path):
         """
