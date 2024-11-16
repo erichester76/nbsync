@@ -37,6 +37,7 @@ class Resolver:
         return sanitized_data
 
     def to_dict(self):
+        print(f'{self}')
         if isinstance(self.item, dict):
             return self.sanitize_keys(self.item)
         return self
