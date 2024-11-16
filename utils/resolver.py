@@ -34,7 +34,7 @@ class Resolver:
                     if isinstance(current_obj, dict):
                         current_obj = current_obj.get(attr)
                     elif hasattr(current_obj, attr):
-                        print(f"b4 {attr}")
+                        print(f"b4 {current_obj} {attr}")
                         current_obj = getattr(current_obj, attr, None)
                         print(f"after {attr}")
 
