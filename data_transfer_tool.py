@@ -174,10 +174,10 @@ class DataTransferTool:
                         if 'source' in field_info:
                             source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                             required_keys=self.extract_required_keys(source_template)
-                            timer.start_timer(f"Extract Required Keys {required_keys} {source_template}")
+                            timer.start_timer(f"Extract Required Keys {required_keys}")
                             resolver = Resolver(item, required_keys=required_keys)
                             print(f"{resolver.keys()}")
-                            timer.stop_timer(f"Extract Required Keys {required_keys} {source_template}")
+                            timer.stop_timer(f"Extract Required Keys {required_keys}")
 
                             # Debug: Ensure the source template is valid
                             template = env.from_string(source_template)
