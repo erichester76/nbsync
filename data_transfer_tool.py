@@ -166,6 +166,7 @@ class DataTransferTool:
                     mappings = obj_config['mapping']
 
                 for item in source_data:
+                    timer.start_timer("Item Processing Total")
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
@@ -218,6 +219,9 @@ class DataTransferTool:
                         timer.start_timer("Create or Update")
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
                         timer.stop_timer("Create or Update")
+                        
+            timer.stop_timer("Item Processing Total")
+
 
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
         """Apply transformations using Jinja2 filters directly."""
