@@ -6,27 +6,22 @@ class Resolver:
     def __init__(self):
         self._cache = {}
 
-    def resolve_nested_context(self,item):
-        """Resolve nested attributes or keys in an object or dictionary using dpath."""
+    def resolve_nested_context(self, item, keys_to_resolve=None):
+        """Resolve specified keys/attributes for an object or dict."""
         context = {}
 
+        if keys_to_resolve is None:
+            keys_to_resolve = []
+
         if isinstance(item, dict):
-            # Flatten the dictionary using dpath
-            flat_dict = dpath.util.search(item, '**', yielded=True, separator='.')
-            for path, value in flat_dict:
-                context[path] = value
+            for key in keys_to_resolve:
+                if key in item:
+                    context[key] = item[key]
         else:
-            # Handle objects with attributes
-            for attr in dir(item):
-                if not attr.startswith('_') and not callable(getattr(item, attr, None)):
-                    value = getattr(item, attr, None)
-                    if isinstance(value, dict):
-                        # Recursively flatten nested dictionaries
-                        nested_flat = resolve_nested_context(value)
-                        for sub_path, sub_value in nested_flat.items():
-                            context[f"{attr}.{sub_path}"] = sub_value
-                    else:
-                        context[attr] = value
+            for key in keys_to_resolve:
+                if hasattr(item, key):
+                    context[key] = getattr(item, key)
 
         return context
+
 
