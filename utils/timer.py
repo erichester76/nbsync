@@ -41,4 +41,6 @@ class Timer:
                 print(f"{name}: {average_time:.2f} ms (average over {timing['count']} runs)")
             else:
                 print(f"{name}: No completed timings recorded.")
+                
+        print("\n")
 
