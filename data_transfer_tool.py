@@ -177,7 +177,7 @@ class DataTransferTool:
                             timer.start_timer(f"Extract Required Keys {required_keys} {source_template}")
                             resolver = Resolver(item, required_keys=required_keys)
                             print(f"{resolver.keys()}")
-                            timer.stop_timer(f"Extract Required Keys {required_keys}")
+                            timer.stop_timer(f"Extract Required Keys {required_keys} {source_template}")
 
                             # Debug: Ensure the source template is valid
                             template = env.from_string(source_template)
