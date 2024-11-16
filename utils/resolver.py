@@ -14,9 +14,11 @@ class Resolver:
             key = []
 
         if isinstance(item, dict):
+            print('is dict')
             if key in item:
                 context[key] = item[key]
         else:
+            print('is attr')
             if hasattr(item, key):
                 context[key] = getattr(item, key)
 
