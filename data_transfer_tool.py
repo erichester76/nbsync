@@ -12,7 +12,6 @@ import jinja2
 import deepdiff
 import cProfile
 import pstats
-import pprint
 
 # Register custom Jinja2 filters
 
@@ -155,7 +154,7 @@ class DataTransferTool:
 
                     for item in source_data:
                         # Prepare the context once per item
-                        pprint(item)
+                        print(f'{item}')
                         context = self.resolve_nested_context(item)
                         
                         # Render each source template for all mappings at once, only once per item
