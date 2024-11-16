@@ -151,14 +151,15 @@ class DataTransferTool:
             source = self.sources[obj_config['source_api']]
 
             for source_client in source.clients:
-                timer.start_timer(f"Total {source_api} Runtime")
 
                 source_api = obj_config.get('source_api')
-                print(f"Fetching data from {source_api}...")
+                timer.start_timer(f"Total {source_api} Runtime")
+
                 
-                timer.start_timer("Fetch Data")
+                timer.start_timer(f"Fetch Data {source_api}")
+                print(f"Fetching data from {source_api}...")
                 source_data = source.fetch_data(obj_config, source_client)
-                timer.stop_timer("Fetch Data")
+                timer.stop_timer(f"Fetch Data {source_api}")
 
                 destination_api = self.sources[obj_config['destination_api']]
                 
