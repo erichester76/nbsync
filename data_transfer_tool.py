@@ -220,12 +220,12 @@ class DataTransferTool:
                     else:                            
                         #print(f'Mapped Data: {mapped_data}')
                         # Create or update the object in the destination
-                        timer.start_timer("Create or Update")
+                        timer.start_timer(f"Create or Update {obj_type}")
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
-                        timer.stop_timer("Create or Update")
+                        timer.stop_timer(f"Create or Update {obj_type}")
                         
-                    timer.stop_timer(f"API Endpoint Processing Total {source_api}")
-                    timer.show_timers()
+                timer.stop_timer(f"API Endpoint Processing Total {source_api}")
+                timer.show_timers()
 
         timer.stop_timer(f"Total {obj_type} Runtime")
         timer.show_timers()
