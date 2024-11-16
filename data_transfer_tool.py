@@ -154,6 +154,7 @@ class DataTransferTool:
                 mappings = obj_config['mapping']
 
                 for item in source_data:
+                    timer.start_timer(f"Per Object Timing {obj_type}")
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
@@ -209,6 +210,8 @@ class DataTransferTool:
                             timer.start_timer(f"Create or Update {obj_type}")
                             self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
                             timer.stop_timer(f"Create or Update {obj_type}")
+
+                    timer.stop_timer(f"Per Object Timing {obj_type}")
                         
                 timer.stop_timer(f"API Endpoint Processing Total {source_api}")
                 timer.show_timers()
