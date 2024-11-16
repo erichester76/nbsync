@@ -1,4 +1,3 @@
-from collections import defaultdict
 
 class Resolver:
     def __init__(self, item, required_keys=None):
@@ -8,67 +7,44 @@ class Resolver:
 
     def _pre_resolve(self):
         """
-        Pre-resolve required keys by grouping shared prefixes and traversing them once.
+        Pre-resolve only the required keys, handling nested paths dynamically.
         """
         resolved = {}
-        grouped_keys = self._group_keys_by_prefix(self.required_keys)
+        for key in self.required_keys:
+            attrs = key.split('.')  # Split the key into its dot notation parts
+            current_obj = self.item
+            full_path = []
 
-        for prefix, keys in grouped_keys.items():
-            # Resolve the shared prefix once
-            prefix_obj = self.resolve(prefix)
+            try:
+                for attr in attrs:
+                    full_path.append(attr)
+                    full_path_str = '.'.join(full_path)
 
-            if prefix_obj is None:
-                # If the prefix itself cannot be resolved, skip all keys in this group
-                for key in keys:
-                    resolved[key] = None
-                continue
+                    if full_path_str not in resolved:
+                        # Resolve intermediate attributes
+                        if isinstance(current_obj, dict):
+                            current_obj = current_obj.get(attr)
+                        elif hasattr(current_obj, attr):
+                            current_obj = getattr(current_obj, attr, None)
+                        else:
+                            current_obj = None
 
-            # Extract all sub-keys for this prefix
-            for key in keys:
-                suffix = key[len(prefix) + 1:]  # Remove prefix + dot
-                resolved[key] = self._extract_nested_value(prefix_obj, suffix)
+                        resolved[full_path_str] = current_obj
+                        if current_obj is None:
+                            break  # Stop resolving deeper if parent is None
+                    else:
+                        # Use already resolved value for the current path
+                        current_obj = resolved[full_path_str]
+            except Exception as e:
+                print(f"Error resolving '{key}': {e}")
+                resolved[key] = None  # Safeguard for unresolved paths
 
         return resolved
 
-    def _group_keys_by_prefix(self, keys):
-        """
-        Group keys by their shared prefix (up to the second-to-last part of the path).
-        """
-        grouped = defaultdict(list)
-        for key in keys:
-            if '.' in key:
-                prefix = key.rsplit('.', 1)[0]
-            else:
-                prefix = key
-            grouped[prefix].append(key)
-        return grouped
-
-    def _extract_nested_value(self, obj, path):
-        """
-        Extract the nested value for a given path starting from `obj`.
-        """
-        if not path:  # If the path is empty, return the object itself
-            return obj
-        attrs = path.split('.')
-        current_obj = obj
-        try:
-            for attr in attrs:
-                if isinstance(current_obj, dict):
-                    current_obj = current_obj.get(attr)
-                elif hasattr(current_obj, attr):
-                    current_obj = getattr(current_obj, attr, None)
-                else:
-                    current_obj = None
-                if current_obj is None:
-                    break
-            return current_obj
-        except Exception as e:
-            print(f"Error resolving nested path '{path}': {e}")
-            return None
 
     def resolve(self, attr_path):
         """
-        Dynamically resolve a dot-notation path from the root item.
+        Dynamically resolve a dot-notation path from an object or dictionary.
         """
         attrs = attr_path.split('.')
         current_obj = self.item
