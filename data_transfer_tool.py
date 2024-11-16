@@ -162,7 +162,7 @@ class DataTransferTool:
         else:
             for attr in dir(item):
                 try:
-                    if attr.startswith('_') or callable(getattr(item, attr)):
+                    if attr.startswith('_'):
                         continue
                     timer.start_timer(f"Resolve Nested Context {attr}")
                     context[attr] = get_nested_value(item, attr)
