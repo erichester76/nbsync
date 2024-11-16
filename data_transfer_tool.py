@@ -13,7 +13,6 @@ import deepdiff
 import cProfile
 import pstats
 from utils.timer import Timer
-from utils.resolver import Resolver
 
 # Register custom Jinja2 filters
 
@@ -138,9 +137,7 @@ class DataTransferTool:
 
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
-        
-        resolver = Resolver()
-        
+                
         for obj_type, obj_config in self.config['object_mappings'].items():
             source = self.sources[obj_config['source_api']]
 
@@ -163,7 +160,7 @@ class DataTransferTool:
                     for item in source_data:
                         # Prepare the context once per item
                         timer.start_timer("Resolve Nested Context")
-                        context = resolver.resolve_nested_context(item)
+                        context = resolve_nested_context(item)
                         timer.stop_timer("Resolve Nested Context")
                         # Render each source template for all mappings at once, only once per item
                         rendered_mappings = {}
@@ -265,6 +262,45 @@ class DataTransferTool:
             raise TypeError(f"Final attribute in path '{function_path}' is not callable.")
         return func
         
+        
+    def resolve_nested_context(self, item):
+        """Resolve nested attributes in an object using dot notation."""
+        context = {}
+
+        def get_nested_value(obj, attr_path):
+            """Recursively get a nested value from an object or dict using dot notation."""
+            attrs = attr_path.split('.')
+            current_obj = obj
+            try:
+                for attr in attrs:
+                    if isinstance(current_obj, dict):
+                        current_obj = current_obj.get(attr)
+                    else:
+                        current_obj = getattr(current_obj, attr)
+                    if current_obj is None:
+                        break
+                return current_obj
+            except AttributeError:
+                return None
+
+        # Build the context with dot notation support for nested attributes
+        if isinstance(item, dict):
+            for key in item:
+                context[key] = get_nested_value(item, key)
+        else:
+            for attr in dir(item):
+                try:
+                    if attr.startswith('_') or callable(getattr(item, attr)):
+                        continue
+                    timer.start_timer(f"Resolve Nested Context {attr}")
+                    context[attr] = get_nested_value(item, attr)
+                    timer.stop_timer(f"Resolve Nested Context {attr}")
+                except Exception as e:
+                    continue
+
+        return context
+
+    
     
     def sanitize_data(self, data):
         """
