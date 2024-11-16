@@ -147,13 +147,12 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
                 
         for obj_type, obj_config in self.config['object_mappings'].items():
-
+            timer.start_timer(f"Total {obj_type} Runtime")
             source = self.sources[obj_config['source_api']]
 
             for source_client in source.clients:
 
                 source_api = obj_config.get('source_api')
-                timer.start_timer(f"Total {source_api} Runtime")
 
                 
                 timer.start_timer(f"Fetch Data {source_api}")
@@ -171,7 +170,7 @@ class DataTransferTool:
 
                 for item in source_data:
                     #timer.show_timers()
-                    timer.start_timer(f"Item Processing Total {obj_type}")
+                    timer.start_timer(f"API Processing Total {source_api}")
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
@@ -225,9 +224,10 @@ class DataTransferTool:
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
                         timer.stop_timer("Create or Update")
                         
-                    timer.stop_timer(f"Item Processing Total {obj_type}")
-            timer.stop_timer(f"Total {source_api} Runtime")
-            timer.show_timers()
+                    timer.stop_timer(f"API Endpoint Processing Total {source_api}")
+        
+        timer.stop_timer(f"Total {obj_type} Runtime")
+        timer.show_timers()
 
 
 
