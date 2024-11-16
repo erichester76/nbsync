@@ -197,7 +197,7 @@ class DataTransferTool:
                     for item in source_data:
                         # Prepare the context once per item
                         timer.start_timer("Resolve Nested Context")
-                        context = resolve_nested_context(item)
+                        context = self.resolve_nested_context(item)
                         timer.stop_timer("Resolve Nested Context")
                         # Render each source template for all mappings at once, only once per item
                         rendered_mappings = {}
