@@ -34,7 +34,10 @@ class Resolver:
                     if isinstance(current_obj, dict):
                         current_obj = current_obj.get(attr)
                     elif hasattr(current_obj, attr):
+                        print(f"b4 {attr}")
                         current_obj = getattr(current_obj, attr, None)
+                        print(f"after {attr}")
+
                     else:
                         current_obj = None
                         break
@@ -81,6 +84,7 @@ class Resolver:
                 # If the prefix is resolved, extract all sub-values
                 if current_obj is not None:
                     sub_keys = [key[len(prefix) + 1:] for key in keys if key != prefix]
+                    
                     sub_values = self._extract_nested_values(current_obj, sub_keys)
                     for suffix, value in sub_values.items():
                         resolved[f"{prefix}.{suffix}"] = value
