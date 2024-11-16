@@ -178,7 +178,7 @@ class DataTransferTool:
 
                             # Debug: Ensure to_dict() works as expected
                             try:
-                                rendered_source_value = template.render(resolver.to_dict())
+                                rendered_source_value = template.render(resolver)
                             except Exception as e:
                                 print(f"Error during rendering: {e}")
                                 raise
