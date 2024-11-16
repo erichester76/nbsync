@@ -225,7 +225,8 @@ class DataTransferTool:
                         timer.stop_timer("Create or Update")
                         
                     timer.stop_timer(f"API Endpoint Processing Total {source_api}")
-        
+                    timer.show_timers()
+
         timer.stop_timer(f"Total {obj_type} Runtime")
         timer.show_timers()
 
