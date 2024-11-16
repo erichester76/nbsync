@@ -24,6 +24,7 @@ class Resolver:
     def resolve_nested_context(self, item):
         """Resolve nested attributes in an object using dot notation."""
         if id(item) in self._cache:
+            print("Used Nested Cache")
             return self._cache[id(item)]
 
         context = {}
