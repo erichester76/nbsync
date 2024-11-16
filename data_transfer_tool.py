@@ -181,7 +181,7 @@ class DataTransferTool:
                                 print(f"Excluding object {mapped_data['name']} based on exclusion criteria.")
                                 continue 
                             
-                            print(f'mappings: {mappings[dest_field]}')
+                            #print(f'mappings: {mappings[dest_field]}')
                             # Apply transformation and lookup actions
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
@@ -191,7 +191,7 @@ class DataTransferTool:
                             mapped_data[dest_field] = rendered_source_value
                         
 
-                        print(f'Mapped Data: {mapped_data}')
+                        #print(f'Mapped Data: {mapped_data}')
                         # Create or update the object in the destination
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
     
@@ -204,7 +204,7 @@ class DataTransferTool:
             actions = [actions]
             
         for action in actions:
-            print(f'ACTION {action} for {value}')
+            #print(f'ACTION {action} for {value}')
             
             if 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
@@ -237,7 +237,7 @@ class DataTransferTool:
                         else:
                             value = {reference_field: nested_obj.id, field_name: value}
             
-            print(f'POST ACTION {action}: value now {value}')
+            #print(f'POST ACTION {action}: value now {value}')
         
         return value
 
@@ -307,7 +307,7 @@ class DataTransferTool:
         
         cache_key = f"{lookup_type}:{value}"
         if cache_key in self.lookup_cache:
-            print(f"Found {cache_key} in cache.")
+            #print(f"Found {cache_key} in cache.")
             return self.lookup_cache[cache_key]
         
         api_client = self.sources[obj_config['destination_api']].api
