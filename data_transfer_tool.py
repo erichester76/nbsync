@@ -171,7 +171,6 @@ class DataTransferTool:
                         if 'source' in field_info:
                             source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                             required_keys=self.extract_required_keys(source_template)
-                            print(f"preloading {required_keys}")
                             resolver = Resolver(item, required_keys=required_keys)
                             # Debug: Ensure the source template is valid
                             template = env.from_string(source_template)

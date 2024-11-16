@@ -29,7 +29,6 @@ class Resolver:
                             break
 
                         resolved[full_path_str] = current_obj
-                        print(f"Resolved '{full_path_str}' -> {current_obj}")
                     else:
                         current_obj = resolved[full_path_str]
             except Exception as e:
