@@ -6,7 +6,7 @@ class Resolver:
     def __init__(self):
         self._cache = {}
 
-    def resolve_nested_context(item):
+    def resolve_nested_context(self,item):
         """Resolve nested attributes or keys in an object or dictionary using dpath."""
         context = {}
 
