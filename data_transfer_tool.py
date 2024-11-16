@@ -147,7 +147,6 @@ class DataTransferTool:
         """Process the mappings defined in the object_mappings section of the YAML."""
                 
         for obj_type, obj_config in self.config['object_mappings'].items():
-            timer.show_timers()
 
             source = self.sources[obj_config['source_api']]
 
@@ -168,6 +167,7 @@ class DataTransferTool:
                     mappings = obj_config['mapping']
 
                 for item in source_data:
+                    timer.show_timers()
                     timer.start_timer(f"Item Processing Total {obj_type}")
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
