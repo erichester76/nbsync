@@ -158,18 +158,33 @@ class DataTransferTool:
                     find_function = obj_config.get('find_function')
                     mappings = obj_config['mapping']
 
-                    for item in source_data:
-                        resolver = Resolver(item)
-                        # Render each source template for all mappings at once, only once per item
-                        rendered_mappings = {}
-                        for dest_field, field_info in mappings.items():
-                            if 'source' in field_info:
-                                source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
-                                template = env.from_string(source_template)
-                                timer.start_timer("Render Source Template")
+                for item in source_data:
+                    resolver = Resolver(item)
+
+                    # Debug: Ensure resolver is initialized correctly
+                    print(f"Type of resolver before template render: {type(resolver)}")
+
+                    # Render each source template for all mappings at once, only once per item
+                    rendered_mappings = {}
+                    for dest_field, field_info in mappings.items():
+                        if 'source' in field_info:
+                            source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
+
+                            # Debug: Ensure the source template is valid
+                            print(f"Source template for {dest_field}: {source_template}")
+
+                            template = env.from_string(source_template)
+                            timer.start_timer("Render Source Template")
+
+                            # Debug: Ensure to_dict() works as expected
+                            try:
                                 rendered_source_value = template.render(resolver.to_dict())
-                                timer.stop_timer("Render Source Template")
-                                rendered_mappings[dest_field] = rendered_source_value
+                            except Exception as e:
+                                print(f"Error during rendering: {e}")
+                                raise
+
+                            timer.stop_timer("Render Source Template")
+                            rendered_mappings[dest_field] = rendered_source_value
 
                         # Now apply any transformations/actions to the rendered mappings
                         mapped_data = {}
