@@ -179,9 +179,7 @@ class DataTransferTool:
                             elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
                                 exclude_object = True
                             
-                            if exclude_object:
-                                print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
-                                continue 
+
                             
                             #print(f'mappings: {mappings[dest_field]}')
                             # Apply transformation and lookup actions
@@ -191,7 +189,10 @@ class DataTransferTool:
 
                             
                             mapped_data[dest_field] = rendered_source_value
-                        
+  
+                        if exclude_object:
+                            print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
+                            continue                       
 
                         #print(f'Mapped Data: {mapped_data}')
                         # Create or update the object in the destination
