@@ -282,8 +282,11 @@ class DataTransferTool:
         else:
             for attr in dir(item):
                 if not attr.startswith('_') and not callable(getattr(item, attr)):
-                    context[attr] = get_nested_value(item, attr)
-
+                    try:
+                        context[attr] = get_nested_value(item, attr)
+                    except:
+                        print(f"Skipping inaccessible property: {attr}")
+                    continue
         return context
     
     
