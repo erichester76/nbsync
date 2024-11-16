@@ -145,14 +145,12 @@ class DataTransferTool:
             current_obj = obj
             try:
                 for attr in attrs:
-                    timer.start_timer(f"Resolve Nested Context {attr_path} {attrs} {attr}")
                     if isinstance(current_obj, dict):
                         current_obj = current_obj.get(attr)
                     else:
                         current_obj = getattr(current_obj, attr)
                     if current_obj is None:
                         break
-                    timer.stop_timer(f"Resolve Nested Context {attr_path} {attrs} {attr}")
                 return current_obj
             except AttributeError:
                 return None
@@ -197,7 +195,8 @@ class DataTransferTool:
                     for item in source_data:
                         # Prepare the context once per item
                         #timer.start_timer("Resolve Nested Context")
-                        #context = self.resolve_nested_context(item)
+                        context = self.resolve_nested_context(item)
+                        print(f'{context}')
                         #timer.stop_timer("Resolve Nested Context")
                         # Render each source template for all mappings at once, only once per item
                         rendered_mappings = {}
