@@ -11,7 +11,7 @@ class Resolver:
     def _flatten_structure(self, item, parent_key='', sep='.', visited=None, max_depth=20, current_depth=0):
         """
         Flatten a nested dictionary or object-like structure into a single-level dictionary,
-        with protections against infinite recursion.
+        with protections against infinite recursion, permissions errors, and remote calls.
         """
         if visited is None:
             visited = set()
@@ -29,35 +29,44 @@ class Resolver:
             return flat_dict
         visited.add(id(item))
 
+        def is_remote_object(value):
+            """
+            Determine if a value is likely to be a remote or lazy-loaded object.
+            """
+            return hasattr(value, "__call__") or "pyVmomi" in str(type(value))
+
         def get_value(obj, attr):
-            """Dynamically get a value from an object or dict."""
-            if isinstance(obj, dict):
-                return obj.get(attr, None)
-            elif hasattr(obj, attr):
-                return getattr(obj, attr, None)
-            return None
+            """Safely get a value from an object or dict."""
+            try:
+                if isinstance(obj, dict):
+                    return obj.get(attr, None)
+                elif hasattr(obj, attr):
+                    value = getattr(obj, attr, None)
+                    if is_remote_object(value):
+                        print(f"Skipping remote-like attribute: {attr}")
+                        return None
+                    return value
+            except Exception as e:
+                print(f"Skipping attribute {attr} due to error: {e}")
+                return None
 
         if isinstance(item, dict):
-            # Process dictionary keys
             for k, v in item.items():
                 new_key = f"{parent_key}{sep}{k}" if parent_key else k
                 flat_dict.update(self._flatten_structure(v, new_key, sep=sep, visited=visited, max_depth=max_depth, current_depth=current_depth + 1))
         elif hasattr(item, '__dict__') or isinstance(item, object):
-            # Process object attributes dynamically
             for attr in dir(item):
                 if attr.startswith('_') or callable(getattr(item, attr, None)):
                     continue  # Skip private and callable attributes
                 value = get_value(item, attr)
+                if value is None:
+                    continue
                 new_key = f"{parent_key}{sep}{attr}" if parent_key else attr
                 flat_dict.update(self._flatten_structure(value, new_key, sep=sep, visited=visited, max_depth=max_depth, current_depth=current_depth + 1))
         else:
-            # Base case: add the final value
             flat_dict[parent_key] = item
 
         return flat_dict
-
-
-
 
     def resolve(self, path):
         """
