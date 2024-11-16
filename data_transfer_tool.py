@@ -145,12 +145,14 @@ class DataTransferTool:
             current_obj = obj
             try:
                 for attr in attrs:
+                    timer.start_timer(f"Resolve Nested Context {attr}")
                     if isinstance(current_obj, dict):
                         current_obj = current_obj.get(attr)
                     else:
                         current_obj = getattr(current_obj, attr)
                     if current_obj is None:
                         break
+                    timer.stop_timer(f"Resolve Nested Context {attr}")
                 return current_obj
             except AttributeError:
                 return None
@@ -164,9 +166,7 @@ class DataTransferTool:
                 try:
                     if attr.startswith('_'):
                         continue
-                    timer.start_timer(f"Resolve Nested Context {attr}")
                     context[attr] = get_nested_value(item, attr)
-                    timer.stop_timer(f"Resolve Nested Context {attr}")
                 except Exception as e:
                     continue
 
