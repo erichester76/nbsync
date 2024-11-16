@@ -179,8 +179,6 @@ class DataTransferTool:
                             elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
                                 exclude_object = True
                             
-
-                            
                             #print(f'mappings: {mappings[dest_field]}')
                             # Apply transformation and lookup actions
                             if 'action' in mappings[dest_field]:
@@ -192,12 +190,11 @@ class DataTransferTool:
   
                         if exclude_object:
                             print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
-                            continue                       
-
-                        #print(f'Mapped Data: {mapped_data}')
-                        # Create or update the object in the destination
-                        self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
-    
+                        else:                            
+                            #print(f'Mapped Data: {mapped_data}')
+                            # Create or update the object in the destination
+                            self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
+        
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
