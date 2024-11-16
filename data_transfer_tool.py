@@ -281,7 +281,7 @@ class DataTransferTool:
                 context[key] = get_nested_value(item, key)
         else:
             for attr in dir(item):
-                if not attr.startswith('_') and not callable(getattr(item, attr)):
+                if not attr.startswith('_') and not callable(getattr(item, attr, None)):
                     try:
                         context[attr] = get_nested_value(item, attr)
                     except:
