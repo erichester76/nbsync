@@ -43,7 +43,7 @@ def replace_map(value, filename):
     Apply a series of regex replacements from a file to the value.
     Each line in the file should be in the format: pattern,replacement
     """
-    print(f"running replace map on {value} from map {filename}")
+    #print(f"running replace map on {value} from map {filename}")
     try:
         with open(filename, 'r') as f:
             # Read the file line by line
@@ -52,7 +52,7 @@ def replace_map(value, filename):
                 pattern, replacement = line.strip().split(',')
                 # Apply the regex replacement
                 value = re.sub(pattern, replacement, value)
-        print(f"after replace_map {value}")
+        #print(f"after replace_map {value}")
         return value
     except Exception as e:
         print(f"Error in replace_map: {e}")
@@ -206,7 +206,7 @@ class DataTransferTool:
             actions = [actions]
             
         for action in actions:
-            print(f'ACTION {action} for {value}')
+            #print(f'ACTION {action} for {value}')
             
             if 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
@@ -239,7 +239,7 @@ class DataTransferTool:
                         else:
                             value = {reference_field: nested_obj.id, field_name: value}
             
-            print(f'POST ACTION {action}: value now {value}')
+            #print(f'POST ACTION {action}: value now {value}')
         
         return value
 
