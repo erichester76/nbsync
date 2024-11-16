@@ -4,7 +4,7 @@ class Resolver:
     def __init__(self):
         self._cache = {}
 
-    def resolve_nested_context(item):
+    def resolve_nested_context(self, item):
         """Resolve flat or top-level attributes and keys in an object or dict."""
         context = {}
 
