@@ -17,9 +17,9 @@ class Resolver:
                     current_obj = getattr(current_obj, attr, None)
                 if current_obj is None:
                     break
-            return current_obj
+            return current_obj or ""  # Return a default value if resolution fails
         except AttributeError:
-            return None
+            return ""
 
     def to_dict(self):
         """
