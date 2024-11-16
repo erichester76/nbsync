@@ -436,7 +436,10 @@ def main():
 
 if __name__ == "__main__":
     timer = Timer()
+    timer.start_timer(f"Total Runtime")
     main()
+    timer.stop_timer(f"Total Runtime")
     timer.show_timers()
+
 
     
