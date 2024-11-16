@@ -375,7 +375,7 @@ class DataTransferTool:
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
             # Check for changes in object to determine if we should update
-            differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_numeric_type_changes=True) d
+            differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_numeric_type_changes=True)
             if differences:
                 print(f"Differences found for {existing_object.name}: {differences}")
                 if self.dry_run:
