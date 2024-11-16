@@ -160,10 +160,12 @@ class DataTransferTool:
                         rendered_mappings = {}
                         for dest_field, field_info in mappings.items():
                             if 'source' in field_info:
+                                print("starting render")
                                 source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                                 template = env.from_string(source_template)
                                 rendered_source_value = template.render(context)
                                 rendered_mappings[dest_field] = rendered_source_value
+                                print("finished render")
 
                         # Now apply any transformations/actions to the rendered mappings
                         mapped_data = {}
