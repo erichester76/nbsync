@@ -12,6 +12,7 @@ import jinja2
 import deepdiff
 import cProfile
 import pstats
+from utils.timer import Timer
 
 # Register custom Jinja2 filters
 
@@ -143,7 +144,11 @@ class DataTransferTool:
             for source_client in source.clients:
                 source_api = obj_config.get('source_api')
                 print(f"Fetching data from {source_api}...")
+                
+                timer.start_timer("Fetch Data")
                 source_data = source.fetch_data(obj_config, source_client)
+                timer.stop_timer("Fetch Data")
+
                 destination_api = self.sources[obj_config['destination_api']]
                 
                 for destination_client in destination_api.clients:
@@ -154,8 +159,9 @@ class DataTransferTool:
 
                     for item in source_data:
                         # Prepare the context once per item
+                        timer.start_timer("Resolve Nested Context")
                         context = self.resolve_nested_context(item)
-                        
+                        timer.stop_timer("Resolve Nested Context")
                         # Render each source template for all mappings at once, only once per item
                         rendered_mappings = {}
                         for dest_field, field_info in mappings.items():
@@ -179,12 +185,12 @@ class DataTransferTool:
                             elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
                                 exclude_object = True
                             
-                            #print(f'mappings: {mappings[dest_field]}')
-                            # Apply transformation and lookup actions
+
                             if 'action' in mappings[dest_field]:
                                 action = mappings[dest_field].get('action')
+                                timer.start_timer("Apply Transforms")
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, mapped_data)
-
+                                timer.stop_timer("Apply Transforms")
                             
                             mapped_data[dest_field] = rendered_source_value
   
@@ -193,9 +199,9 @@ class DataTransferTool:
                         else:                            
                             #print(f'Mapped Data: {mapped_data}')
                             # Create or update the object in the destination
-                            print("b4 create/update")
+                            timer.start_timer("Create or Update")
                             self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
-                            print("after create/update")
+                            timer.stop_timer("Create or Update")
 
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
         """Apply transformations using Jinja2 filters directly."""
@@ -324,8 +330,10 @@ class DataTransferTool:
 
         # Try finding the object
         try:
-            
+            timer.start_timer(f"Find Object {lookup_type}")
             found_object = find_function(**filter_params)
+            timer.stop_timer(f"Find Object {lookup_type}")
+
             if found_object:
                 first_object = list(found_object)[0]
                 self.lookup_cache[cache_key] = first_object
@@ -342,7 +350,9 @@ class DataTransferTool:
                 print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
             else:
                 print(f"Creating {create_function_path} object with data: {create_data}")
+                timer.start_timer(f"Create Object {lookup_type}")
                 created_object = create_function(create_data)
+                timer.stop_timer(f"Create Object {lookup_type}")
                 self.lookup_cache[cache_key] = created_object
                 return created_object if hasattr(created_object, 'id') else None
             
@@ -392,7 +402,10 @@ class DataTransferTool:
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
             # Check for changes in object to determine if we should update
+            timer.start_timer(f"DeepDiff")
             differences = deepdiff.DeepDiff(filtered_current_data, self.normalize_types(sanitized_mapped_data), ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
+            timer.stop_timer(f"DeepDiff")
+
             if differences:
                 print(f"Differences found for {existing_object.name}: {differences}")
                 if self.dry_run:
@@ -400,7 +413,10 @@ class DataTransferTool:
                 else: 
                     print(f"Updating object {existing_object.id}:")
                     update_function = self.get_nested_function(api_client, update_function_path)
+                    timer.start_timer(f"Update object")
                     update_function([sanitized_mapped_data])
+                    timer.stop_timer(f"Update object")
+
             else:
                 print(f"No changes detected for object {existing_object.name}, skipping update.")
             return existing_object.id
@@ -411,7 +427,9 @@ class DataTransferTool:
             else:
                 print(f"Creating new object {mapped_data['name']}: {mapped_data}")
                 create_function = self.get_nested_function(api_client, create_function_path)
+                timer.start_timer(f"Create object")
                 new_object = create_function(self.sanitize_data(mapped_data))
+                timer.stopt_timer(f"Create object")
                 print(f"Created New Object {mapped_data['name']} #{new_object.id}")
                 return new_object.id
 
@@ -426,15 +444,8 @@ def main():
     tool.process_mappings()
 
 if __name__ == "__main__":
-    profiler = cProfile.Profile()
-    profiler.enable()  
+    timer = Timer()
     main()
-    profiler.disable()
-   
-    stats = pstats.Stats(profiler)
-    stats.sort_stats("cumulative").print_stats(20)  # Adjust '20' to see more or fewer lines of output
-    # # Print only the top 10 functions sorted by time
-    # stats.sort_stats("time").print_stats(10)
-    # # Print callers and callees for detailed call chain information
-    # stats.print_callers(10)  
-    # stats.print_callees(10)  
+    timer.show_timers()
+
+    
