@@ -170,8 +170,11 @@ class DataTransferTool:
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
                             source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
+                            timer.start_timer("Extract Required Keys")
                             required_keys=self.extract_required_keys(source_template)
                             resolver = Resolver(item, required_keys=required_keys)
+                            timer.stop_timer("Extract Required Keys")
+
                             # Debug: Ensure the source template is valid
                             template = env.from_string(source_template)
                             timer.start_timer("Render Source Template")
