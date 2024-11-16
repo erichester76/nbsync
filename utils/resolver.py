@@ -9,6 +9,7 @@ class Resolver:
         """
         Dynamically resolve a dot-notation path from an object or dictionary.
         """
+        print(f"resolving {attr_path}")
         attrs = attr_path.split('.')
         current_obj = self.item
         try:
