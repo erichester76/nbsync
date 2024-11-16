@@ -8,12 +8,26 @@ class Resolver:
         self.flattened_item = self._flatten_structure(item)
         print("Flattened structure:", self.flattened_item)
 
-    def _flatten_structure(self, item, parent_key='', sep='.'):
+    def _flatten_structure(self, item, parent_key='', sep='.', visited=None, max_depth=20, current_depth=0):
         """
         Flatten a nested dictionary or object-like structure into a single-level dictionary,
-        incorporating dynamic resolution logic.
+        with protections against infinite recursion.
         """
+        if visited is None:
+            visited = set()
+
         flat_dict = {}
+
+        # Prevent infinite recursion by checking max depth
+        if current_depth > max_depth:
+            print(f"Max depth reached at key: {parent_key}")
+            return flat_dict
+
+        # Prevent revisiting objects
+        if id(item) in visited:
+            print(f"Circular reference detected at key: {parent_key}")
+            return flat_dict
+        visited.add(id(item))
 
         def get_value(obj, attr):
             """Dynamically get a value from an object or dict."""
@@ -27,24 +41,21 @@ class Resolver:
             # Process dictionary keys
             for k, v in item.items():
                 new_key = f"{parent_key}{sep}{k}" if parent_key else k
-                print(f"Processing dict key: {new_key} -> {v}")
-                flat_dict.update(self._flatten_structure(v, new_key, sep=sep))
+                flat_dict.update(self._flatten_structure(v, new_key, sep=sep, visited=visited, max_depth=max_depth, current_depth=current_depth + 1))
         elif hasattr(item, '__dict__') or isinstance(item, object):
             # Process object attributes dynamically
             for attr in dir(item):
                 if attr.startswith('_') or callable(getattr(item, attr, None)):
-                    # Skip private/protected and callable attributes
-                    continue
+                    continue  # Skip private and callable attributes
                 value = get_value(item, attr)
                 new_key = f"{parent_key}{sep}{attr}" if parent_key else attr
-                print(f"Processing object attribute: {new_key} -> {value}")
-                flat_dict.update(self._flatten_structure(value, new_key, sep=sep))
+                flat_dict.update(self._flatten_structure(value, new_key, sep=sep, visited=visited, max_depth=max_depth, current_depth=current_depth + 1))
         else:
             # Base case: add the final value
             flat_dict[parent_key] = item
-            print(f"Added flat value: {parent_key} -> {item}")
 
         return flat_dict
+
 
 
 
