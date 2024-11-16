@@ -25,9 +25,24 @@ class Resolver:
 
     def resolve(self, path):
         """
-        Resolve a dot-notation path using the pre-flattened structure.
+        Resolve a dot-notation path using the pre-flattened structure or dynamically.
         """
-        return self.flattened_item.get(path, None)
+        # Attempt to resolve using the flattened structure
+        if path in self.flattened_item:
+            return self.flattened_item[path]
+
+        # Resolve dynamically for missing intermediate paths
+        attrs = path.split('.')
+        current_obj = self.item
+        for attr in attrs:
+            if isinstance(current_obj, dict):
+                current_obj = current_obj.get(attr)
+            elif hasattr(current_obj, attr):
+                current_obj = getattr(current_obj, attr, None)
+            else:
+                current_obj = None
+                break
+        return current_obj
 
     def __getitem__(self, path):
         return self.resolve(path)
