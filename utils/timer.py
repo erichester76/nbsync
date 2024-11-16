@@ -26,12 +26,19 @@ class Timer:
 
     def show_timers(self):
         """
-        Display the average times for all timers.
+        Display the average times for all timers, sorted from slowest to fastest.
         """
-        print("Timer Results:")
-        for name, timing in self.timings.items():
+        print("Timer Results (sorted by average time):")
+        sorted_timers = sorted(
+            self.timings.items(),
+            key=lambda item: item[1]["total"] / item[1]["count"] if item[1]["count"] > 0 else 0,
+            reverse=True
+        )
+
+        for name, timing in sorted_timers:
             if timing["count"] > 0:
                 average_time = timing["total"] / timing["count"]
                 print(f"{name}: {average_time:.2f} ms (average over {timing['count']} runs)")
             else:
                 print(f"{name}: No completed timings recorded.")
+
