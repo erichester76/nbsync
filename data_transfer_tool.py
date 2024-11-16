@@ -349,7 +349,23 @@ class DataTransferTool:
             print(f"Error calling create_function: {str(e)}")
             return None
 
-    
+    def normalize_types(self, data):
+        if isinstance(data, dict):
+            return {k: self.normalize_types(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [self.normalize_types(v) for v in data]
+        elif isinstance(data, str):
+            # Convert to int or float if the string represents a number
+            try:
+                return int(data)
+            except ValueError:
+                try:
+                    return float(data)
+                except ValueError:
+                    return data
+        else:
+            return data
+        
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
         """Create or update objects in the destination API."""
         # Find function
@@ -375,7 +391,7 @@ class DataTransferTool:
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
             # Check for changes in object to determine if we should update
-            differences = deepdiff.DeepDiff(filtered_current_data, sanitized_mapped_data, ignore_order=True, report_repetition=True, ignore_numeric_type_changes=True, ignore_type_in_groups=[(int, str, float)])
+            differences = deepdiff.DeepDiff(filtered_current_data, self.normalize_types(sanitized_mapped_data), ignore_order=True, report_repetition=True, ignore_numeric_type_changes=True, ignore_type_in_groups=[(int, str, float)])
             if differences:
                 print(f"Differences found for {existing_object.name}: {differences}")
                 if self.dry_run:
