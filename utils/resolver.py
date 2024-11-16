@@ -7,14 +7,19 @@ class Resolver:
         self._cache = {}
 
     def resolve_nested_context(self,item):
-        """Resolve nested attributes in a dictionary using dpath."""
+        """Resolve flat attributes and keys with minimal overhead."""
         context = {}
 
+        # Handle dictionary objects
         if isinstance(item, dict):
-            for key in item.keys():
-                try:
-                    value = dpath.util.get(item, key, separator='.')
-                    context[key] = value
-                except KeyError:
-                    continue
+            context.update(item)
+        else:
+            # Filter attributes to skip private and callable ones
+            attrs = [
+                attr for attr in dir(item)
+                if not attr.startswith('_') and not callable(getattr(item, attr, None))
+            ]
+            for attr in attrs:
+                context[attr] = getattr(item, attr, None)
+
         return context
