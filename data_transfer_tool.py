@@ -154,7 +154,6 @@ class DataTransferTool:
 
                     for item in source_data:
                         # Prepare the context once per item
-                        print(f'{item}')
                         context = self.resolve_nested_context(item)
                         
                         # Render each source template for all mappings at once, only once per item
