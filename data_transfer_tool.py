@@ -220,7 +220,7 @@ class DataTransferTool:
                         self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
                         timer.stop_timer("Create or Update")
                         
-                timer.stop_timer("Item Processing Total")
+                    timer.stop_timer("Item Processing Total")
 
 
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
