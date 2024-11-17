@@ -129,7 +129,7 @@ class DataTransferTool:
         """
         Extract keys referenced in a Jinja template.
         """
-        key_pattern = r"{{[\s\(]*([A-Za-z0-9\\\/\_\.]+)"
+        key_pattern = r"{{[\s\(\[]*([\w\.]+)"
         return re.findall(key_pattern, template_string)
 
     def process_mappings(self):
@@ -348,7 +348,8 @@ class DataTransferTool:
         elif isinstance(data, list):
             return [self.normalize_types(v) for v in data]
         elif isinstance(data, str):
-            # Convert to int or float if the string represents a number
+            if data.lower() in ['true', 'false']:
+               return data.lower() == 'true'
             try:
                 return int(data)
             except ValueError:
