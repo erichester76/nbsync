@@ -385,7 +385,7 @@ class DataTransferTool:
             if value is None:
                 return None
             # Append '_id' to the key if the value is a number
-            if isinstance(value, (int, float)):
+            if isinstance(value, (int)):
                 key_field = f"{key_field}_id"
             filter_params[key_field] = value
         
