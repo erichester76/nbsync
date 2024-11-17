@@ -379,13 +379,16 @@ class DataTransferTool:
         # Automatically extract the first two fields from mapped_data as key fields
         key_fields = list(mapped_data.keys())[:2]
 
-        # Ensure both key fields are present
         filter_params = {}
         for key_field in key_fields:
-            if not mapped_data[key_field]: 
+            value = mapped_data[key_field]
+            if value is None:
                 return None
-            filter_params[key_field] = mapped_data[key_field]
-
+            # Append '_id' to the key if the value is a number
+            if isinstance(value, (int, float)):
+                key_field = f"{key_field}_id"
+            filter_params[key_field] = value
+        
         # Attempt to find the object
         try:
             found_object = find_function(**filter_params)
