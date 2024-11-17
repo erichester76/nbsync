@@ -214,7 +214,7 @@ class DataTransferTool:
                     timer.stop_timer(f"Per Object Timing {obj_type}")
                         
                 timer.stop_timer(f"API Endpoint Processing Total {source_api}")
-                timer.show_timers()
+                #timer.show_timers()
 
             timer.stop_timer(f"Total {obj_type} Runtime")
             timer.show_timers()
@@ -223,24 +223,31 @@ class DataTransferTool:
         """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
-        
+
         if isinstance(actions, str):
             actions = [actions]
-            
+
         for action in actions:
-            #print(f'ACTION {action} for {value}')
-            
             if 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](value, pattern, replacement)
-            
+
             elif 'lookup_object' in action:
                 matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     lookup_type, find_function_path, create_function_path = matches[0]
+
+                    # Extract additional fields from actions (if any)
+                    additional_fields = []
+                    for sub_action in actions:
+                        if isinstance(sub_action, dict) and "append" in sub_action:
+                            field, template = sub_action["append"]
+                            field_value = self.render_template(template, obj_config)
+                            additional_fields.append({"field": field, "value": field_value})
+
                     value = self.lookup_object(
-                        value, lookup_type, find_function_path, create_function_path, 
-                        obj_config
+                        value, lookup_type, find_function_path, create_function_path,
+                        obj_config, additional_fields
                     ).id
 
             elif 'include_object' in action:
@@ -248,11 +255,11 @@ class DataTransferTool:
                 if matches:
                     reference_field, lookup_type, find_function_path, create_function_path = matches[0]
                     # Get the reference field value from mapped_data or item
-                    sub_value = mapped_data.get(reference_field) or item.get(reference_field)
-                    
+                    sub_value = mapped_data.get(reference_field) or obj_config.get(reference_field)
+
                     if sub_value:
                         nested_obj = self.lookup_object(
-                            sub_value, lookup_type, find_function_path, create_function_path, 
+                            sub_value, lookup_type, find_function_path, create_function_path,
                             obj_config
                         )
                         # Instead of placing it in mapped_data, nest it within `value`
@@ -260,10 +267,9 @@ class DataTransferTool:
                             value[reference_field] = nested_obj.id
                         else:
                             value = {reference_field: nested_obj.id, field_name: value}
-            
-            #print(f'POST ACTION {action}: value now {value}')
-        
+
         return value
+
 
     def get_nested_function(self, api_client, function_path):
         """Recursively get a function from the API client."""
@@ -296,19 +302,22 @@ class DataTransferTool:
 
         return sanitized_data
 
-    def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config):
-        """Perform API lookup or create an object on the server side."""
-        
+    def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, additional_fields=None):
+        """Perform API lookup or create an object on the server side with support for additional fields."""
+        additional_fields = additional_fields or []
+
         cache_key = f"{lookup_type}:{value}"
         if cache_key in self.lookup_cache:
-            #print(f"Found {cache_key} in cache.")
             return self.lookup_cache[cache_key]
-        
+
         api_client = self.sources[obj_config['destination_api']].api
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
-        
+
+        # Prepare filter parameters for lookup
         filter_params = {lookup_type: value}
+        for field_info in additional_fields:
+            filter_params[field_info["field"]] = field_info["value"]
 
         # Try finding the object
         try:
@@ -320,14 +329,16 @@ class DataTransferTool:
                 first_object = list(found_object)[0]
                 self.lookup_cache[cache_key] = first_object
                 return first_object
-            
+
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
 
-        # If not found, create the object
+        # If not found, prepare data for creation
         try:
-            
-            create_data = {lookup_type: value, 'slug': re.sub(r'\W+', '-', value.lower())} #, **additional_data}
+            create_data = {lookup_type: value, 'slug': re.sub(r'\W+', '-', value.lower())}
+            for field_info in additional_fields:
+                create_data[field_info["field"]] = field_info["value"]
+
             if self.dry_run:
                 print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
             else:
@@ -337,10 +348,11 @@ class DataTransferTool:
                 timer.stop_timer(f"Create Object {lookup_type}")
                 self.lookup_cache[cache_key] = created_object
                 return created_object if hasattr(created_object, 'id') else None
-            
+
         except Exception as e:
             print(f"Error calling create_function: {str(e)}")
             return None
+
 
     def normalize_types(self, data):
         if isinstance(data, dict):
@@ -364,12 +376,17 @@ class DataTransferTool:
         """Create or update objects in the destination API."""
         # Find function
         find_function = self.get_nested_function(api_client, find_function_path)
-        # Automatically extract the first field from mapped_data as the key field
-        key_field = list(mapped_data.keys())[0]
-        if not mapped_data[key_field]: 
-            return None
-        
-        filter_params = {key_field: mapped_data[key_field]}        
+        # Automatically extract the first two fields from mapped_data as key fields
+        key_fields = list(mapped_data.keys())[:2]
+
+        # Ensure both key fields are present
+        filter_params = {}
+        for key_field in key_fields:
+            if not mapped_data[key_field]: 
+                return None
+            filter_params[key_field] = mapped_data[key_field]
+
+        # Attempt to find the object
         try:
             found_object = find_function(**filter_params)
         except Exception as e:
