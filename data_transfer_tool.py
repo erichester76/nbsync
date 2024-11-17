@@ -183,18 +183,15 @@ class DataTransferTool:
                             
                             exclude_patterns = mappings[dest_field].get('exclude',[])
                             if isinstance(exclude_patterns, list):
-                                print(f'processing exclusion {exclude_patterns}')
                                 for pattern in exclude_patterns:
-                                    print(f'{pattern} {rendered_mappings[dest_field]}')
                                     if bool(re.match(pattern, rendered_mappings[dest_field])):
-                                        print("MATCHED")
                                         exclude_object = True
                                         break
                             elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
                                 exclude_object = True
                             
 
-                            if 'action' in mappings[dest_field]:
+                            if 'action' in mappings[dest_field] and not exclude_object:
                                 action = mappings[dest_field].get('action')
                                 timer.start_timer("Apply Transforms")
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, mapped_data)
