@@ -183,6 +183,7 @@ class DataTransferTool:
                             
                             exclude_patterns = mappings[dest_field].get('exclude',[])
                             if isinstance(exclude_patterns, list):
+                                print(f'processing exclusion {exclude_patterns}')
                                 for pattern in exclude_patterns:
                                     if bool(re.match(pattern, rendered_mappings[dest_field])):
                                         exclude_object = True
