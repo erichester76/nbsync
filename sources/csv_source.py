@@ -39,7 +39,7 @@ class CSVDataSource(DataSource):
         all_data = []
 
         # Open the file and read the CSV content
-        with open(file_path, mode='r') as file:
+        with open(file_path, encoding='utf16', mode='r') as file:
             reader = csv.DictReader(file, delimiter=delimiter)
 
             # Collect raw rows without mapping
