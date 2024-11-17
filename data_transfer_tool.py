@@ -187,6 +187,7 @@ class DataTransferTool:
                                 for pattern in exclude_patterns:
                                     print(f'{pattern} {rendered_mappings[dest_field]}')
                                     if bool(re.match(pattern, rendered_mappings[dest_field])):
+                                        print("MATCHED")
                                         exclude_object = True
                                         break
                             elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
