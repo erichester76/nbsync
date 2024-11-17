@@ -129,7 +129,7 @@ class DataTransferTool:
         """
         Extract keys referenced in a Jinja template.
         """
-        key_pattern = r"{{[\s\(\[]*(\S+)"
+        key_pattern = r"{{[\s\(]*([A-Za-z0-9\\\/\_\.]+)"
         return re.findall(key_pattern, template_string)
 
     def process_mappings(self):
