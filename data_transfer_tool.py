@@ -12,7 +12,6 @@ import jinja2
 import deepdiff
 from utils.timer import Timer
 from utils.resolver import Resolver
-import pprint
 
 # Custom Jinja2 filters
 def regex_replace(value, pattern, replacement):
@@ -400,10 +399,9 @@ class DataTransferTool:
             raise
 
         if found_object:
-            for existing_object in found_object:
-                mapped_data['id'] = existing_object.serialize().get('id')
-                current_data = self.sanitize_data(existing_object.serialize())
-
+            existing_object = list(found_object)[0]
+            mapped_data['id'] = existing_object.id
+            current_data = self.sanitize_data(existing_object.serialize())
             sanitized_mapped_data = self.sanitize_data(mapped_data)
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
@@ -445,7 +443,8 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode without making any changes')
     parser.add_argument('-d','--debug', action='store_true', help='enable debug')
     args = parser.parse_args()
-    tool = DataTransferTool(args.file, args.dry_run, True)
+    debug=args.debug
+    tool = DataTransferTool(args.file, args.dry_run, args.debug)
     tool.initialize_sources()
     tool.process_mappings()
 
