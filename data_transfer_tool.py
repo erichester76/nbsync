@@ -402,7 +402,7 @@ class DataTransferTool:
         if found_object:
             existing_object = list(found_object)[0]
             current_data = self.sanitize_data(existing_object.serialize())
-            mapped_data['id'] = current_data.id
+            mapped_data['id'] = current_data['id']
 
             sanitized_mapped_data = self.sanitize_data(mapped_data)
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
