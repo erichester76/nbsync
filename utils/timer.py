@@ -1,8 +1,9 @@
 import time
 
 class Timer:
-    def __init__(self):
+    def __init__(self,debug):
         self.timings = {}
+        self.debug=debug
 
     def start_timer(self, name):
         """
