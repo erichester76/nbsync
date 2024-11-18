@@ -401,7 +401,7 @@ class DataTransferTool:
 
         if found_object:
             for existing_object in found_object:
-                mapped_data['id'] = existing_object.id
+                mapped_data['id'] = existing_object.serialize().id
                 current_data = self.sanitize_data(existing_object.serialize())
 
             sanitized_mapped_data = self.sanitize_data(mapped_data)
