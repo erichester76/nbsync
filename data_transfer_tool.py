@@ -400,6 +400,8 @@ class DataTransferTool:
             raise
 
         if found_object:
+            for obj in found_object:
+                print(f"{obj.id} - {obj.name}") 
             existing_object = next(iter(found_object), None)
             print(existing_object.serialize())
             mapped_data['id'] = existing_object.id
