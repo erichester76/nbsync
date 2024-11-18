@@ -400,18 +400,8 @@ class DataTransferTool:
             raise
 
         if found_object:
-            try:
-                # Access the first item in the RecordSet
-                existing_object = found_object[0]
-                print(f"Found object: {existing_object}")
-                if hasattr(existing_object, 'id'):
-                    mapped_data['id'] = existing_object.id
-                    print(f"Mapped ID: {mapped_data['id']}")
-                else:
-                    raise AttributeError(f"Object does not have an 'id' attribute: {existing_object}")
-            except IndexError:
-                print("No objects found in RecordSet.")
-                
+            existing_object = next(iter(found_object), None)
+            mapped_data['id'] = existing_object.id
             current_data = self.sanitize_data(existing_object.serialize())
             sanitized_mapped_data = self.sanitize_data(mapped_data)
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
