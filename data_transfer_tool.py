@@ -444,7 +444,7 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode without making any changes')
     parser.add_argument('-d','--debug', action='store_true', help='enable debug')
     args = parser.parse_args()
-    tool = DataTransferTool(args.file, args.dry_run, args.debug)
+    tool = DataTransferTool(args.file, args.dry_run, True)
     tool.initialize_sources()
     tool.process_mappings()
 
