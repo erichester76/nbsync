@@ -391,7 +391,6 @@ class DataTransferTool:
         
         # Attempt to find the object
         try:
-            print(f"calling {find_function_path} with filter: {filter_params}")
             found_object = find_function(**filter_params)
         except Exception as e:
             print(f"Error calling find_function: {str(e)}")
