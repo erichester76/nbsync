@@ -22,7 +22,7 @@ class Timer:
             self.timings[name]["total"] += duration
             self.timings[name]["count"] += 1
             self.timings[name]["start"] = None  # Reset start time
-            #print(f"TIMER: {name} took {duration}ms")
+            if self.debug: print(f"TIMER: {name} took {duration}ms")
 
     def show_timers(self):
         """
@@ -38,9 +38,9 @@ class Timer:
         for name, timing in sorted_timers:
             if timing["count"] > 0:
                 average_time = timing["total"] / timing["count"]
-                print(f"{name}: {average_time:.2f} ms (average over {timing['count']} runs)")
+                if self.debug: print(f"{name}: {average_time:.2f} ms (average over {timing['count']} runs)")
             else:
-                print(f"{name}: No completed timings recorded.")
+                if self.debug: print(f"{name}: No completed timings recorded.")
                 
         print("\n")
 

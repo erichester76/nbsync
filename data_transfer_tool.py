@@ -41,7 +41,7 @@ def replace_map(value, filename):
     Apply a series of regex replacements from a file to the value.
     Each line in the file should be in the format: pattern,replacement
     """
-    #print(f"running replace map on {value} from map {filename}")
+    print(f"running replace map on {value} from map {filename}")
     try:
         with open(filename, 'r') as f:
             # Read the file line by line
@@ -83,7 +83,7 @@ yaml.add_implicit_resolver('!envvar', env_var_pattern)
 yaml.add_constructor('!envvar', env_var_constructor)
 
 class DataTransferTool:
-    def __init__(self, yaml_file, dry_run):
+    def __init__(self, yaml_file, dry_run, debug):
         # Read the YAML file line by line and build yaml_content until object_mappings
         yaml_content = []
         object_mappings = []
@@ -105,6 +105,8 @@ class DataTransferTool:
 
         # Store the dry_run flag
         self.dry_run = dry_run
+        self.debug = debug
+
         self.sources = {}
         self.mapped_data = {}
         self.DEBUG = 1
@@ -144,7 +146,7 @@ class DataTransferTool:
                 source_api = obj_config.get('source_api')
 
                 timer.start_timer(f"Fetch Data {obj_type} {source_api}")
-                print(f"Fetching {obj_type} from {source_api}...")
+                if self.debug: print(f"Fetching {obj_type} from {source_api}...")
                 source_data = source.fetch_data(obj_config, source_client)
                 timer.stop_timer(f"Fetch Data {obj_type} {source_api}")
 
@@ -200,7 +202,7 @@ class DataTransferTool:
                             mapped_data[dest_field] = rendered_source_value
   
                     if exclude_object:
-                        print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
+                        if self.debug: print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
                     else:                            
                         # Create or update the object in the destination
                         for destination_client in destination_api.clients:
@@ -342,7 +344,7 @@ class DataTransferTool:
             if self.dry_run:
                 print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
             else:
-                print(f"Creating {create_function_path} object with data: {create_data}")
+                if self.debug: print(f"Creating {create_function_path} object with data: {create_data}")
                 timer.start_timer(f"Create Object {lookup_type}")
                 created_object = create_function(create_data)
                 timer.stop_timer(f"Create Object {lookup_type}")
@@ -410,39 +412,40 @@ class DataTransferTool:
             timer.stop_timer(f"DeepDiff")
 
             if differences:
-                print(f"Differences found for {existing_object.name}: {differences}")
+                if self.debug: print(f"Differences found for {existing_object.name}: {differences}")
                 if self.dry_run:
                     print(f"[DRY RUN] Would update object {existing_object.id} with data")
                 else: 
-                    print(f"Updating object {existing_object.id}:")
+                    if self.debug: print(f"Updating object {existing_object.id}:")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     timer.start_timer(f"Update object")
                     update_function([sanitized_mapped_data])
                     timer.stop_timer(f"Update object")
 
             else:
-                print(f"No changes detected for object {existing_object.name}, skipping update.")
+                if self.debug: print(f"No changes detected for object {existing_object.name}, skipping update.")
             return existing_object.id
         
         else:
             if self.dry_run:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}")
             else:
-                print(f"Creating new object {mapped_data['name']}: {mapped_data}")
+                if self.debug: print(f"Creating new object {mapped_data['name']}: {mapped_data}")
                 create_function = self.get_nested_function(api_client, create_function_path)
                 timer.start_timer(f"Create object")
                 new_object = create_function(self.sanitize_data(mapped_data))
                 timer.stop_timer(f"Create object")
-                print(f"Created New Object {mapped_data['name']} #{new_object.id}")
+                if self.debug: print(f"Created New Object {mapped_data['name']} #{new_object.id}")
                 return new_object.id
 
 def main():
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
     parser.add_argument('-f', '--file', required=True, help='YAML file to load configurations')
     parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode without making any changes')
+    parser.add_argument('-d','--debug', action='store_true', help='enable debug')
     args = parser.parse_args()
 
-    tool = DataTransferTool(args.file, args.dry_run)
+    tool = DataTransferTool(args.file, args.dry_run, args.debug)
     tool.initialize_sources()
     tool.process_mappings()
 
