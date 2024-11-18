@@ -400,10 +400,10 @@ class DataTransferTool:
             raise
 
         if found_object:
-            existing_object = list(found_object)[0]
+            existing_object = next(iter(found_object), None)
+            print(existing_object.serialize())
+            mapped_data['id'] = existing_object.id
             current_data = self.sanitize_data(existing_object.serialize())
-            mapped_data['id'] = current_data['id']
-
             sanitized_mapped_data = self.sanitize_data(mapped_data)
             filtered_current_data = {key: current_data.get(key) for key in mapped_data}
             sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
