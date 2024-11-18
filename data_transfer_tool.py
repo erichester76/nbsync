@@ -41,7 +41,6 @@ def replace_map(value, filename):
     Apply a series of regex replacements from a file to the value.
     Each line in the file should be in the format: pattern,replacement
     """
-    print(f"running replace map on {value} from map {filename}")
     try:
         with open(filename, 'r') as f:
             # Read the file line by line
