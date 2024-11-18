@@ -444,13 +444,12 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode without making any changes')
     parser.add_argument('-d','--debug', action='store_true', help='enable debug')
     args = parser.parse_args()
-    debug=args.debug
     tool = DataTransferTool(args.file, args.dry_run, args.debug)
     tool.initialize_sources()
     tool.process_mappings()
 
 if __name__ == "__main__":
-    timer = Timer(main.debug)
+    timer = Timer(True)
     timer.start_timer(f"Total Runtime")
     main()
     timer.stop_timer(f"Total Runtime")
