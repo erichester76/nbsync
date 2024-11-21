@@ -94,6 +94,7 @@ class APIDataSource(DataSource):
                     self.clients.append(self.api)
                     print(f"Connected to {self.name} at {base_url}")
                     if self.config['branch']:
+                        print(f"Setting Branch Header to {self.config['branch']}")
                         branch = self.api.plugins.branching.branches.get(name=self.config['branch'])
                         self.api.http_session.headers["X-NetBox-Branch"] = branch.schema_id
                         print(f"Set Branch Header to {self.config['branch']}")
