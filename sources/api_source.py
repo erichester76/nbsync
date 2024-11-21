@@ -87,7 +87,6 @@ class APIDataSource(DataSource):
             print(f"(re)authenticating for {self.name} @ {base_url}.")
             # Handle authentication methods
             if auth_method == 'token':
-                self.api.http_session.headers["X-NetBox-Branch"] = branch.schema_id
                 self.api = auth_func(base_url, token=self.config['auth_args']['token'])
                 self.api.http_session.verify = False
                 if base_url not in self.session_expiry: 
