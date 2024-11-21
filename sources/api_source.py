@@ -95,7 +95,7 @@ class APIDataSource(DataSource):
                         print(f"Setting Branch Header to {self.config['branch']}")
                         ts = datetime.datetime.now().strftime("%m%d%y%H%M")
                         branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']} {ts}", status='new')
-                        while 'ready' not in list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']} {ts}").get('status'))[0]:
+                        while 'ready' not in list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']} {ts}"))[0]['status']:
                             print('waiting on branch to form')
                             time.sleep(1)
 
