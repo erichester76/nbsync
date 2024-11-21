@@ -374,67 +374,67 @@ class DataTransferTool:
             return data
         
     def create_or_update(self, api_client, find_function_path, create_function_path, update_function_path, mapped_data):
-        # """Create or update objects in the destination API."""
-        # # Find function
-        # find_function = self.get_nested_function(api_client, find_function_path)
-        # # Automatically extract the first two fields from mapped_data as key fields
-        # key_fields = list(mapped_data.keys())[:2]
+        """Create or update objects in the destination API."""
+        # Find function
+        find_function = self.get_nested_function(api_client, find_function_path)
+        # Automatically extract the first two fields from mapped_data as key fields
+        key_fields = list(mapped_data.keys())[:2]
 
-        # filter_params = {}
-        # for key_field in key_fields:
-        #     value = mapped_data[key_field]
-        #     if value is None:
-        #         return None
-        #     # Append '_id' to the key if the value is a number
-        #     if isinstance(value, (int)):
-        #         key_field = f"{key_field}_id"
-        #     filter_params[key_field] = value
+        filter_params = {}
+        for key_field in key_fields:
+            value = mapped_data[key_field]
+            if value is None:
+                return None
+            # Append '_id' to the key if the value is a number
+            if isinstance(value, (int)):
+                key_field = f"{key_field}_id"
+            filter_params[key_field] = value
         
-        # # Attempt to find the object
-        # try:
-        #     found_object = find_function(**filter_params)
-        # except Exception as e:
-        #     print(f"Error calling find_function: {str(e)}")
-        #     raise
+        # Attempt to find the object
+        try:
+            found_object = find_function(**filter_params)
+        except Exception as e:
+            print(f"Error calling find_function: {str(e)}")
+            raise
 
-        # if found_object:
-        #     existing_object = list(found_object)[0]
-        #     mapped_data['id'] = existing_object.id
-        #     current_data = self.sanitize_data(existing_object.serialize())
-        #     sanitized_mapped_data = self.sanitize_data(mapped_data)
-        #     filtered_current_data = {key: current_data.get(key) for key in mapped_data}
-        #     sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
-        #     # Check for changes in object to determine if we should update
-        #     timer.start_timer(f"DeepDiff")
-        #     differences = deepdiff.DeepDiff(filtered_current_data, self.normalize_types(sanitized_mapped_data), ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
-        #     timer.stop_timer(f"DeepDiff")
+        if found_object:
+            existing_object = list(found_object)[0]
+            mapped_data['id'] = existing_object.id
+            current_data = self.sanitize_data(existing_object.serialize())
+            sanitized_mapped_data = self.sanitize_data(mapped_data)
+            filtered_current_data = {key: current_data.get(key) for key in mapped_data}
+            sanitized_mapped_data = self.sanitize_data(sanitized_mapped_data)
+            # Check for changes in object to determine if we should update
+            timer.start_timer(f"DeepDiff")
+            differences = deepdiff.DeepDiff(filtered_current_data, self.normalize_types(sanitized_mapped_data), ignore_order=True, report_repetition=True, ignore_type_in_groups=[(int, str, float)])
+            timer.stop_timer(f"DeepDiff")
 
-        #     if differences:
-        #         if self.debug: print(f"Differences found for {existing_object.name}: {differences}")
-        #         if self.dry_run:
-        #             print(f"[DRY RUN] Would update object {existing_object.id} with data")
-        #         else: 
-        #             if self.debug: print(f"Updating object {existing_object.id}:")
-        #             update_function = self.get_nested_function(api_client, update_function_path)
-        #             timer.start_timer(f"Update object")
-        #             update_function([sanitized_mapped_data])
-        #             timer.stop_timer(f"Update object")
+            if differences:
+                if self.debug: print(f"Differences found for {existing_object.name}: {differences}")
+                if self.dry_run:
+                    print(f"[DRY RUN] Would update object {existing_object.id} with data")
+                else: 
+                    if self.debug: print(f"Updating object {existing_object.id}:")
+                    update_function = self.get_nested_function(api_client, update_function_path)
+                    timer.start_timer(f"Update object")
+                    update_function([sanitized_mapped_data])
+                    timer.stop_timer(f"Update object")
 
-        #     else:
-        #         if self.debug: print(f"No changes detected for object {existing_object.name}, skipping update.")
-        #     return existing_object.id
+            else:
+                if self.debug: print(f"No changes detected for object {existing_object.name}, skipping update.")
+            return existing_object.id
         
-        # else:
-        if self.dry_run:
-            print(f"[DRY RUN] Would create new object {mapped_data['name']}")
         else:
-            if self.debug: print(f"Creating new object {mapped_data['name']}: {mapped_data}")
-            create_function = self.get_nested_function(api_client, create_function_path)
-            timer.start_timer(f"Create object")
-            new_object = create_function(self.sanitize_data(mapped_data))
-            timer.stop_timer(f"Create object")
-            if self.debug: print(f"Created New Object {mapped_data['name']} #{new_object.id}")
-            return new_object.id
+            if self.dry_run:
+                print(f"[DRY RUN] Would create new object {mapped_data['name']}")
+            else:
+                if self.debug: print(f"Creating new object {mapped_data['name']}: {mapped_data}")
+                create_function = self.get_nested_function(api_client, create_function_path)
+                timer.start_timer(f"Create object")
+                new_object = create_function(self.sanitize_data(mapped_data))
+                timer.stop_timer(f"Create object")
+                if self.debug: print(f"Created New Object {mapped_data['name']} #{new_object.id}")
+                return new_object.id
 
 def main():
     parser = argparse.ArgumentParser(description='Data Transfer Tool')
