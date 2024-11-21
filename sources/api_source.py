@@ -5,10 +5,9 @@ import requests
 from bravado.client import SwaggerClient
 from bravado.requests_client import RequestsClient
 import datetime
+import time
 import inspect
 import types
-import pprint
-import json
 import urllib3
 
 class APIDataSource(DataSource):
@@ -95,7 +94,11 @@ class APIDataSource(DataSource):
                     if self.config['branch']:
                         print(f"Setting Branch Header to {self.config['branch']}")
                         ts = datetime.datetime.now().strftime("%m%d%y%H%M")
-                        branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']} {ts}", status='ready')
+                        branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']} {ts}", status='new')
+                        while 'ready' not in self.api.plugins.branching.branches.get(name=f"{self.config['branch']} {ts}").get('status'):
+                            print('waiting on branch to form')
+                            time.sleep(1)
+
                         self.api.http_session.headers["X-NetBox-Branch"] = branch.schema_id
                         print(f"Set Branch Header to {self.config['branch']}")
        
