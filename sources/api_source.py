@@ -97,7 +97,7 @@ class APIDataSource(DataSource):
                         branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']} {ts}", status='new')
                         status='new'
                         while 'ready' not in status:
-                            status=list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']} {ts}"))[0]['status']
+                            status=list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']} {ts}"))[0]['status'].value
                             print(f'waiting on branch to form {status}')
                             time.sleep(1)
 
