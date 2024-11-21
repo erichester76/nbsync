@@ -76,10 +76,7 @@ class APIDataSource(DataSource):
         auth_method = self.config['auth_method']
         auth_func = self._get_auth_function(module, self.config['auth_function'])
         auth_args = self._prepare_auth_args(base_url)
- 
-        if self.config['branch']:
-            branch = self.api.plugins.branching.branches.get(name=self.config['branch'])
- 
+  
         # Add base_url if required
         if 'base_url' in inspect.signature(auth_func).parameters:
             auth_args['base_url'] = base_url
