@@ -76,6 +76,10 @@ class APIDataSource(DataSource):
         auth_method = self.config['auth_method']
         auth_func = self._get_auth_function(module, self.config['auth_function'])
         auth_args = self._prepare_auth_args(base_url)
+ 
+        if self.config['branch']:
+            branch = self.api.plugins.branching.branches.get(name=self.config['branch'])
+ 
         # Add base_url if required
         if 'base_url' in inspect.signature(auth_func).parameters:
             auth_args['base_url'] = base_url
@@ -86,13 +90,20 @@ class APIDataSource(DataSource):
             print(f"(re)authenticating for {self.name} @ {base_url}.")
             # Handle authentication methods
             if auth_method == 'token':
+                self.api.http_session.headers["X-NetBox-Branch"] = branch.schema_id
                 self.api = auth_func(base_url, token=self.config['auth_args']['token'])
                 self.api.http_session.verify = False
                 if base_url not in self.session_expiry: 
                     self.clients.append(self.api)
                     print(f"Connected to {self.name} at {base_url}")
+                    
 
                 self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
+                if self.config['branch']:
+                    branch = self.api.plugins.branching.branches.get(name=self.config['branch'])
+                    self.api.http_session.headers["X-NetBox-Branch"] = branch.schema_id
+                    print(f"Set Branch Header to {self.config['branch']}")
+
 
             elif auth_method == 'login':
                 if auth_args:
