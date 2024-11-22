@@ -92,7 +92,7 @@ class DataTransferTool:
 
         #replace jinjas {{}} with <<>> so it wont parse them yet.
         yaml_content = yaml_content.replace('{{', '<<').replace('}}', '>>')
-
+        yaml_content = yaml_content.replace('{%', '#<<')
         # Substitute environment variables in the YAML content
         yaml_content = os.path.expandvars(yaml_content)
 
@@ -159,6 +159,7 @@ class DataTransferTool:
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
+                            source_template = field_info['source'].replace('#<<', '{%')
                             source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
                             required_keys=self.extract_required_keys(source_template)
                             timer.start_timer(f"Extract Required Keys {required_keys}")
