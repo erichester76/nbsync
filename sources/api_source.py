@@ -102,7 +102,7 @@ class APIDataSource(DataSource):
                             time.sleep(1)
 
                         self.api.http_session.headers["X-NetBox-Branch"] = branch.schema_id
-                        print(f"Set Branch Header to {self.config['branch']}")
+                        print(f"Set Branch Header to {branch.schema_id} ({self.config['branch']} {ts})")
        
                 self.session_expiry[base_url] = datetime.datetime.now() + datetime.timedelta(minutes=2)
              
