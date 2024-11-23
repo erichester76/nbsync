@@ -255,8 +255,9 @@ class DataTransferTool:
                 # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
-                    additional_data[append_key] = self.render_template(append_template, obj_config)
-
+                    rendered_value = self.render_template(append_template, obj_config)
+                    additional_data[append_key] = rendered_value
+                    
                 # Call lookup_object with additional_data
                 value = self.lookup_object(
                     value, lookup_type, find_function_path, create_function_path,
@@ -316,9 +317,10 @@ class DataTransferTool:
         return sanitized_data
 
     def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, additional_fields=None):
-        """Perform API lookup or create an object on the server side with support for additional fields."""
-        additional_fields = additional_fields or []
+        """Perform API lookup or create an object on the server side with optional additional fields."""
+        additional_fields = additional_fields or {}
 
+        # Cache key to avoid repeated lookups
         cache_key = f"{lookup_type}:{value}"
         if cache_key in self.lookup_cache:
             return self.lookup_cache[cache_key]
@@ -327,12 +329,8 @@ class DataTransferTool:
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
 
-        # Prepare filter parameters for lookup
-        filter_params = {lookup_type: value}
-        for field_info in additional_fields:
-            filter_params[field_info["field"]] = field_info["value"]
-
         # Try finding the object
+        filter_params = {lookup_type: value}
         try:
             timer.start_timer(f"Find Object {lookup_type}")
             found_object = find_function(**filter_params)
@@ -348,9 +346,10 @@ class DataTransferTool:
 
         # If not found, prepare data for creation
         try:
-            create_data = {lookup_type: value, 'slug': re.sub(r'\W+', '-', value.lower())}
-            for field_info in additional_fields:
-                create_data[field_info["field"]] = field_info["value"]
+            create_data = {lookup_type: value}
+            create_data.update(additional_fields)  # Include appended fields
+            if 'slug' not in create_data:
+                create_data['slug'] = re.sub(r'\W+', '-', value.lower())
 
             if self.dry_run:
                 print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
