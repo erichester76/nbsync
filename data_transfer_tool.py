@@ -197,14 +197,13 @@ class DataTransferTool:
                                 timer.start_timer("Apply Transforms")
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, mapped_data)
                                 timer.stop_timer("Apply Transforms")
-                            
-                            if 'exclude_field' in rendered_source_value:
-                                print("skipping {rendered_source_value} {value}")
-                                continue
+                                if 'exclude_field' in str(rendered_source_value):
+                                    print("skipping {rendered_source_value} {value}")
+                                    continue
                             
                             mapped_data[dest_field] = rendered_source_value
                     
-                    if 'exclude_field' in rendered_source_value:
+                    if 'exclude_field' in str(rendered_source_value):
                         print("skipping {rendered_source_value} {value}")
                         continue
                     
