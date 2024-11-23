@@ -248,7 +248,7 @@ class DataTransferTool:
             elif isinstance(action, dict) and 'lookup_object' in action:
                 # Handle `lookup_object` with sub-actions
                 lookup_config = action['lookup_object']
-                lookup_type = lookup_config.get('type')
+                lookup_type = lookup_config.get('field')
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
 
