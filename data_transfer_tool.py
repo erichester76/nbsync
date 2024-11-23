@@ -252,7 +252,7 @@ class DataTransferTool:
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
 
-                # Process `append` fields if present
+                  # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
                     rendered_value = self.render_template(append_template, obj_config)
@@ -317,10 +317,9 @@ class DataTransferTool:
         return sanitized_data
 
     def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, additional_fields=None):
-        """Perform API lookup or create an object on the server side with optional additional fields."""
-        additional_fields = additional_fields or {}
+        """Perform API lookup or create an object on the server side with support for additional fields."""
+        additional_fields = additional_fields or []
 
-        # Cache key to avoid repeated lookups
         cache_key = f"{lookup_type}:{value}"
         if cache_key in self.lookup_cache:
             return self.lookup_cache[cache_key]
@@ -329,8 +328,10 @@ class DataTransferTool:
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
 
-        # Try finding the object
+        # Prepare filter parameters for lookup
         filter_params = {lookup_type: value}
+        
+        # Try finding the object
         try:
             timer.start_timer(f"Find Object {lookup_type}")
             found_object = find_function(**filter_params)
