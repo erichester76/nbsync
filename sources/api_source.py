@@ -91,7 +91,7 @@ class APIDataSource(DataSource):
                 if base_url not in self.session_expiry: 
                     self.clients.append(self.api)
                     print(f"Connected to {self.name} at {base_url}")
-                    if self.config['branch']:
+                    if branch in self.config:
                         print(f"Setting Branch Header to {self.config['branch']}")
                         ts = datetime.datetime.now().strftime("%m%d%y%H%M")
                         branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']} {ts}", status='new')
