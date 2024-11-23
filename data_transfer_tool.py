@@ -344,7 +344,7 @@ class DataTransferTool:
             if self.dry_run:
                 print(f"[DRY RUN] Would create {lookup_type} object with data: {create_data}")
             else:
-                if self.debug: print(f"Creating {create_function_path} object with data: {create_data}")
+                print(f"Creating {create_function_path} object with data: {create_data}")
                 timer.start_timer(f"Create Object {lookup_type}")
                 created_object = create_function(create_data)
                 timer.stop_timer(f"Create Object {lookup_type}")
