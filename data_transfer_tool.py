@@ -232,7 +232,7 @@ class DataTransferTool:
         Render a Jinja2 template string with the given context.
         """
         try:
-            template = template.replace('<<', '{{').replace('>>', '}}')
+            template_str = template_str.replace('<<', '{{').replace('>>', '}}')
             template = env.from_string(template_str)
             return template.render(context)
         except Exception as e:
@@ -278,9 +278,6 @@ class DataTransferTool:
                 lookup_type = lookup_config.get('field')
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
-
-                # Debug to validate lookup_type and source value
-                print(f"Debug: lookup_type={lookup_type}, value={value}, field_name={field_name}")
 
                 # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
@@ -466,14 +463,15 @@ class DataTransferTool:
                 if self.dry_run:
                     print(f"[DRY RUN] Would update object {existing_object.id} with data")
                 else: 
-                    if self.debug: print(f"Updating object {existing_object.id}:")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     timer.start_timer(f"Update object")
                     update_function([sanitized_mapped_data])
                     timer.stop_timer(f"Update object")
+                    print(f"Updated object {existing_object.id}:")
+
 
             else:
-                if self.debug: print(f"No changes detected for object {existing_object.name}, skipping update.")
+                print(f"No changes detected for object {existing_object.name}, skipping update.")
             return existing_object.id
         
         else:
@@ -485,7 +483,7 @@ class DataTransferTool:
                 timer.start_timer(f"Create object")
                 new_object = create_function(self.sanitize_data(mapped_data))
                 timer.stop_timer(f"Create object")
-                if self.debug: print(f"Created New Object {mapped_data['name']} #{new_object.id}")
+                print(f"Created New Object {mapped_data['name']} #{new_object.id}")
                 return new_object.id
 
 def main():
