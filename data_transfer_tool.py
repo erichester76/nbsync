@@ -233,15 +233,12 @@ class DataTransferTool:
 
         if isinstance(actions, str):
             actions = [actions]
-   
-        additional_data = {}  # Store appended fields for lookup_object
 
         for action in actions:
           
-            if 'exclude' in action:
-                # Handle `exclude`
-                exclude_value = re.findall(r"exclude\('(.*?)'\)", action)[0]
-                if value.startswith(exclude_value):
+            if "exclude" in action:
+                if value in action:
+                    #leave function and loop because we are skipping this field and all actions after this
                     return 'exclude_field'
                 
             elif 'regex_replace' in action:
@@ -249,23 +246,23 @@ class DataTransferTool:
                 value = env.filters['regex_replace'](value, pattern, replacement)
 
             elif 'lookup_object' in action:
-                # Handle `lookup_object` with sub-actions
                 matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     lookup_type, find_function_path, create_function_path = matches[0]
 
-                    # Process sub-actions (e.g., append)
-                    sub_actions = action.get('sub_actions', [])
-                    for sub_action in sub_actions:
-                        if 'append' in sub_action:
-                            append_field, template = re.findall(r"append\('(.*?)',\s*'(.*?)'\)", sub_action)[0]
-                            additional_data[append_field] = self.render_template(template, obj_config)
+                    # Extract additional fields from actions (if any)
+                    additional_fields = []
+                    for sub_action in action:
+
+                        if isinstance(sub_action, dict) and "append" in sub_action:
+                            field, template = sub_action["append"]
+                            field_value = self.render_template(template, obj_config)
+                            additional_fields.append({"field": field, "value": field_value})
 
                     value = self.lookup_object(
                         value, lookup_type, find_function_path, create_function_path,
-                        obj_config, additional_data
+                        obj_config, additional_fields
                     ).id
-
 
             elif 'include_object' in action:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
