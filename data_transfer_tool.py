@@ -252,10 +252,11 @@ class DataTransferTool:
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
 
-                  # Process `append` fields if present
+                # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
-                    rendered_value = self.render_template(append_template, obj_config)
+                    template = env.from_string(append_template)
+                    rendered_value = template.render(obj_config)
                     additional_data[append_key] = rendered_value
                     
                 # Call lookup_object with additional_data
