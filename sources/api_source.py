@@ -13,7 +13,7 @@ import urllib3
 class APIDataSource(DataSource):
     def __init__(self, name, config):
         super().__init__(config)
-        self.name = namex
+        self.name = name
         self.api = None
         self.clients = []
         self.session_expiry = {}
