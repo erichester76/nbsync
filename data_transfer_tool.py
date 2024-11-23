@@ -224,7 +224,9 @@ class DataTransferTool:
 
             timer.stop_timer(f"Total {obj_type} Runtime")
             timer.show_timers()
-    def render_template(self, template_str, context):
+    
+    
+    def _render_template(self, template_str, context):
         """
         Render a Jinja2 template string with the given context.
         """
@@ -235,6 +237,20 @@ class DataTransferTool:
             print(f"Error rendering template '{template_str}': {e}")
             return None
         
+    def _render_nested_structure(self, template_structure, context):
+        """
+        Render a nested dictionary or list of templates.
+        """
+        if isinstance(template_structure, dict):
+            return {key: self._render_nested_structure(value, context) if isinstance(value, (dict, list)) 
+                    else self.render_template(value, context)
+                    for key, value in template_structure.items()}
+        elif isinstance(template_structure, list):
+            return [self._render_nested_structure(item, context) for item in template_structure]
+        else:
+            return self._render_template(template_structure, context)
+    
+  
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
         if value is None:
             return value
@@ -256,19 +272,21 @@ class DataTransferTool:
                 value = env.filters['regex_replace'](value, pattern, replacement)
 
             elif isinstance(action, dict) and 'lookup_object' in action:
-                # Handle `lookup_object` with sub-actions
                 lookup_config = action['lookup_object']
-                lookup_type = lookup_config.get('field')
+                lookup_type = lookup_config.get('type')
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
-                
+
                 # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
-                    # Render each append field using its template
-                    print(f"Appending field: {append_key}, Rendered Value: {rendered_value}")
-                    rendered_value = self.render_template(append_template, mapped_data)
-                    additional_data[append_key] = rendered_value
+                    if isinstance(append_template, dict):
+                        # Handle nested structures recursively
+                        additional_data[append_key] = self._render_nested_structure(append_template, mapped_data)
+                    else:
+                        # Render simple fields
+                        rendered_value = self._render_template(append_template, mapped_data)
+                        additional_data[append_key] = rendered_value
 
                 # Call lookup_object with additional_data
                 value = self.lookup_object(
