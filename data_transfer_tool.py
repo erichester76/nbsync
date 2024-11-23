@@ -257,6 +257,7 @@ class DataTransferTool:
                         if 'append' in sub_action:
                             append_field, template = re.findall(r"append\('(.*?)',\s*'(.*?)'\)", sub_action)[0]
                             additional_data[append_field] = self.render_template(template, obj_config)
+                            print(f"appending data to object: {additional_data[append_field]}")
 
                     # Call lookup_object with additional_data
                     value = self.lookup_object(
