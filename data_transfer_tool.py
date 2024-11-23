@@ -247,23 +247,21 @@ class DataTransferTool:
 
             elif isinstance(action, dict) and 'lookup_object' in action:
                 # Handle `lookup_object` with sub-actions
-                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action['lookup_object'])
-                if matches:
-                    lookup_type, find_function_path, create_function_path = matches[0]
+                lookup_config = action['lookup_object']
+                lookup_type = lookup_config.get('type')
+                find_function_path = lookup_config.get('find_function')
+                create_function_path = lookup_config.get('create_function')
 
-                    # Process sub-actions (e.g., append)
-                    sub_actions = action.get('sub_actions', [])
-                    for sub_action in sub_actions:
-                        if 'append' in sub_action:
-                            append_field, template = re.findall(r"append\('(.*?)',\s*'(.*?)'\)", sub_action)[0]
-                            additional_data[append_field] = self.render_template(template, obj_config)
-                            print(f"appending data to object: {additional_data[append_field]}")
+                # Process `append` fields if present
+                append_fields = lookup_config.get('append', {})
+                for append_key, append_template in append_fields.items():
+                    additional_data[append_key] = self.render_template(append_template, obj_config)
 
-                    # Call lookup_object with additional_data
-                    value = self.lookup_object(
-                        value, lookup_type, find_function_path, create_function_path,
-                        obj_config, additional_data
-                    ).id
+                # Call lookup_object with additional_data
+                value = self.lookup_object(
+                    value, lookup_type, find_function_path, create_function_path,
+                    obj_config, additional_data
+                ).id
 
             elif 'include_object' in action:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
