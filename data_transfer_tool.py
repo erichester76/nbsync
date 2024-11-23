@@ -198,9 +198,12 @@ class DataTransferTool:
                                 rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, mapped_data)
                                 timer.stop_timer("Apply Transforms")
                             
+                            if 'exclude_field' in rendered_source_value:
+                                continue
+                            
                             mapped_data[dest_field] = rendered_source_value
                     
-                    if 'exclude' in rendered_source_value:
+                    if 'exclude_field' in rendered_source_value:
                         continue
                     
                     if exclude_object:
@@ -232,9 +235,11 @@ class DataTransferTool:
             actions = [actions]
 
         for action in actions:
+          
             if "exclude" in action:
                 if value in action:
-                    return 'exclude'
+                    return 'exclude_field'
+                
             elif 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](value, pattern, replacement)
