@@ -277,6 +277,9 @@ class DataTransferTool:
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
 
+                # Debug to validate lookup_type and source value
+                print(f"Debug: lookup_type={lookup_type}, value={value}, field_name={field_name}")
+
                 # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
@@ -289,10 +292,14 @@ class DataTransferTool:
                         additional_data[append_key] = rendered_value
 
                 # Call lookup_object with additional_data
-                value = self.lookup_object(
+                lookup_result = self.lookup_object(
                     value, lookup_type, find_function_path, create_function_path,
                     obj_config, additional_data
-                ).id
+                )
+                if lookup_result is not None:
+                    value = lookup_result.id
+                else:
+                    print(f"Warning: Lookup failed for {lookup_type} with value {value}")
 
             elif 'include_object' in action:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
@@ -357,10 +364,11 @@ class DataTransferTool:
         api_client = self.sources[obj_config['destination_api']].api
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
+        # Validate lookup_type and value
+        if not lookup_type or value is None:
+            raise ValueError(f"Invalid lookup_type or value: lookup_type={lookup_type}, value={value}")
 
-        # Prepare filter parameters for lookup
-        filter_params = {lookup_type: value}
-        
+        filter_params = {lookup_type: value}        
         # Try finding the object
         try:
             timer.start_timer(f"Find Object {lookup_type}")
