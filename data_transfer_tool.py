@@ -224,7 +224,17 @@ class DataTransferTool:
 
             timer.stop_timer(f"Total {obj_type} Runtime")
             timer.show_timers()
-
+    def render_template(self, template_str, context):
+        """
+        Render a Jinja2 template string with the given context.
+        """
+        try:
+            template = env.from_string(template_str)
+            return template.render(context)
+        except Exception as e:
+            print(f"Error rendering template '{template_str}': {e}")
+            return None
+        
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
         if value is None:
             return value
@@ -251,13 +261,15 @@ class DataTransferTool:
                 lookup_type = lookup_config.get('field')
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
-
+                
                 # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
-                    # Use rendered_source_value directly
-                    additional_data[append_key] = mapped_data.get(field_name) or value
-         
+                    # Render each append field using its template
+                    print(f"Appending field: {append_key}, Rendered Value: {rendered_value}")
+                    rendered_value = self.render_template(append_template, mapped_data)
+                    additional_data[append_key] = rendered_value
+
                 # Call lookup_object with additional_data
                 value = self.lookup_object(
                     value, lookup_type, find_function_path, create_function_path,
