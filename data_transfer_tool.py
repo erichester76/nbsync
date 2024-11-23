@@ -255,7 +255,7 @@ class DataTransferTool:
                 # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
-                    template = env.from_string(append_template)
+                    template = env.from_string(str(append_template).strip())
                     rendered_value = template.render(obj_config)
                     additional_data[append_key] = rendered_value
                     
