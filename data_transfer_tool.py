@@ -199,11 +199,13 @@ class DataTransferTool:
                                 timer.stop_timer("Apply Transforms")
                             
                             if 'exclude_field' in rendered_source_value:
+                                print("skipping {rendered_source_value} {value}")
                                 continue
                             
                             mapped_data[dest_field] = rendered_source_value
                     
                     if 'exclude_field' in rendered_source_value:
+                        print("skipping {rendered_source_value} {value}")
                         continue
                     
                     if exclude_object:
@@ -237,6 +239,7 @@ class DataTransferTool:
         for action in actions:
           
             if "exclude" in action:
+                print("{action} {value}")
                 if value in action:
                     return 'exclude_field'
                 
