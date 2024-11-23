@@ -228,7 +228,6 @@ class DataTransferTool:
             timer.show_timers()
 
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
-        """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
 
@@ -238,8 +237,9 @@ class DataTransferTool:
         for action in actions:
           
             if "exclude" in action:
-                print("{action} {value}")
+                print(f"{action} {value}")
                 if value in action:
+                    print(f"{action} found {value}")
                     return 'exclude_field'
                 
             elif 'regex_replace' in action:
