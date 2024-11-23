@@ -192,7 +192,6 @@ class DataTransferTool:
                             elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
                                 exclude_object = True
                             
-
                             if 'action' in mappings[dest_field] and not exclude_object:
                                 action = mappings[dest_field].get('action')
                                 timer.start_timer("Apply Transforms")
@@ -200,7 +199,10 @@ class DataTransferTool:
                                 timer.stop_timer("Apply Transforms")
                             
                             mapped_data[dest_field] = rendered_source_value
-  
+                    
+                    if 'exclude' in rendered_source_value:
+                        continue
+                    
                     if exclude_object:
                         if self.debug: print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
                     else:                            
@@ -230,7 +232,10 @@ class DataTransferTool:
             actions = [actions]
 
         for action in actions:
-            if 'regex_replace' in action:
+            if "exclude" in action:
+                if value in action:
+                    return 'exclude'
+            elif 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](value, pattern, replacement)
 
@@ -242,6 +247,7 @@ class DataTransferTool:
                     # Extract additional fields from actions (if any)
                     additional_fields = []
                     for sub_action in actions:
+
                         if isinstance(sub_action, dict) and "append" in sub_action:
                             field, template = sub_action["append"]
                             field_value = self.render_template(template, obj_config)
