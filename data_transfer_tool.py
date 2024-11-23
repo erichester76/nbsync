@@ -250,7 +250,7 @@ class DataTransferTool:
 
             elif 'lookup_object' in action:
                 # Handle `lookup_object` with sub-actions
-                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action['lookup_object'])
+                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
                 if matches:
                     lookup_type, find_function_path, create_function_path = matches[0]
 
