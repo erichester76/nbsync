@@ -203,6 +203,7 @@ class DataTransferTool:
                             mapped_data[dest_field] = rendered_source_value
                     
                     if 'exclude_field' in str(rendered_source_value):
+                        print(f"Excluding field due to exclusion clause")
                         continue
                     
                     if exclude_object:
@@ -231,6 +232,7 @@ class DataTransferTool:
         Render a Jinja2 template string with the given context.
         """
         try:
+            template = template.replace('<<', '{{').replace('>>', '}}')
             template = env.from_string(template_str)
             return template.render(context)
         except Exception as e:
