@@ -240,6 +240,7 @@ class DataTransferTool:
                 print(f"{action} {value}")
                 if value in action:
                     print(f"{action} found {value}")
+                    #leave function and loop because we are skipping this field and all actions after thisvi co
                     return 'exclude_field'
                 
             elif 'regex_replace' in action:
