@@ -194,7 +194,8 @@ class DataTransferTool:
         print(f"Processing {obj_type} Mapping.")
         # Render mappings for the current object
         mappings = obj_config['mapping']
-        rendered_mappings = {'parent_id': { parent_id, {'exclude': None}}}
+        mappings['parent_id']=parent_id
+        rendered_mappings = {}
         
         for dest_field, field_info in mappings.items():
             if 'source' in field_info:
