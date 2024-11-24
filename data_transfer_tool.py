@@ -298,7 +298,8 @@ class DataTransferTool:
 
                 # Process `append` fields
                 append_fields = lookup_config.get('append', {})
-                additional_data = self._render_nested_structure(append_fields, mapped_data)
+                if append_fields: 
+                    additional_data = self._render_nested_structure(append_fields, mapped_data)
 
                 # Debugging
                 print(f"Debug: lookup_field={lookup_field}, value={value}, field_name={field_name}")
