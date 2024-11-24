@@ -275,28 +275,35 @@ class DataTransferTool:
     
         for action in actions:
             print(f"processing {action} with {value}")
-            # Regex replace action
-            if 'regex_replace' in action:
-                pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
-                value = env.filters['regex_replace'](value, pattern, replacement)
+            if isinstance(action, dict) and 'lookup_object' in action:
+                lookup_config = action['lookup_object']
+                lookup_field = lookup_config.get('field')
+                find_function_path = lookup_config.get('find_function')
+                create_function_path = lookup_config.get('create_function')
 
-            # Lookup object action
-            elif 'lookup_object' in action:
-                matches = re.findall(r"lookup_object\('(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
-                if matches:
-                    lookup_type, find_function_path, create_function_path = matches[0]
-                    value = self.lookup_object(
-                        value, lookup_type, find_function_path, create_function_path, obj_config, mapped_data
-                    ).id
+                # Process `append` fields
+                append_fields = lookup_config.get('append', {})
+                additional_data = self._render_nested_structure(append_fields, mapped_data)
 
-            # Append additional fields
-            elif 'append' in action:
-                append_data = re.findall(r"append\((.*?)\)", action)
-                if append_data:
-                    for field_definition in append_data:
-                        append_field, append_value = re.findall(r"'(.*?)',\s*'(.*?)'", field_definition)[0]
-                        mapped_data[append_field] = self._render_template(append_value, item)
+                # Debugging
+                print(f"Debug: lookup_field={lookup_field}, value={value}, field_name={field_name}")
 
+                # Call lookup_object
+                lookup_result = self.lookup_object(
+                    value, lookup_field, find_function_path, create_function_path,
+                    obj_config, additional_data
+                )
+                if lookup_result is not None:
+                    value = lookup_result.id
+                else:
+                    print(f"Warning: Lookup failed for {lookup_field} with value {value}")
+
+            elif 'exclude' in action:
+                # Handle `exclude`
+                exclude_value = action['exclude']
+                if value.startswith(exclude_value):
+                    return None, []
+                
         return value
 
     def get_nested_function(self, api_client, function_path):
