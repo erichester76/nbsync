@@ -193,8 +193,7 @@ class DataTransferTool:
         timer.start_timer(f"Per Object Timing {obj_type}")
         print(f"Processing {obj_type} Mapping.")
         mappings = obj_config.get('mapping', {})
-        mappings['parent_id']=parent_id
-        rendered_mappings = {}
+        rendered_mappings = {'parent_id': parent_id}
         
         for dest_field, field_info in mappings.items():
             if field_info and 'source' in str(field_info):
