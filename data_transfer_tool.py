@@ -133,6 +133,35 @@ class DataTransferTool:
         key_pattern = r"{{[\s\(\[]*([\w\.]+)"
         return re.findall(key_pattern, template_string)
 
+    
+    def _render_template(self, template_str, context):
+        """
+        Render a Jinja2 template string with the given context.
+        """
+        try:
+            template_str = template_str.replace('<<', '{{').replace('>>', '}}')
+            required_keys=self.extract_required_keys(template_str)
+            resolver = Resolver(context, required_keys=required_keys)
+            template = env.from_string(template_str)
+            return template.render(resolver)
+        except Exception as e:
+            print(f"Error rendering template '{template_str}': {e}")
+            return None
+        
+    def _render_nested_structure(self, template_structure, context):
+        """
+        Render a nested dictionary or list of templates.
+        """
+        if isinstance(template_structure, dict):
+            return {key: self._render_nested_structure(value, context) if isinstance(value, (dict, list)) 
+                    else self._render_template(value, context)
+                    for key, value in template_structure.items()}
+        elif isinstance(template_structure, list):
+            return [self._render_nested_structure(item, context) for item in template_structure]
+        else:
+            return self._render_template(template_structure, context)
+
+
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
                 
@@ -159,28 +188,11 @@ class DataTransferTool:
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
-                            source_template = field_info['source'].replace('#<<', '{%')
-                            source_template = field_info['source'].replace('<<', '{{').replace('>>', '}}')
-                            required_keys=self.extract_required_keys(source_template)
-                            timer.start_timer(f"Extract Required Keys {required_keys}")
-                            resolver = Resolver(item, required_keys=required_keys)
-                            timer.stop_timer(f"Extract Required Keys {required_keys}")
-
-                            # Debug: Ensure the source template is valid
-                            template = env.from_string(source_template)
-                            timer.start_timer("Render Source Template")
-                            try:
-                                rendered_source_value = template.render(resolver)
-                            except Exception as e:
-                                print(f"Error during rendering: {e}")
-                                raise
-
-                            timer.stop_timer("Render Source Template")
-                            rendered_mappings[dest_field] = rendered_source_value
-
-                        # Now apply any transformations/actions to the rendered mappings
+                            rendered_mappings[dest_field] = self._render_template(item,field_info['source'])
+                        
                         mapped_data = {}
                         exclude_object = False
+                        
                         for dest_field, rendered_source_value in rendered_mappings.items():
                             
                             exclude_patterns = mappings[dest_field].get('exclude',[])
@@ -225,32 +237,6 @@ class DataTransferTool:
 
             timer.stop_timer(f"Total {obj_type} Runtime")
             timer.show_timers()
-    
-    
-    def _render_template(self, template_str, context):
-        """
-        Render a Jinja2 template string with the given context.
-        """
-        try:
-            template_str = template_str.replace('<<', '{{').replace('>>', '}}')
-            template = env.from_string(template_str)
-            return template.render(context)
-        except Exception as e:
-            print(f"Error rendering template '{template_str}': {e}")
-            return None
-        
-    def _render_nested_structure(self, template_structure, context):
-        """
-        Render a nested dictionary or list of templates.
-        """
-        if isinstance(template_structure, dict):
-            return {key: self._render_nested_structure(value, context) if isinstance(value, (dict, list)) 
-                    else self._render_template(value, context)
-                    for key, value in template_structure.items()}
-        elif isinstance(template_structure, list):
-            return [self._render_nested_structure(item, context) for item in template_structure]
-        else:
-            return self._render_template(template_structure, context)
     
   
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
@@ -459,7 +445,7 @@ class DataTransferTool:
             timer.stop_timer(f"DeepDiff")
 
             if differences:
-                if self.debug: print(f"Differences found for {existing_object.name}: {differences}")
+                print(f"Differences found for {existing_object.name}: {differences}")
                 if self.dry_run:
                     print(f"[DRY RUN] Would update object {existing_object.id} with data")
                 else: 
@@ -467,7 +453,7 @@ class DataTransferTool:
                     timer.start_timer(f"Update object")
                     update_function([sanitized_mapped_data])
                     timer.stop_timer(f"Update object")
-                    print(f"Updated object {existing_object.id}:")
+                    print(f"Updated object {existing_object.name}:")
 
 
             else:
