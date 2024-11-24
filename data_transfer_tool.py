@@ -189,35 +189,54 @@ class DataTransferTool:
 
 
     def process_single_mapping(self, obj_type, obj_config, destination_api, item, parent_id=None):
-        """Process a single mapping, including nested mappings."""
+        """Process a single mapping including nested mappings."""
         timer.start_timer(f"Per Object Timing {obj_type}")
-        print(f"Processing {obj_type} Mapping.")
-        mappings = obj_config.get('mapping', {})
-        rendered_mappings = {'parent_id': parent_id}
-        
-        for dest_field, field_info in mappings.items():
-            print(f"rendering {dest_field} {field_info}")
-            if field_info and 'source' in str(field_info) and not 'nested_mappings' in dest_field:
-                rendered_mappings[dest_field] = self._render_template(field_info['source'], item)
 
-        # Process exclusion logic and transformations
+        # Ensure rendered_mappings includes parent_id
+        rendered_mappings = {'parent_id': parent_id}
+        mappings = obj_config.get('mapping', {})
+        
+        # Separate nested_mappings from regular mappings
+        nested_mappings = mappings.pop('nested_mappings', None)
+
+        for dest_field, field_info in mappings.items():
+            if field_info is None:
+                print(f"Skipping field {dest_field} because field_info is None.")
+                continue
+
+            # Render the source template for the field
+            if 'source' in field_info:
+                try:
+                    rendered_mappings[dest_field] = self._render_template(
+                        field_info['source'], item, additional_context={'parent_id': parent_id}
+                    )
+                except Exception as e:
+                    print(f"Error rendering field {dest_field}: {e}")
+                    rendered_mappings[dest_field] = None
+
+        # Process the mapped data
         mapped_data = {}
         exclude_object = False
-        exclude_patterns=[]
 
         for dest_field, rendered_source_value in rendered_mappings.items():
-            if dest_field in rendered_mappings:
-                exclude_patterns = rendered_mappings[dest_field].get('exclude', [])
+            field_info = mappings.get(dest_field, {})
+            if not field_info:
+                print(f"Skipping field {dest_field} because its mapping is missing.")
+                continue
+
+            # Apply exclusion logic
+            exclude_patterns = field_info.get('exclude', [])
             if isinstance(exclude_patterns, list):
                 for pattern in exclude_patterns:
-                    if bool(re.match(pattern, rendered_mappings[dest_field])):
+                    if bool(re.match(pattern, str(rendered_source_value))):
                         exclude_object = True
                         break
-            elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
+            elif bool(re.match(str(exclude_patterns), str(rendered_source_value))):
                 exclude_object = True
 
-            if 'action' in mappings[dest_field] and not exclude_object:
-                action = rendered_mappings[dest_field].get('action')
+            # Apply transformations
+            if 'action' in field_info and not exclude_object:
+                action = field_info.get('action')
                 timer.start_timer("Apply Transforms")
                 rendered_source_value = self.apply_transform_function(
                     rendered_source_value, action, obj_config, destination_api, dest_field, mapped_data, item
@@ -228,27 +247,24 @@ class DataTransferTool:
 
             mapped_data[dest_field] = rendered_source_value
 
+        # Skip excluded objects
         if exclude_object:
-            print(f"Excluding object {rendered_mappings.get('name')} based on exclusion criteria.")
-            timer.stop_timer(f"Per Object Timing {obj_type}")
+            if self.debug:
+                print(f"Excluding object {rendered_mappings.get('name', '<unknown>')} based on exclusion criteria.")
             return
 
-        # Handle creation or updating
+        # Create or update the object in the destination
         for destination_client in destination_api.clients:
             create_function = obj_config.get('create_function')
             update_function = obj_config.get('update_function')
             find_function = obj_config.get('find_function')
-            parent_id = self.create_or_update(
-                destination_client, find_function, create_function, update_function, mapped_data
-            )
+            timer.start_timer(f"Create or Update {obj_type}")
+            self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)
+            timer.stop_timer(f"Create or Update {obj_type}")
 
-        # Process nested mappings recursively
-        nested_mappings = mappings.get('nested_mappings', {})
-        for nested_obj_type, nested_obj_config in nested_mappings.items():
-            print(f"Found Nested {nested_obj_type} mapping under {obj_type} Mapping.")
-
-            # Use the parent API if destination_api is not explicitly defined'
-            self._process_nested_mappings(nested_obj_type, nested_obj_config, item, parent_id, destination_api)
+        # Process nested mappings explicitly
+        if nested_mappings:
+            self._process_nested_mappings(nested_mappings, item, parent_id, destination_api)
 
         timer.stop_timer(f"Per Object Timing {obj_type}")
 
