@@ -149,162 +149,163 @@ class DataTransferTool:
             return None
         
     def _render_nested_structure(self, template_structure, context):
+        """
+        Render a nested dictionary or list of templates.
+        """
         if isinstance(template_structure, dict):
-            print(f"Rendering nested dictionary: {template_structure}")
-            return {
-                key: self._render_nested_structure(value, context) if isinstance(value, (dict, list))
-                else self._render_template(value, context)
-                for key, value in template_structure.items()
-            }
+            return {key: self._render_nested_structure(value, context) if isinstance(value, (dict, list)) 
+                    else self._render_template(value, context)
+                    for key, value in template_structure.items()}
         elif isinstance(template_structure, list):
-            print(f"Rendering nested list: {template_structure}")
             return [self._render_nested_structure(item, context) for item in template_structure]
-        elif isinstance(template_structure, str):
-            print(f"Rendering string: {template_structure}")
-            return self._render_template(template_structure, context)
         else:
-            print(f"Returning non-string value: {template_structure}")
-            return template_structure
-        
-    def process_mappings(self, obj_mappings=None, parent_object=None, parent_id=None):
-        """Process object mappings, including nested mappings."""
-        if obj_mappings is None:
-            obj_mappings = self.config['object_mappings']
+            return self._render_template(template_structure, context)
 
-        for obj_type, obj_config in obj_mappings.items():
+
+    def process_mappings(self):
+        """Process the mappings defined in the object_mappings section of the YAML."""
+                
+        for obj_type, obj_config in self.config['object_mappings'].items():
             timer.start_timer(f"Total {obj_type} Runtime")
             source = self.sources[obj_config['source_api']]
 
-            if parent_object is None:  # Root level, iterate over source clients
-                for source_client in source.clients:
-                    source_data = source.fetch_data(obj_config, source_client)
+            for source_client in source.clients:
 
-                    # Process the data for this source client
-                    self._process_items(obj_type, obj_config, source_data, parent_id=None)
-            else:  # Nested level, no need to fetch data
-                source_data = parent_object.get(obj_type, [])
-                self._process_items(obj_type, obj_config, source_data, parent_id=parent_id)
+                source_api = obj_config.get('source_api')
+
+                timer.start_timer(f"Fetch Data {obj_type} {source_api}")
+                if self.debug: print(f"Fetching {obj_type} from {source_api}...")
+                source_data = source.fetch_data(obj_config, source_client)
+                timer.stop_timer(f"Fetch Data {obj_type} {source_api}")
+
+                destination_api = self.sources[obj_config['destination_api']]
+                timer.start_timer(f"API Endpoint Processing Total {source_api}")
+     
+                mappings = obj_config['mapping']
+
+                for item in source_data:
+                    timer.start_timer(f"Per Object Timing {obj_type}")
+                    rendered_mappings = {}
+                    for dest_field, field_info in mappings.items():
+                        if 'source' in field_info:
+                            rendered_mappings[dest_field] = self._render_template(field_info['source'],item)
+                        
+                        mapped_data = {}
+                        exclude_object = False
+                        
+                        for dest_field, rendered_source_value in rendered_mappings.items():
+                            
+                            exclude_patterns = mappings[dest_field].get('exclude',[])
+                            if isinstance(exclude_patterns, list):
+                                for pattern in exclude_patterns:
+                                    if bool(re.match(pattern, rendered_mappings[dest_field])):
+                                        exclude_object = True
+                                        break
+                            elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
+                                exclude_object = True
+                            
+                            if 'action' in mappings[dest_field] and not exclude_object:
+                                action = mappings[dest_field].get('action')
+                                timer.start_timer("Apply Transforms")
+                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, mapped_data, item)
+                                timer.stop_timer("Apply Transforms")
+                                if 'exclude_field' in str(rendered_source_value):
+                                    continue
+                            
+                            mapped_data[dest_field] = rendered_source_value
+                    
+                    if 'exclude_field' in str(rendered_source_value):
+                        print(f"Excluding field due to exclusion clause")
+                        continue
+                    
+                    if exclude_object:
+                        if self.debug: print(f"Excluding object {rendered_mappings['name']} based on exclusion criteria.")
+                    else:                            
+                        # Create or update the object in the destination
+                        for destination_client in destination_api.clients:
+                            create_function = obj_config.get('create_function')
+                            update_function = obj_config.get('update_function')
+                            find_function = obj_config.get('find_function')
+                            timer.start_timer(f"Create or Update {obj_type}")
+                            self.create_or_update(destination_client, find_function, create_function, update_function, mapped_data)    
+                            timer.stop_timer(f"Create or Update {obj_type}")
+
+                    timer.stop_timer(f"Per Object Timing {obj_type}")
+                        
+                timer.stop_timer(f"API Endpoint Processing Total {source_api}")
+                #timer.show_timers()
 
             timer.stop_timer(f"Total {obj_type} Runtime")
-            
-    def _process_items(self, obj_type, obj_config, source_data, parent_id=None):
-        """Helper function to process individual items and handle nested mappings."""
-        destination_api = self.sources[obj_config['destination_api']]
-        mappings = obj_config['mapping']
-
-        for item in source_data:
-            timer.start_timer(f"Per Object Timing {obj_type}")
-            rendered_mappings = {}
-            mapped_data = {}
-            exclude_object = False
-            mapped_data = {'parent_id': parent_id}  # Include parent_id in mapped_data
-
-            # Render and process fields
-            for dest_field, field_info in mappings.items():
-                if 'source' in field_info:
-                    rendered_source_value = self._render_template(field_info['source'], item)
-
-                    # Handle exclusion rules
-                    exclude_patterns = field_info.get('exclude', [])
-                    if isinstance(exclude_patterns, list):
-                        for pattern in exclude_patterns:
-                            if bool(re.match(pattern, rendered_source_value)):
-                                exclude_object = True
-                                break
-                    elif bool(re.match(exclude_patterns, rendered_source_value)):
-                        exclude_object = True
-
-                    # Apply transforms and actions
-                    if 'action' in field_info and not exclude_object:
-                        action = field_info['action']
-                        timer.start_timer("Apply Transforms")
-                        rendered_source_value = self.apply_transform_function(
-                            rendered_source_value, action, obj_config, dest_field, mapped_data, item
-                        )
-                        timer.stop_timer("Apply Transforms")
-
-                    if 'exclude_field' in str(rendered_source_value):
-                        continue
-
-                    rendered_mappings[dest_field] = rendered_source_value
-
-            if exclude_object:
-                if self.debug:
-                    print(f"Excluding object {rendered_mappings.get('name', 'unknown')} based on exclusion criteria.")
-                timer.stop_timer(f"Per Object Timing {obj_type}")
-                continue
-
-            # Build mapped_data with rendered fields
-            mapped_data.update(rendered_mappings)
-
-            # Handle primary object creation or update
-            destination_client = destination_api.clients[0]  # Use the first client for this API
-            primary_object = self.create_or_update(
-                destination_client,
-                obj_config['find_function'],
-                obj_config['create_function'],
-                obj_config['update_function'],
-                mapped_data
-            )
-
-            # Process nested mappings if defined
-            for dest_field, field_info in mappings.items():
-                if 'nested_mappings' in field_info:
-                    nested_config = field_info['nested_mappings']
-                    nested_data = item.get(dest_field, [])
-                    if not isinstance(nested_data, list):  # Ensure it's iterable
-                        nested_data = [nested_data]
-                    self.process_mappings(
-                        obj_mappings={dest_field: nested_config},
-                        parent_object={dest_field: nested_data},
-                        parent_id=primary_object.id if primary_object else None
-                    )
-
-            timer.stop_timer(f"Per Object Timing {obj_type}")
-        
+            timer.show_timers()
+    
+  
     def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data, item):
-        """Apply transformations using Jinja2 filters directly."""
         if value is None:
             return value
 
         if isinstance(actions, str):
             actions = [actions]
-        elif not isinstance(actions, list):
-            print(f"Unexpected action type for field '{field_name}': {type(actions)}")
-            return value
-    
+
+        additional_data = {}  # Store appended fields for lookup_object
+
         for action in actions:
-            print(f"processing {action} with {value}")
-            if isinstance(action, dict) and 'lookup_object' in action:
+        
+            if "exclude" in action:
+                if value in action:
+                    #leave function and loop because we are skipping this field and all actions after this
+                    return 'exclude_field'
+                
+            elif 'regex_replace' in action:
+                pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
+                value = env.filters['regex_replace'](value, pattern, replacement)
+
+            elif isinstance(action, dict) and 'lookup_object' in action:
                 lookup_config = action['lookup_object']
-                lookup_field = lookup_config.get('field')
+                lookup_type = lookup_config.get('field')
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
 
-                # Process `append` fields
+                # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
-                additional_data = self._render_nested_structure(append_fields, mapped_data)
+                for append_key, append_template in append_fields.items():
+                    if isinstance(append_template, dict):
+                        # Handle nested structures recursively
+                        additional_data[append_key] = self._render_nested_structure(append_template, item)
+                    else:
+                        # Render simple fields
+                        rendered_value = self._render_template(append_template, item)
+                        additional_data[append_key] = rendered_value
 
-                # Debugging
-                print(f"Debug: lookup_field={lookup_field}, value={value}, field_name={field_name}")
-
-                # Call lookup_object
+                # Call lookup_object with additional_data
                 lookup_result = self.lookup_object(
-                    value, lookup_field, find_function_path, create_function_path,
+                    value, lookup_type, find_function_path, create_function_path,
                     obj_config, additional_data
                 )
                 if lookup_result is not None:
                     value = lookup_result.id
                 else:
-                    print(f"Warning: Lookup failed for {lookup_field} with value {value}")
+                    print(f"Warning: Lookup failed for {lookup_type} with value {value}")
 
-            elif 'exclude' in action:
-                # Handle `exclude`
-                exclude_value = action['exclude']
-                if value.startswith(exclude_value):
-                    return None, []
-                
+            elif 'include_object' in action:
+                matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
+                if matches:
+                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
+                    # Get the reference field value from mapped_data or item
+                    sub_value = mapped_data.get(reference_field) or obj_config.get(reference_field)
+
+                    if sub_value:
+                        nested_obj = self.lookup_object(
+                            sub_value, lookup_type, find_function_path, create_function_path,
+                            obj_config
+                        )
+                        # Instead of placing it in mapped_data, nest it within `value`
+                        if isinstance(value, dict):
+                            value[reference_field] = nested_obj.id
+                        else:
+                            value = {reference_field: nested_obj.id, field_name: value}
+
         return value
+
 
     def get_nested_function(self, api_client, function_path):
         """Recursively get a function from the API client."""
@@ -424,7 +425,7 @@ class DataTransferTool:
                 key_field = f"{key_field}_id"
             filter_params[key_field] = value
         
-        #print(f"Lookup filter: {filter_params}")
+        print(f"Ilookup filter: {filter_params}")
         # Attempt to find the object
         try:
             found_object = find_function(**filter_params)
