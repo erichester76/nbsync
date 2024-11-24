@@ -197,7 +197,7 @@ class DataTransferTool:
         
         for dest_field, field_info in mappings.items():
             print(f"rendering {dest_field} {field_info}")
-            if field_info and 'source' in str(field_info) and 'nested_mappings' not in dest_field:
+            if field_info and 'source' in str(field_info) and dest_field != 'nested_mappings':
                 rendered_mappings[dest_field] = self._render_template(field_info['source'], item)
 
         # Process exclusion logic and transformations
@@ -206,7 +206,7 @@ class DataTransferTool:
         exclude_patterns=[]
 
         for dest_field, rendered_source_value in rendered_mappings.items():
-            if dest_field in rendered_mappings and 'nested_mappings' not in dest_field:
+            if dest_field in rendered_mappings:
                 exclude_patterns = rendered_mappings[dest_field].get('exclude', [])
             if isinstance(exclude_patterns, list):
                 for pattern in exclude_patterns:
