@@ -215,7 +215,7 @@ class DataTransferTool:
                 exclude_object = True
 
             if 'action' in mappings[dest_field] and not exclude_object:
-                action = mappings[dest_field].get('action')
+                action = rendered_mappings[dest_field].get('action')
                 timer.start_timer("Apply Transforms")
                 rendered_source_value = self.apply_transform_function(
                     rendered_source_value, action, obj_config, destination_api, dest_field, mapped_data, item
