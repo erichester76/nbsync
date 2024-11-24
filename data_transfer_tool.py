@@ -271,7 +271,7 @@ class DataTransferTool:
                 for append_key, append_template in append_fields.items():
                     if isinstance(append_template, dict):
                         # Handle nested structures recursively
-                        additional_data[append_key] = self._render_nested_structure(append_template, mapped_data)
+                        additional_data[append_key] = self._render_nested_structure(append_template, item)
                     else:
                         # Render simple fields
                         rendered_value = self._render_template(append_template, item)
