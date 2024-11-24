@@ -264,7 +264,12 @@ class DataTransferTool:
 
         # Process nested mappings explicitly
         if nested_mappings:
-            self._process_nested_mappings(nested_mappings, item, parent_id, destination_api)
+            for nested_obj_type, nested_obj_config in nested_mappings.items():
+                print(f"Found Nested {nested_obj_type} mapping under {obj_type} Mapping.")
+
+                # Use the parent API if destination_api is not explicitly defined'
+                self._process_nested_mappings(nested_obj_type, nested_obj_config, item, parent_id, destination_api)
+
 
         timer.stop_timer(f"Per Object Timing {obj_type}")
 
