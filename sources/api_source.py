@@ -100,7 +100,7 @@ class APIDataSource(DataSource):
                             if len(result)<1: 
                                 branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']}", status='new')
                             else:
-                                status=result[0].get('value')
+                                status=result[0].status
                             print(f'waiting on branch to form {status}')
                             time.sleep(1)
 
