@@ -241,6 +241,7 @@ class DataTransferTool:
         # Process nested mappings recursively
         nested_mappings = mappings.get('nested_mappings', {})
         for nested_obj_type, nested_obj_config in nested_mappings.items():
+            # Use the parent API if destination_api is not explicitly defined
             self._process_nested_mappings(nested_obj_type, nested_obj_config, item, parent_id, destination_api)
 
         timer.stop_timer(f"Per Object Timing {obj_type}")
@@ -249,6 +250,7 @@ class DataTransferTool:
     def _process_nested_mappings(self, nested_obj_type, nested_obj_config, item, parent_id, destination_api):
         """Process nested mappings recursively."""
         nested_data = item.get(nested_obj_type, [])
+        
         for nested_item in nested_data:
             self.process_single_mapping(nested_obj_type, nested_obj_config, destination_api, nested_item, parent_id)
 
