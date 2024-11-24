@@ -94,14 +94,14 @@ class APIDataSource(DataSource):
                     if 'branch' in self.config:
                         ts = datetime.datetime.now().strftime("%m%d%y%H%M")
                         print(f"Setting Branch Header to {self.config['branch']}")
-                        status='new'
-                        while 'ready' not in status:
+                        ready=False
+                        while not ready:
                             result=list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']}"))
                             if len(result)<1: 
                                 branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']}", status='new')
                             else:
-                                status=result[0].status
-                            print(f'waiting on branch to form {status}')
+                                ready=True
+                            print(f'waiting on branch to be ready. Current Status: {result[0].status}')
                             time.sleep(1)
 
                         self.api.http_session.headers["X-NetBox-Branch"] = branch.schema_id
