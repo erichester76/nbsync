@@ -206,7 +206,7 @@ class DataTransferTool:
         exclude_patterns=[]
 
         for dest_field, rendered_source_value in rendered_mappings.items():
-            if 'exclude' in rendered_mappings[dest_field] and 'nested_mappings' not in dest_field:
+            if dest_field in rendered_mappings:
                 exclude_patterns = rendered_mappings[dest_field].get('exclude', [])
             if isinstance(exclude_patterns, list):
                 for pattern in exclude_patterns:
