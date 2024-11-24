@@ -449,6 +449,7 @@ class DataTransferTool:
                 if self.dry_run:
                     print(f"[DRY RUN] Would update object {existing_object.id} with data")
                 else: 
+                    print(f"Updating object {existing_object.name} {sanitized_mapped_data}:")
                     update_function = self.get_nested_function(api_client, update_function_path)
                     timer.start_timer(f"Update object")
                     update_function([sanitized_mapped_data])
@@ -464,7 +465,7 @@ class DataTransferTool:
             if self.dry_run:
                 print(f"[DRY RUN] Would create new object {mapped_data['name']}")
             else:
-                if self.debug: print(f"Creating new object {mapped_data['name']}: {mapped_data}")
+                print(f"Creating new object {mapped_data['name']}: {mapped_data}")
                 create_function = self.get_nested_function(api_client, create_function_path)
                 timer.start_timer(f"Create object")
                 new_object = create_function(self.sanitize_data(mapped_data))
