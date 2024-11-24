@@ -214,6 +214,7 @@ class DataTransferTool:
             if 'action' in mappings[dest_field] and not exclude_object:
                 action = mappings[dest_field].get('action')
                 timer.start_timer("Apply Transforms")
+                obj_config['destination_api']=destination_api
                 rendered_source_value = self.apply_transform_function(
                     rendered_source_value, action, obj_config, dest_field, mapped_data, item
                 )
