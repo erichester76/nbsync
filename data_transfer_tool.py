@@ -202,29 +202,29 @@ class DataTransferTool:
                 if 'source' in field_info:
                     rendered_source_value = self._render_template(field_info['source'], item)
 
-                    # Handle exclusion rules
-                    exclude_patterns = field_info.get('exclude', [])
-                    if isinstance(exclude_patterns, list):
-                        for pattern in exclude_patterns:
-                            if bool(re.match(pattern, rendered_source_value)):
-                                exclude_object = True
-                                break
-                    elif bool(re.match(exclude_patterns, rendered_source_value)):
-                        exclude_object = True
+                # Handle exclusion rules
+                exclude_patterns = field_info.get('exclude', [])
+                if isinstance(exclude_patterns, list):
+                    for pattern in exclude_patterns:
+                        if bool(re.match(pattern, rendered_source_value)):
+                            exclude_object = True
+                            break
+                elif bool(re.match(exclude_patterns, rendered_source_value)):
+                    exclude_object = True
 
-                    # Apply transforms and actions
-                    if 'action' in field_info and not exclude_object:
-                        action = field_info['action']
-                        timer.start_timer("Apply Transforms")
-                        rendered_source_value = self.apply_transform_function(
-                            rendered_source_value, action, obj_config, dest_field, mapped_data, item
-                        )
-                        timer.stop_timer("Apply Transforms")
+                # Apply transforms and actions
+                if 'action' in field_info and not exclude_object:
+                    action = field_info['action']
+                    timer.start_timer("Apply Transforms")
+                    rendered_source_value = self.apply_transform_function(
+                        rendered_source_value, action, obj_config, dest_field, mapped_data, item
+                    )
+                    timer.stop_timer("Apply Transforms")
 
-                    if 'exclude_field' in str(rendered_source_value):
-                        continue
+                if 'exclude_field' in str(rendered_source_value):
+                    continue
 
-                    rendered_mappings[dest_field] = rendered_source_value
+                rendered_mappings[dest_field] = rendered_source_value
 
             if exclude_object:
                 if self.debug:
