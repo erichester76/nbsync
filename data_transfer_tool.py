@@ -338,7 +338,7 @@ class DataTransferTool:
         if cache_key in self.lookup_cache:
             return self.lookup_cache[cache_key]
 
-        api_client = self.sources[destination_api].api
+        api_client = destination_api
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
         # Validate lookup_type and value
