@@ -149,19 +149,23 @@ class DataTransferTool:
             return None
         
     def _render_nested_structure(self, template_structure, context):
-        """
-        Render a nested dictionary or list of templates.
-        """
         if isinstance(template_structure, dict):
-            return {key: self._render_nested_structure(value, context) if isinstance(value, (dict, list)) 
-                    else self._render_template(value, context)
-                    for key, value in template_structure.items()}
+            print(f"Rendering nested dictionary: {template_structure}")
+            return {
+                key: self._render_nested_structure(value, context) if isinstance(value, (dict, list))
+                else self.render_template(value, context)
+                for key, value in template_structure.items()
+            }
         elif isinstance(template_structure, list):
+            print(f"Rendering nested list: {template_structure}")
             return [self._render_nested_structure(item, context) for item in template_structure]
+        elif isinstance(template_structure, str):
+            print(f"Rendering string: {template_structure}")
+            return self.render_template(template_structure, context)
         else:
-            return self._render_template(template_structure, context)
-
-
+            print(f"Returning non-string value: {template_structure}")
+            return template_structure
+        
     def process_mappings(self):
         """Process the mappings defined in the object_mappings section of the YAML."""
                 
@@ -239,51 +243,29 @@ class DataTransferTool:
             timer.show_timers()
     
   
-    def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data, item):
+    def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data, parent_id=None):
+        """Apply transformations using pre-rendered source values, nested actions, and associations."""
         if value is None:
-            return value
+            return value, []
 
         if isinstance(actions, str):
             actions = [actions]
 
         additional_data = {}  # Store appended fields for lookup_object
+        associations = []     # Collect associations for deferred processing
 
         for action in actions:
-        
-            if "exclude" in action:
-                if value in action:
-                    #leave function and loop because we are skipping this field and all actions after this
-                    return 'exclude_field'
-                
-            elif 'regex_replace' in action:
-                pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
-                value = env.filters['regex_replace'](value, pattern, replacement)
-
             if isinstance(action, dict) and 'lookup_object' in action:
                 lookup_config = action['lookup_object']
                 lookup_field = lookup_config.get('field')
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
 
-                # Debug to validate lookup_type and source value
-                print(f"Debug: lookup_field={lookup_field}, value={value}, field_name={field_name}")
-
-                # Process `append` fields if present
+                # Process `append` fields
                 append_fields = lookup_config.get('append', {})
-                for append_key, append_template in append_fields.items():
-                    if isinstance(append_template, dict) and 'lookup_object' in append_template:
-                        # Handle nested lookup_object
-                        nested_lookup = append_template['lookup_object']
-                        nested_value = self.apply_transform_function(
-                            None, [nested_lookup], obj_config, append_key, mapped_data
-                        )
-                        additional_data[append_key] = nested_value
-                    else:
-                        # Render simple fields
-                        rendered_value = self._render_template(append_template, mapped_data)
-                        additional_data[append_key] = rendered_value
+                additional_data = self._render_nested_structure(append_fields, mapped_data)
 
-                # Call lookup_object with additional_data
+                # Call lookup_object
                 lookup_result = self.lookup_object(
                     value, lookup_field, find_function_path, create_function_path,
                     obj_config, additional_data
@@ -293,26 +275,20 @@ class DataTransferTool:
                 else:
                     print(f"Warning: Lookup failed for {lookup_field} with value {value}")
 
-            elif 'include_object' in action:
-                matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
-                if matches:
-                    reference_field, lookup_type, find_function_path, create_function_path = matches[0]
-                    # Get the reference field value from mapped_data or item
-                    sub_value = mapped_data.get(reference_field) or obj_config.get(reference_field)
+            elif 'exclude' in action:
+                # Handle `exclude`
+                exclude_value = action['exclude']
+                if value.startswith(exclude_value):
+                    return None, []
 
-                    if sub_value:
-                        nested_obj = self.lookup_object(
-                            sub_value, lookup_type, find_function_path, create_function_path,
-                            obj_config
-                        )
-                        # Instead of placing it in mapped_data, nest it within `value`
-                        if isinstance(value, dict):
-                            value[reference_field] = nested_obj.id
-                        else:
-                            value = {reference_field: nested_obj.id, field_name: value}
+        # Handle associations for deferred processing
+        if 'associations' in obj_config:
+            for assoc_key, assoc_config in obj_config['associations'].items():
+                # Add the parent_id for the association
+                assoc_config['append']['parent_id'] = parent_id
+                associations.append(assoc_config)
 
-        return value
-
+        return value, associations
 
     def get_nested_function(self, api_client, function_path):
         """Recursively get a function from the API client."""
