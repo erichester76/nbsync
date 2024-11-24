@@ -142,9 +142,10 @@ class DataTransferTool:
             template_str = template_str.replace('<<', '{{').replace('>>', '}}')
             required_keys=self.extract_required_keys(template_str)
             resolver = Resolver(context, required_keys=required_keys)
-            print(f"Resolved: {dir(resolver)}")
             template = env.from_string(template_str)
-            return template.render(resolver)
+            rendered_template = template.render(resolver)
+            print(f"rendered items: {template_str} = {rendered_template}")
+            return rendered_template
         except Exception as e:
             print(f"Error rendering template '{template_str}': {e}")
             return None
