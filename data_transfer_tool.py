@@ -192,9 +192,11 @@ class DataTransferTool:
         """Process a single mapping, including nested mappings."""
         timer.start_timer(f"Per Object Timing {obj_type}")
         print(f"Processing {obj_type} Mapping.")
-        # Render mappings for the current object
-        mappings = obj_config['mapping']
+        mappings = obj_config.get('mapping', {})
+        mappings['parent_id']=parent_id
         rendered_mappings = {'parent_id': parent_id}
+
+        rendered_mappings = {}
         
         for dest_field, field_info in mappings.items():
             if field_info and 'source' in field_info:
