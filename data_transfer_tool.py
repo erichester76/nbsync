@@ -425,6 +425,7 @@ class DataTransferTool:
                 key_field = f"{key_field}_id"
             filter_params[key_field] = value
         
+        print(f"Ilookup filter: {filter_params}")
         # Attempt to find the object
         try:
             found_object = find_function(**filter_params)
