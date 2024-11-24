@@ -280,7 +280,7 @@ class DataTransferTool:
                         additional_data[append_key] = nested_value
                     else:
                         # Render simple fields
-                        rendered_value = self.render_template(append_template, mapped_data)
+                        rendered_value = self._render_template(append_template, mapped_data)
                         additional_data[append_key] = rendered_value
 
                 # Call lookup_object with additional_data
