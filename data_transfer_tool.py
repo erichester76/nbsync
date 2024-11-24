@@ -214,7 +214,6 @@ class DataTransferTool:
             if 'action' in mappings[dest_field] and not exclude_object:
                 action = mappings[dest_field].get('action')
                 timer.start_timer("Apply Transforms")
-                obj_config['destination_api']=destination_api
                 rendered_source_value = self.apply_transform_function(
                     rendered_source_value, action, obj_config, dest_field, mapped_data, item
                 )
@@ -241,7 +240,8 @@ class DataTransferTool:
         # Process nested mappings recursively
         nested_mappings = mappings.get('nested_mappings', {})
         for nested_obj_type, nested_obj_config in nested_mappings.items():
-            # Use the parent API if destination_api is not explicitly defined
+            # Use the parent API if destination_api is not explicitly defined'
+            nested_obj_config['destination_api']=destination_api
             self._process_nested_mappings(nested_obj_type, nested_obj_config, item, parent_id, destination_api)
 
         timer.stop_timer(f"Per Object Timing {obj_type}")
