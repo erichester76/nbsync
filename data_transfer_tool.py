@@ -188,7 +188,7 @@ class DataTransferTool:
                     rendered_mappings = {}
                     for dest_field, field_info in mappings.items():
                         if 'source' in field_info:
-                            rendered_mappings[dest_field] = self._render_template(item,field_info['source'])
+                            rendered_mappings[dest_field] = self._render_template(field_info['source'],item)
                         
                         mapped_data = {}
                         exclude_object = False
