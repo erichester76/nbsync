@@ -208,7 +208,7 @@ class DataTransferTool:
                             if 'action' in mappings[dest_field] and not exclude_object:
                                 action = mappings[dest_field].get('action')
                                 timer.start_timer("Apply Transforms")
-                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, mapped_data)
+                                rendered_source_value = self.apply_transform_function(rendered_source_value, action, obj_config, dest_field, mapped_data, item)
                                 timer.stop_timer("Apply Transforms")
                                 if 'exclude_field' in str(rendered_source_value):
                                     continue
@@ -240,7 +240,7 @@ class DataTransferTool:
             timer.show_timers()
     
   
-    def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data):
+    def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data, item):
         if value is None:
             return value
 
@@ -274,7 +274,7 @@ class DataTransferTool:
                         additional_data[append_key] = self._render_nested_structure(append_template, mapped_data)
                     else:
                         # Render simple fields
-                        rendered_value = self._render_template(append_template, mapped_data)
+                        rendered_value = self._render_template(append_template, item)
                         additional_data[append_key] = rendered_value
 
                 # Call lookup_object with additional_data
