@@ -139,7 +139,6 @@ class DataTransferTool:
         Render a Jinja2 template string with the given context.
         """
         try:
-            print(f"rendering {context} {template_str}")
             template_str = template_str.replace('<<', '{{').replace('>>', '}}')
             required_keys=self.extract_required_keys(template_str)
             resolver = Resolver(context, required_keys=required_keys)
