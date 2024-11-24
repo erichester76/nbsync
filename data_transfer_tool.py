@@ -193,7 +193,6 @@ class DataTransferTool:
         timer.start_timer(f"Per Object Timing {obj_type}")
         print(f"Processing {obj_type} Mapping.")
         mappings = obj_config.get('mapping', {})
-        mappings['parent_id']=parent_id
         rendered_mappings = {'parent_id': parent_id}
         
         for dest_field, field_info in mappings.items():
@@ -206,7 +205,7 @@ class DataTransferTool:
         exclude_object = False
 
         for dest_field, rendered_source_value in rendered_mappings.items():
-            exclude_patterns = mappings[dest_field].get('exclude', [])
+            exclude_patterns = rendered_mappings[dest_field].get('exclude', [])
             if isinstance(exclude_patterns, list):
                 for pattern in exclude_patterns:
                     if bool(re.match(pattern, rendered_mappings[dest_field])):
