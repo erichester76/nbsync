@@ -272,7 +272,10 @@ class DataTransferTool:
 
         if isinstance(actions, str):
             actions = [actions]
-
+        elif not isinstance(actions, list):
+            print(f"Unexpected action type for field '{field_name}': {type(actions)}")
+            return value
+    
         for action in actions:
             # Regex replace action
             if 'regex_replace' in action:
