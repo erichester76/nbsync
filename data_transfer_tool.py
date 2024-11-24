@@ -257,10 +257,25 @@ class DataTransferTool:
         """
         for nested_obj_type, nested_obj_config in nested_mappings.items():
             timer.start_timer(f"Total Nested {nested_obj_type} Runtime")
+            
+            # Ensure source data exists in the parent item
             source_data = parent_item.get(nested_obj_type, [])
+            if not source_data:
+                if self.debug:
+                    print(f"No source data found for nested object type: {nested_obj_type}")
+                continue
+            
+            # Use the parent API if destination_api is not explicitly defined
+            destination_api = self.sources.get(
+                nested_obj_config.get('destination_api'), 
+                parent_api  # Default to parent_api if not defined
+            )
 
+            # Validate destination API
+            if not destination_api:
+                raise ValueError(f"Destination API is not defined for nested object type: {nested_obj_type}")
+            
             mappings = nested_obj_config['mapping']
-            destination_api = self.sources[nested_obj_config['destination_api']]
 
             for nested_item in source_data:
                 timer.start_timer(f"Per Nested Object Timing {nested_obj_type}")
