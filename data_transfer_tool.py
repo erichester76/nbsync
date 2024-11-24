@@ -215,7 +215,7 @@ class DataTransferTool:
                 action = mappings[dest_field].get('action')
                 timer.start_timer("Apply Transforms")
                 rendered_source_value = self.apply_transform_function(
-                    rendered_source_value, action, obj_config, dest_field, mapped_data, item
+                    rendered_source_value, action, obj_config, destination_api, dest_field, mapped_data, item
                 )
                 timer.stop_timer("Apply Transforms")
                 if 'exclude_field' in str(rendered_source_value):
@@ -255,7 +255,7 @@ class DataTransferTool:
             self.process_single_mapping(nested_obj_type, nested_obj_config, destination_api, nested_item, parent_id)
 
   
-    def apply_transform_function(self, value, actions, obj_config, field_name, mapped_data, item):
+    def apply_transform_function(self, value, actions, obj_config, destination_api, field_name, mapped_data, item):
         if value is None:
             return value
 
@@ -283,7 +283,7 @@ class DataTransferTool:
                 append_fields = lookup_config.get('append', {})
                 additional_data = self._render_nested_structure(append_fields, mapped_data)
                 lookup_result = self.lookup_object(
-                    value, lookup_field, find_function_path, create_function_path,
+                    value, lookup_field, find_function_path, create_function_path, destination_api,
                     obj_config, additional_data
                 )
                 if lookup_result is not None:
@@ -330,7 +330,7 @@ class DataTransferTool:
 
         return sanitized_data
 
-    def lookup_object(self, value, lookup_type, find_function_path, create_function_path, obj_config, additional_fields=None):
+    def lookup_object(self, value, lookup_type, find_function_path, create_function_path, destination_api, obj_config, additional_fields=None):
         """Perform API lookup or create an object on the server side with support for additional fields."""
         additional_fields = additional_fields or []
 
@@ -338,7 +338,7 @@ class DataTransferTool:
         if cache_key in self.lookup_cache:
             return self.lookup_cache[cache_key]
 
-        api_client = self.sources[obj_config['destination_api']].api
+        api_client = self.sources[destination_api].api
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
         # Validate lookup_type and value
