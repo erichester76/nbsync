@@ -197,19 +197,21 @@ class DataTransferTool:
             exclude_object = False
             mapped_data = {'parent_id': parent_id}  # Include parent_id in mapped_data
 
-            # Render and process fields
+            # Render fields
             for dest_field, field_info in mappings.items():
                 if 'source' in field_info:
-                    rendered_source_value = self._render_template(field_info['source'], item)
-
+                    rendered_mappings[dest_field] = self._render_template(field_info['source'], item)
+            
+            # process fields
+            for dest_field, rendered_source_value in rendered_mappings.items():
                 # Handle exclusion rules
                 exclude_patterns = field_info.get('exclude', [])
                 if isinstance(exclude_patterns, list):
                     for pattern in exclude_patterns:
-                        if bool(re.match(pattern, rendered_source_value)):
+                        if bool(re.match(pattern, rendered_mappings[dest_field])):
                             exclude_object = True
                             break
-                elif bool(re.match(exclude_patterns, rendered_source_value)):
+                elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
                     exclude_object = True
 
                 # Apply transforms and actions
@@ -217,7 +219,7 @@ class DataTransferTool:
                     action = field_info['action']
                     timer.start_timer("Apply Transforms")
                     rendered_source_value = self.apply_transform_function(
-                        rendered_source_value, action, obj_config, dest_field, mapped_data, item
+                        rendered_mappings[dest_field], action, obj_config, dest_field, mapped_data, item
                     )
                     timer.stop_timer("Apply Transforms")
 
