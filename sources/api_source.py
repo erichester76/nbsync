@@ -101,6 +101,7 @@ class APIDataSource(DataSource):
                                 branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']}", status='new')
                             else:
                                 ready=True
+                                branch=result[0]
                             print(f'waiting on branch to be ready. Current Status: {result[0].status}')
                             time.sleep(1)
 
