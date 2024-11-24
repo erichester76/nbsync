@@ -195,7 +195,9 @@ class DataTransferTool:
         # Ensure rendered_mappings includes parent_id
         rendered_mappings = {'parent_id': parent_id}
         mappings = obj_config.get('mapping', {})
-        
+        if not mappings:
+            print(f"No mappings defined for {obj_type}. Skipping.")
+            return
         # Separate nested_mappings from regular mappings
         nested_mappings = mappings.pop('nested_mappings', None)
 
@@ -207,8 +209,10 @@ class DataTransferTool:
             # Render the source template for the field
             if 'source' in field_info:
                 try:
+                    context = {**item}  # Base context is the item itself
+                    context.update({'parent_id': parent_id}) 
                     rendered_mappings[dest_field] = self._render_template(
-                        field_info['source'], item, additional_context={'parent_id': parent_id}
+                        field_info['source'], context
                     )
                 except Exception as e:
                     print(f"Error rendering field {dest_field}: {e}")
