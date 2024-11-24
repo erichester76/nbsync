@@ -178,8 +178,6 @@ class DataTransferTool:
             if parent_object is None:  # Root level, iterate over source clients
                 for source_client in source.clients:
                     source_data = source.fetch_data(obj_config, source_client)
-
-                    # Process the data for this source client
                     self._process_items(obj_type, obj_config, source_data, parent_id=None)
             else:  # Nested level, no need to fetch data
                 source_data = parent_object.get(obj_type, [])
@@ -187,78 +185,75 @@ class DataTransferTool:
 
             timer.stop_timer(f"Total {obj_type} Runtime")
             
-    def _process_items(self, obj_type, obj_config, source_data, parent_id=None):
+    def _process_items(self, obj_type, obj_config, items, parent_id=None):
         """Helper function to process individual items and handle nested mappings."""
         destination_api = self.sources[obj_config['destination_api']]
         mappings = obj_config['mapping']
 
-        for item in source_data:
+        for item in items:
             timer.start_timer(f"Per Object Timing {obj_type}")
             rendered_mappings = {}
             mapped_data = {}
             exclude_object = False
             mapped_data = {'parent_id': parent_id}  # Include parent_id in mapped_data
 
-            # Render and process fields
+            # Render fields
             for dest_field, field_info in mappings.items():
                 if 'source' in field_info:
-                    rendered_source_value = self._render_template(field_info['source'], item)
+                    rendered_mappings[dest_field] = self._render_template(field_info['source'], item)
+            for dest_field, rendered_source_value in rendered_mappings.items():
+                exclude_patterns = mappings[dest_field].get('exclude', [])
+                if isinstance(exclude_patterns, list):
+                    for pattern in exclude_patterns:
+                        if bool(re.match(pattern, rendered_mappings[dest_field])):
+                            exclude_object = True
+                            break
+                elif bool(re.match(exclude_patterns, rendered_mappings[dest_field])):
+                    exclude_object = True
 
-                    # Handle exclusion rules
-                    exclude_patterns = field_info.get('exclude', [])
-                    if isinstance(exclude_patterns, list):
-                        for pattern in exclude_patterns:
-                            if bool(re.match(pattern, rendered_source_value)):
-                                exclude_object = True
-                                break
-                    elif bool(re.match(exclude_patterns, rendered_source_value)):
-                        exclude_object = True
+                # Apply transforms and actions
+                if 'action' in  mappings[dest_field] and not exclude_object:
+                    action =  mappings[dest_field]['action']
+                    timer.start_timer("Apply Transforms")
+                    rendered_mappings[dest_field] = self.apply_transform_function(
+                        rendered_mappings[dest_field], action, obj_config, dest_field, mapped_data, item
+                    )
+                    timer.stop_timer("Apply Transforms")
 
-                    # Apply transforms and actions
-                    if 'action' in field_info and not exclude_object:
-                        action = field_info['action']
-                        timer.start_timer("Apply Transforms")
-                        rendered_source_value = self.apply_transform_function(
-                            rendered_source_value, action, obj_config, dest_field, mapped_data, item
-                        )
-                        timer.stop_timer("Apply Transforms")
+                if 'exclude_field' in str(rendered_mappings[dest_field]):
+                    continue
 
-                    if 'exclude_field' in str(rendered_source_value):
-                        continue
-
-                    rendered_mappings[dest_field] = rendered_source_value
+                rendered_mappings[dest_field]
 
             if exclude_object:
                 if self.debug:
                     print(f"Excluding object {rendered_mappings.get('name', 'unknown')} based on exclusion criteria.")
                 timer.stop_timer(f"Per Object Timing {obj_type}")
                 continue
-
+           
             # Build mapped_data with rendered fields
             mapped_data.update(rendered_mappings)
 
-            # Handle primary object creation or update
-            destination_client = destination_api.clients[0]  # Use the first client for this API
-            primary_object = self.create_or_update(
-                destination_client,
-                obj_config['find_function'],
-                obj_config['create_function'],
-                obj_config['update_function'],
-                mapped_data
-            )
+            for destination_client in destination_api.clients:
+                create_function = obj_config.get("create_function")
+                update_function = obj_config.get("update_function")
+                find_function = obj_config.get("find_function")
+                created_object = self.create_or_update(
+                    destination_client,
+                    find_function,
+                    create_function,
+                    update_function,
+                    mapped_data,
+                )
+                if created_object and hasattr(created_object, "id"):
+                    parent_id = created_object.id
 
-            # Process nested mappings if defined
-            for dest_field, field_info in mappings.items():
-                if 'nested_mappings' in field_info:
-                    nested_config = field_info['nested_mappings']
-                    nested_data = item.get(dest_field, [])
-                    if not isinstance(nested_data, list):  # Ensure it's iterable
-                        nested_data = [nested_data]
-                    self.process_mappings(
-                        obj_mappings={dest_field: nested_config},
-                        parent_object={dest_field: nested_data},
-                        parent_id=primary_object.id if primary_object else None
-                    )
+                # Process nested mappings
+                for nested_name, nested_config in obj_config.get("nested_mappings", {}).items():
+                    nested_items = item.get(nested_name, [])
+                    if not nested_items:
+                        continue
+                    self._process_items(nested_name, nested_config, nested_items, parent_id)
 
             timer.stop_timer(f"Per Object Timing {obj_type}")
         
