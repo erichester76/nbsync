@@ -235,22 +235,19 @@ class DataTransferTool:
             # Build mapped_data with rendered fields
             mapped_data.update(rendered_mappings)
 
-            # Create or update primary object
-            if obj_type and "destination_endpoint" in obj_config:
-                destination_api = self.sources[obj_config["destination_api"]]
-                for destination_client in destination_api.clients:
-                    create_function = obj_config.get("create_function")
-                    update_function = obj_config.get("update_function")
-                    find_function = obj_config.get("find_function")
-                    created_object = self.create_or_update(
-                        destination_client,
-                        find_function,
-                        create_function,
-                        update_function,
-                        mapped_data,
-                    )
-                    if created_object and hasattr(created_object, "id"):
-                        parent_id = created_object.id
+            for destination_client in destination_api.clients:
+                create_function = obj_config.get("create_function")
+                update_function = obj_config.get("update_function")
+                find_function = obj_config.get("find_function")
+                created_object = self.create_or_update(
+                    destination_client,
+                    find_function,
+                    create_function,
+                    update_function,
+                    mapped_data,
+                )
+                if created_object and hasattr(created_object, "id"):
+                    parent_id = created_object.id
 
                 # Process nested mappings
                 for nested_name, nested_config in obj_config.get("nested_mappings", {}).items():
