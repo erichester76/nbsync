@@ -93,11 +93,14 @@ class APIDataSource(DataSource):
                     print(f"Connected to {self.name} at {base_url}")
                     if 'branch' in self.config:
                         ts = datetime.datetime.now().strftime("%m%d%y%H%M")
-                        print(f"Setting Branch Header to {self.config['branch']} {ts}")
-                        branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']} {ts}", status='new')
+                        print(f"Setting Branch Header to {self.config['branch']}")
                         status='new'
                         while 'ready' not in status:
-                            status=list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']} {ts}"))[0]['status'].get('value')
+                            result=list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']}"))[0]['status'].get('value')
+                            if len(result)<1: 
+                                branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']}", status='new')
+                            else:
+                                status=result.get('value')
                             print(f'waiting on branch to form {status}')
                             time.sleep(1)
 
