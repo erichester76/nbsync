@@ -259,32 +259,39 @@ class DataTransferTool:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](value, pattern, replacement)
 
-            elif isinstance(action, dict) and 'lookup_object' in action:
+            if isinstance(action, dict) and 'lookup_object' in action:
                 lookup_config = action['lookup_object']
-                lookup_type = lookup_config.get('field')
+                lookup_field = lookup_config.get('field')
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
+
+                # Debug to validate lookup_type and source value
+                print(f"Debug: lookup_field={lookup_field}, value={value}, field_name={field_name}")
 
                 # Process `append` fields if present
                 append_fields = lookup_config.get('append', {})
                 for append_key, append_template in append_fields.items():
-                    if isinstance(append_template, dict):
-                        # Handle nested structures recursively
-                        additional_data[append_key] = self._render_nested_structure(append_template, item)
+                    if isinstance(append_template, dict) and 'lookup_object' in append_template:
+                        # Handle nested lookup_object
+                        nested_lookup = append_template['lookup_object']
+                        nested_value = self.apply_transform_function(
+                            None, [nested_lookup], obj_config, append_key, mapped_data
+                        )
+                        additional_data[append_key] = nested_value
                     else:
                         # Render simple fields
-                        rendered_value = self._render_template(append_template, item)
+                        rendered_value = self.render_template(append_template, mapped_data)
                         additional_data[append_key] = rendered_value
 
                 # Call lookup_object with additional_data
                 lookup_result = self.lookup_object(
-                    value, lookup_type, find_function_path, create_function_path,
+                    value, lookup_field, find_function_path, create_function_path,
                     obj_config, additional_data
                 )
                 if lookup_result is not None:
                     value = lookup_result.id
                 else:
-                    print(f"Warning: Lookup failed for {lookup_type} with value {value}")
+                    print(f"Warning: Lookup failed for {lookup_field} with value {value}")
 
             elif 'include_object' in action:
                 matches = re.findall(r"include_object\('(.*?)',\s*'(.*?)',\s*'(.*?)',\s*'(.*?)'\)", action)
@@ -425,7 +432,7 @@ class DataTransferTool:
                 key_field = f"{key_field}_id"
             filter_params[key_field] = value
         
-        print(f"Ilookup filter: {filter_params}")
+        #print(f"Lookup filter: {filter_params}")
         # Attempt to find the object
         try:
             found_object = find_function(**filter_params)
