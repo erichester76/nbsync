@@ -185,12 +185,12 @@ class DataTransferTool:
 
             timer.stop_timer(f"Total {obj_type} Runtime")
             
-    def _process_items(self, obj_type, obj_config, source_data, parent_id=None):
+    def _process_items(self, obj_type, obj_config, items, parent_id=None):
         """Helper function to process individual items and handle nested mappings."""
         destination_api = self.sources[obj_config['destination_api']]
         mappings = obj_config['mapping']
 
-        for item in source_data:
+        for item in items:
             timer.start_timer(f"Per Object Timing {obj_type}")
             rendered_mappings = {}
             mapped_data = {}
@@ -235,29 +235,31 @@ class DataTransferTool:
             # Build mapped_data with rendered fields
             mapped_data.update(rendered_mappings)
 
-            # Handle primary object creation or update
-            destination_client = destination_api.clients[0]  # Use the first client for this API
-            primary_object = self.create_or_update(
-                destination_client,
-                obj_config['find_function'],
-                obj_config['create_function'],
-                obj_config['update_function'],
-                mapped_data
-            )
-
-            # Process nested mappings if defined
-            for dest_field, field_info in mappings.items():
-                if 'nested_mappings' in field_info:
-                    print(f"entering nest {field_info['nested_mappings']}")
-                    nested_config = field_info['nested_mappings']
-                    nested_data = item.get(dest_field, [])
-                    if not isinstance(nested_data, list):  # Ensure it's iterable
-                        nested_data = [nested_data]
-                    self.process_mappings(
-                        obj_mappings={dest_field: nested_config},
-                        parent_object={dest_field: nested_data},
-                        parent_id=primary_object.id if primary_object else None
+            # Create or update primary object
+            if obj_type and "destination_endpoint" in obj_config:
+                destination_api = self.sources[obj_config["destination_api"]]
+                for destination_client in destination_api.clients:
+                    create_function = obj_config.get("create_function")
+                    update_function = obj_config.get("update_function")
+                    find_function = obj_config.get("find_function")
+                    created_object = self.create_or_update(
+                        destination_client,
+                        find_function,
+                        create_function,
+                        update_function,
+                        mapped_data,
                     )
+                    if created_object and hasattr(created_object, "id"):
+                        parent_id = created_object.id
+
+                # Process nested mappings
+                for nested_name, nested_config in obj_config.get("nested_mappings", {}).items():
+                    nested_items = item.get(nested_name, [])
+                    if not nested_items:
+                        continue
+
+                    # Recursively process the nested mappings
+                    self._process_items(nested_name, nested_config, nested_items, parent_id)
 
             timer.stop_timer(f"Per Object Timing {obj_type}")
         
