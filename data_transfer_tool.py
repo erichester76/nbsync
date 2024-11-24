@@ -194,12 +194,10 @@ class DataTransferTool:
         print(f"Processing {obj_type} Mapping.")
         mappings = obj_config.get('mapping', {})
         mappings['parent_id']=parent_id
-        rendered_mappings = {'parent_id': parent_id}
-
         rendered_mappings = {}
         
         for dest_field, field_info in mappings.items():
-            if field_info and 'source' in field_info:
+            if field_info and 'source' in str(field_info):
                 rendered_mappings[dest_field] = self._render_template(field_info['source'], item)
 
         # Process exclusion logic and transformations
