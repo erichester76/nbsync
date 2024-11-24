@@ -178,8 +178,6 @@ class DataTransferTool:
             if parent_object is None:  # Root level, iterate over source clients
                 for source_client in source.clients:
                     source_data = source.fetch_data(obj_config, source_client)
-
-                    # Process the data for this source client
                     self._process_items(obj_type, obj_config, source_data, parent_id=None)
             else:  # Nested level, no need to fetch data
                 source_data = parent_object.get(obj_type, [])

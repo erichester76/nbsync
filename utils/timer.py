@@ -23,7 +23,7 @@ class Timer:
             self.timings[name]["total"] += duration
             self.timings[name]["count"] += 1
             self.timings[name]["start"] = None  # Reset start time
-            #print(f"TIMER: {name} took {duration}ms")
+            print(f"TIMER: {name} took {duration}ms")
 
     def show_timers(self):
         """
