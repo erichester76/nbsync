@@ -153,7 +153,7 @@ class DataTransferTool:
             print(f"Rendering nested dictionary: {template_structure}")
             return {
                 key: self._render_nested_structure(value, context) if isinstance(value, (dict, list))
-                else self.render_template(value, context)
+                else self._render_template(value, context)
                 for key, value in template_structure.items()
             }
         elif isinstance(template_structure, list):
@@ -161,7 +161,7 @@ class DataTransferTool:
             return [self._render_nested_structure(item, context) for item in template_structure]
         elif isinstance(template_structure, str):
             print(f"Rendering string: {template_structure}")
-            return self.render_template(template_structure, context)
+            return self._render_template(template_structure, context)
         else:
             print(f"Returning non-string value: {template_structure}")
             return template_structure
