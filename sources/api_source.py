@@ -96,7 +96,7 @@ class APIDataSource(DataSource):
                         print(f"Setting Branch Header to {self.config['branch']}")
                         status='new'
                         while 'ready' not in status:
-                            result=list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']}"))[0]['status'].get('value')
+                            result=list(self.api.plugins.branching.branches.filter(name=f"{self.config['branch']}"))
                             if len(result)<1: 
                                 branch = self.api.plugins.branching.branches.create(name=f"{self.config['branch']}", status='new')
                             else:
