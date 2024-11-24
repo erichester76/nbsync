@@ -250,6 +250,7 @@ class DataTransferTool:
             # Process nested mappings if defined
             for dest_field, field_info in mappings.items():
                 if 'nested_mappings' in field_info:
+                    print(f"entering nest {field_info['nested_mappings']}")
                     nested_config = field_info['nested_mappings']
                     nested_data = item.get(dest_field, [])
                     if not isinstance(nested_data, list):  # Ensure it's iterable
