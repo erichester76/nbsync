@@ -241,7 +241,6 @@ class DataTransferTool:
         nested_mappings = mappings.get('nested_mappings', {})
         for nested_obj_type, nested_obj_config in nested_mappings.items():
             # Use the parent API if destination_api is not explicitly defined'
-            nested_obj_config['destination_api']=destination_api
             self._process_nested_mappings(nested_obj_type, nested_obj_config, item, parent_id, destination_api)
 
         timer.stop_timer(f"Per Object Timing {obj_type}")
