@@ -196,8 +196,8 @@ class DataTransferTool:
         rendered_mappings = {'parent_id': parent_id}
         
         for dest_field, field_info in mappings.items():
+            print(f"rendering {dest_field} {field_info}")
             if field_info and 'source' in str(field_info):
-                print(f"rendering {dest_field} {field_info}")
                 rendered_mappings[dest_field] = self._render_template(field_info['source'], item)
 
         # Process exclusion logic and transformations
