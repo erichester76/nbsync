@@ -201,11 +201,8 @@ class DataTransferTool:
             for dest_field, field_info in mappings.items():
                 if 'source' in field_info:
                     rendered_mappings[dest_field] = self._render_template(field_info['source'], item)
-            
-            # process fields
             for dest_field, rendered_source_value in rendered_mappings.items():
-                # Handle exclusion rules
-                exclude_patterns = field_info.get('exclude', [])
+                exclude_patterns = mappings[dest_field].get('exclude', [])
                 if isinstance(exclude_patterns, list):
                     for pattern in exclude_patterns:
                         if bool(re.match(pattern, rendered_mappings[dest_field])):
@@ -215,25 +212,25 @@ class DataTransferTool:
                     exclude_object = True
 
                 # Apply transforms and actions
-                if 'action' in field_info and not exclude_object:
-                    action = field_info['action']
+                if 'action' in  mappings[dest_field] and not exclude_object:
+                    action =  mappings[dest_field]['action']
                     timer.start_timer("Apply Transforms")
-                    rendered_source_value = self.apply_transform_function(
+                    rendered_mappings[dest_field] = self.apply_transform_function(
                         rendered_mappings[dest_field], action, obj_config, dest_field, mapped_data, item
                     )
                     timer.stop_timer("Apply Transforms")
 
-                if 'exclude_field' in str(rendered_source_value):
+                if 'exclude_field' in str(rendered_mappings[dest_field]):
                     continue
 
-                rendered_mappings[dest_field] = rendered_source_value
+                rendered_mappings[dest_field]
 
             if exclude_object:
                 if self.debug:
                     print(f"Excluding object {rendered_mappings.get('name', 'unknown')} based on exclusion criteria.")
                 timer.stop_timer(f"Per Object Timing {obj_type}")
                 continue
-
+           
             # Build mapped_data with rendered fields
             mapped_data.update(rendered_mappings)
 
@@ -256,8 +253,6 @@ class DataTransferTool:
                     nested_items = item.get(nested_name, [])
                     if not nested_items:
                         continue
-
-                    # Recursively process the nested mappings
                     self._process_items(nested_name, nested_config, nested_items, parent_id)
 
             timer.stop_timer(f"Per Object Timing {obj_type}")
