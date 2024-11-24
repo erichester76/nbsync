@@ -189,7 +189,7 @@ class DataTransferTool:
     def process_single_mapping(self, obj_type, obj_config, destination_api, item, parent_id=None):
         """Process a single mapping, including nested mappings."""
         timer.start_timer(f"Per Object Timing {obj_type}")
-
+        print(f"Processing {obj_type} Mapping.")
         # Render mappings for the current object
         mappings = obj_config['mapping']
         rendered_mappings = {}
@@ -224,7 +224,7 @@ class DataTransferTool:
             mapped_data[dest_field] = rendered_source_value
 
         if exclude_object:
-            if self.debug: print(f"Excluding object {rendered_mappings.get('name')} based on exclusion criteria.")
+            print(f"Excluding object {rendered_mappings.get('name')} based on exclusion criteria.")
             timer.stop_timer(f"Per Object Timing {obj_type}")
             return
 
@@ -240,6 +240,8 @@ class DataTransferTool:
         # Process nested mappings recursively
         nested_mappings = mappings.get('nested_mappings', {})
         for nested_obj_type, nested_obj_config in nested_mappings.items():
+            print(f"Found Nested {nested_obj_type} mapping under {obj_type} Mapping.")
+
             # Use the parent API if destination_api is not explicitly defined'
             self._process_nested_mappings(nested_obj_type, nested_obj_config, item, parent_id, destination_api)
 
@@ -355,6 +357,7 @@ class DataTransferTool:
             if found_object:
                 first_object = list(found_object)[0]
                 self.lookup_cache[cache_key] = first_object
+                print(f"looked up {filter_params} and found {first_object.name}")
                 return first_object
 
         except Exception as e:
