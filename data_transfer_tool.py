@@ -166,9 +166,6 @@ class DataTransferTool:
             print(f"Returning non-string value: {template_structure}")
             return template_structure
         
-        
-        
-        
     def process_mappings(self, obj_mappings=None, parent_object=None, parent_id=None):
         """Process object mappings, including nested mappings."""
         if obj_mappings is None:
@@ -277,6 +274,7 @@ class DataTransferTool:
             return value
     
         for action in actions:
+            print(f"processing {action} with {value}")
             # Regex replace action
             if 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
