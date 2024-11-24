@@ -203,9 +203,11 @@ class DataTransferTool:
         # Process exclusion logic and transformations
         mapped_data = {}
         exclude_object = False
+        exclude_patterns=[]
 
         for dest_field, rendered_source_value in rendered_mappings.items():
-            exclude_patterns = rendered_mappings[dest_field].get('exclude', [])
+            if 'exclude' in rendered_mappings[dest_field] and 'nested_mappings' not in dest_field:
+                exclude_patterns = rendered_mappings[dest_field].get('exclude', [])
             if isinstance(exclude_patterns, list):
                 for pattern in exclude_patterns:
                     if bool(re.match(pattern, rendered_mappings[dest_field])):
