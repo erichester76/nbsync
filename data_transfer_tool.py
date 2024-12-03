@@ -305,6 +305,10 @@ class DataTransferTool:
             elif 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
                 value = env.filters['regex_replace'](str(value), pattern, replacement)
+                
+            elif 'listify' in action:
+                if not isinstance(value, list):
+                 value = [value]
 
             if isinstance(action, dict) and 'lookup_object' in action:
                 lookup_config = action['lookup_object']
