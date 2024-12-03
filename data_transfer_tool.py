@@ -144,7 +144,6 @@ class DataTransferTool:
             resolver = Resolver(context, required_keys=required_keys)
             template = env.from_string(template_str)
             rendered_template = template.render(resolver)
-            print(f"rendered items: {template_str} = {rendered_template}")
             return rendered_template
         except Exception as e:
             print(f"Error rendering template '{template_str}': {e}")
@@ -305,7 +304,7 @@ class DataTransferTool:
                 
             elif 'regex_replace' in action:
                 pattern, replacement = re.findall(r"regex_replace\('(.*?)',\s*'*(.*?)'*\)", action)[0]
-                value = env.filters['regex_replace'](value, pattern, replacement)
+                value = env.filters['regex_replace'](str(value), pattern, replacement)
 
             if isinstance(action, dict) and 'lookup_object' in action:
                 lookup_config = action['lookup_object']
