@@ -156,7 +156,6 @@ class DataTransferTool:
         if isinstance(structure, dict):
             rendered = {}
             for key, value in structure.items():
-                print(f"Append: {key} {value} {context}")
                 if isinstance(value, (dict, list)):
                     # Recursively render nested dicts or lists
                     rendered[key] = self._render_nested_structure(value, context)
@@ -166,7 +165,6 @@ class DataTransferTool:
                 else:
                     # Pass non-template values through as-is
                     rendered[key] = value
-                print(f"RENDERED: {rendered[key]}")
             return rendered
         elif isinstance(structure, list):
             return [self._render_nested_structure(item, context) for item in structure]
@@ -236,7 +234,7 @@ class DataTransferTool:
 
         for dest_field, rendered_source_value in rendered_mappings.items():
             field_info = mappings.get(dest_field, {})
-            if not field_info:
+            if not field_info and 'parent_id' not in dest_field:
                 print(f"Skipping field {dest_field} because its mapping is missing.")
                 continue
 
@@ -391,6 +389,7 @@ class DataTransferTool:
         find_function = self.get_nested_function(api_client, find_function_path)
         create_function = self.get_nested_function(api_client, create_function_path)
         # Validate lookup_type and value
+        print("lookup_type={lookup_type}, value={value}")
         if not lookup_type or value is None:
             raise ValueError(f"Invalid lookup_type or value: lookup_type={lookup_type}, value={value}")
 
