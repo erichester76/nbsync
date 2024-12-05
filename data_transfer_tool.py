@@ -149,18 +149,29 @@ class DataTransferTool:
             print(f"Error rendering template '{template_str}': {e}")
             return None
         
-    def _render_nested_structure(self, template_structure, context):
+    def _render_nested_structure(self, structure, context):
         """
-        Render a nested dictionary or list of templates.
+        Recursively render a nested structure (dict or list) with Jinja2 templates.
         """
-        if isinstance(template_structure, dict):
-            return {key: self._render_nested_structure(value, context) if isinstance(value, (dict, list)) 
-                    else self._render_template(value, context)
-                    for key, value in template_structure.items()}
-        elif isinstance(template_structure, list):
-            return [self._render_nested_structure(item, context) for item in template_structure]
+        if isinstance(structure, dict):
+            rendered = {}
+            for key, value in structure.items():
+                if isinstance(value, (dict, list)):
+                    # Recursively render nested dicts or lists
+                    rendered[key] = self._render_nested_structure(value, context)
+                elif isinstance(value, str):
+                    # Render the string template with the current context
+                    rendered[key] = self._render_template(value, context)
+                else:
+                    # Pass non-template values through as-is
+                    rendered[key] = value
+            return rendered
+        elif isinstance(structure, list):
+            return [self._render_nested_structure(item, context) for item in structure]
+        elif isinstance(structure, str):
+            return self._render_template(structure, context)
         else:
-            return self._render_template(template_structure, context)
+            return structure
 
 
     def process_mappings(self):
