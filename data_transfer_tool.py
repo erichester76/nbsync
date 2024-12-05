@@ -156,7 +156,7 @@ class DataTransferTool:
         if isinstance(structure, dict):
             rendered = {}
             for key, value in structure.items():
-                print(f"Append: {key} {value}")
+                print(f"Append: {key} {value} {context}")
                 if isinstance(value, (dict, list)):
                     # Recursively render nested dicts or lists
                     rendered[key] = self._render_nested_structure(value, context)
