@@ -156,6 +156,7 @@ class DataTransferTool:
         if isinstance(structure, dict):
             rendered = {}
             for key, value in structure.items():
+                print(f"Append: {key} {value}")
                 if isinstance(value, (dict, list)):
                     # Recursively render nested dicts or lists
                     rendered[key] = self._render_nested_structure(value, context)
@@ -327,6 +328,7 @@ class DataTransferTool:
                 find_function_path = lookup_config.get('find_function')
                 create_function_path = lookup_config.get('create_function')
                 append_fields = lookup_config.get('append', {})
+                print(f"Append: {append_fields}")
                 additional_data = self._render_nested_structure(append_fields, mapped_data)
                 lookup_result = self.lookup_object(
                     value, lookup_field, find_function_path, create_function_path, destination_api,
