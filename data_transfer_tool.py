@@ -166,6 +166,7 @@ class DataTransferTool:
                 else:
                     # Pass non-template values through as-is
                     rendered[key] = value
+                print(f"RENDERED: {rendered[key]}")
             return rendered
         elif isinstance(structure, list):
             return [self._render_nested_structure(item, context) for item in structure]
